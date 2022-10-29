@@ -1,10 +1,14 @@
-# UserDefine
+# Keil
 /MDK-ARM/RM_Frame_C
 /MDK-ARM/DebugConfig
-/cmake-build-debug
-/.idea
-RM_Frame_C.uvguix.*
 MDK-ARM/JLinkLog.txt
+RM_Frame_C.uvguix.*
+
+# CLion
+/cmake-build*
+/.idea
+
+# Others
 *.crf
 
 # Prerequisites
