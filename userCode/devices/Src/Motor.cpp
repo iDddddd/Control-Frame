@@ -3,6 +3,7 @@
 //
 
 #include "Motor.h"
+#include <queue>
 
 Motor* Motor::motorPtrs[2][8] = {0};
 int16_t Motor::motor_intensity[16];
@@ -75,13 +76,15 @@ void Motor::CANPackageSend() {
     txHeaderTypeDef.RTR = CAN_RTR_DATA;
     txHeaderTypeDef.TransmitGlobalTime = DISABLE;
 
-
-    for(auto motorIndex = 3; motorIndex < 4; motorIndex++) {
+    for(auto motorIndex = 0; motorIndex < 4; motorIndex++) {
         if((1 << motorIndex) & motor_IDs){
             txHeaderTypeDef.StdId = 0x141 + motorIndex;
+				
             canBuf[0] = 0xA1;
 						canBuf[4] = motor_intensity[motorIndex] >> 8u;
             canBuf[5] = motor_intensity[motorIndex];
+						while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)==0)
+							;
             HAL_CAN_AddTxMessage(&hcan1,&txHeaderTypeDef,canBuf,(uint32_t *) CAN_TX_MAILBOX0);
         }
     }
@@ -170,7 +173,6 @@ void Motor::IT_Handle(CAN_HandleTypeDef *hcan) {
     }
     motorPos = rx_header.StdId - 0x141;
     motorPtrs[canPos][motorPos]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
-
     motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
     motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
     motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];

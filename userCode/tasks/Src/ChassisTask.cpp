@@ -4,8 +4,8 @@
 #include "ChassisTask.h"
 
 PID_Regulator_t pidRegulator = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 0.002f,
-        .ki = 0,
+        .kp = -0.002f,
+        .ki = -0.0002,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -15,7 +15,7 @@ PID_Regulator_t pidRegulator = {//此为储存pid参数的结构体，四个底�
 
 PID_Regulator_t pidRegulatorInvert = {//此为储存pid参数的结构体，四个底盘电机共用
         .kp = -0.002f,
-        .ki = -0.0002,
+        .ki = -0.0002f,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -98,7 +98,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
      */
     CMFLSpeed = fbVelocity - rtVelocity;
     CMFRSpeed = -fbVelocity - rtVelocity;
-    CMBLSpeed = fbVelocity - rtVelocity;
+    CMBLSpeed = -fbVelocity + rtVelocity;
     CMBRSpeed = fbVelocity + rtVelocity;
 
     //计算四个轮子角速度，单位：rad/s
