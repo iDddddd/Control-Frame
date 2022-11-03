@@ -61,6 +61,55 @@ void Motor::Init(){
     HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
 }
 /**
+ * @brief CRC16_MODBUS校验
+ *
+ */
+static uint8_t *CRC16_MODBUS(uint8_t *puchMsg, uint16_t usDataLen){
+    uint8_t *CRC_GET;
+    CRC_GET = new uint8_t [2];
+    uint8_t uchCRCHi = 0xFF;//高CRC字节初始化
+    uint8_t uchCRCLo = 0xFF;//低CRC 字节初始化
+    uint32_t uIndex;//CRC循环中的索引
+    while (usDataLen--)//传输消息缓冲区
+    {
+        uIndex = uchCRCHi ^ *puchMsg++;//计算CRC
+        uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
+        uchCRCLo = auchCRCLo[uIndex];
+    }
+    CRC_GET[0] = uchCRCHi;
+    CRC_GET[1] = uchCRCLo;
+
+    return CRC_GET;
+}
+/**
+ * @brief rs485消息包发送任务
+ */
+static void RS485PackageSend(){
+    uint8_t rs485Buf[11] = {0};
+    uint8_t *CRC_GET;
+    rs485Buf[0] = 0x3E;//协议头
+    rs485Buf[1] = 0x00;//包序号
+
+    rs485Buf[3] = 0x55;//绝对位置闭环控制命令码
+    rs485Buf[4] = 0x04;//数据包长度
+    for (int motorIndex = 0; motorIndex < 4; motorIndex++ ){
+        rs485Buf[2] = 0x01+motorIndex;//设备地址
+        rs485Buf[5] = 0;//目标位置低字节
+        rs485Buf[6] = 0;
+        rs485Buf[7] = 0;
+        rs485Buf[8] = 0;//目标位置高字节
+    }
+    CRC_GET = CRC16_MODBUS(rs485Buf,9);
+    rs485Buf[9] = CRC_GET[1];//CRC校验低位
+    rs485Buf[10] = CRC_GET[2];//CRC校验高位
+    for (int motorIndex = 0; motorIndex < 4; motorIndex++ ){
+        HAL_UART_Transmit(&huart1, rs485Buf, 11, 100);
+        //HAL_UART_Transmit_DMA(&huart1, rs485Buf, 11);
+    }
+}
+
+
+/**
  * @brief can消息包发送任务
  * @callergraph void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  *              in Device.cpp
@@ -85,7 +134,7 @@ void Motor::CANPackageSend() {
             canBuf[5] = motor_intensity[motorIndex];
 						while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)==0)
 							;
-            HAL_CAN_AddTxMessage(&hcan1,&txHeaderTypeDef,canBuf,(uint32_t *) CAN_TX_MAILBOX0);
+            HAL_CAN_AddTxMessage(&hcan1,&txHeaderTypeDef,canBuf,0);
         }
     }
 }
@@ -176,7 +225,7 @@ void Motor::IT_Handle(CAN_HandleTypeDef *hcan) {
     motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
     motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
     motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
-
+    //TODO rs485接收？
 }
 /**
  * @brief 用于设置电机速度，只用当电机控制类型对应时才有效
