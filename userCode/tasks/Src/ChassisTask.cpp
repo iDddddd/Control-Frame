@@ -85,6 +85,9 @@ void ChassisStop(){
     CMBL.Stop();
     CMBR.Stop();
 }
+/**
+ * @brief 4315角度计算任务
+ */
 /*
 void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity){
     float CMFLAngle,CMFRAngle,CMBLAngle,CMBRAngle;
@@ -100,6 +103,12 @@ void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity){
     CMBRAngle = CMBRAngle/360*16384;
     //TODO 转换为四位16进制
 }
+ */
+/**
+ * @brief 4010速度计算任务
+ * @param fbVelocity
+ * @param lrVelocity
+ * @param rtVelocity
  */
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float CMFLSpeed, CMFRSpeed, CMBLSpeed, CMBRSpeed;

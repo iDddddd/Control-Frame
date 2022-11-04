@@ -64,7 +64,7 @@ void Motor::Init(){
  * @brief CRC16_MODBUS校验
  *
  */
-static uint8_t *CRC16_MODBUS(uint8_t *puchMsg, uint16_t usDataLen){
+uint8_t *Motor::CRC16_MODBUS(uint8_t *puchMsg, uint16_t usDataLen){
     uint8_t *CRC_GET;
     CRC_GET = new uint8_t [2];
     uint8_t uchCRCHi = 0xFF;//高CRC字节初始化
@@ -84,8 +84,8 @@ static uint8_t *CRC16_MODBUS(uint8_t *puchMsg, uint16_t usDataLen){
 /**
  * @brief rs485消息包发送任务
  */
-static void RS485PackageSend(){
-    uint8_t rs485Buf[11] = {0};
+void Motor::RS485PackageSend(){
+    static uint8_t rs485Buf[11] = {0};
     uint8_t *CRC_GET;
     rs485Buf[0] = 0x3E;//协议头
     rs485Buf[1] = 0x00;//包序号
@@ -93,11 +93,13 @@ static void RS485PackageSend(){
     rs485Buf[3] = 0x55;//绝对位置闭环控制命令码
     rs485Buf[4] = 0x04;//数据包长度
     for (int motorIndex = 0; motorIndex < 4; motorIndex++ ){
-        rs485Buf[2] = 0x01+motorIndex;//设备地址
-        rs485Buf[5] = 0;//目标位置低字节
-        rs485Buf[6] = 0;
-        rs485Buf[7] = 0;
-        rs485Buf[8] = 0;//目标位置高字节
+        if((1 << motorIndex) & motor_IDs) {
+            rs485Buf[2] = 0x01 + motorIndex;//设备地址
+            rs485Buf[5] = motor_angle[motorIndex] >> 24u;//目标位置低字节
+            rs485Buf[6] = motor_angle[motorIndex] >> 16u;
+            rs485Buf[7] = motor_angle[motorIndex] >> 8u;
+            rs485Buf[8] = motor_angle[motorIndex];//目标位置高字节
+        }
     }
     CRC_GET = CRC16_MODBUS(rs485Buf,9);
     rs485Buf[9] = CRC_GET[1];//CRC校验低位
@@ -130,7 +132,7 @@ void Motor::CANPackageSend() {
             txHeaderTypeDef.StdId = 0x141 + motorIndex;
 				
             canBuf[0] = 0xA1;
-						canBuf[4] = motor_intensity[motorIndex] >> 8u;
+            canBuf[4] = motor_intensity[motorIndex] >> 8u;
             canBuf[5] = motor_intensity[motorIndex];
 						while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)==0)
 							;
@@ -200,8 +202,10 @@ void Motor::Handle(){
 
     if (stopFlag == 1){
         motor_intensity[GET_MOTOR_POS(deviceID)] = 0;
+        motor_angle[GET_MOTOR_POS(deviceID)] = 0;
     }else {
         motor_intensity[GET_MOTOR_POS(deviceID)] = intensity;
+        motor_angle[GET_MOTOR_POS(deviceID)] = rsTargetAngle;
     }
 }
 
@@ -225,10 +229,16 @@ void Motor::IT_Handle(CAN_HandleTypeDef *hcan) {
     motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
     motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
     motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
-    //TODO rs485接收？
 }
 /**
- * @brief 用于设置电机速度，只用当电机控制类型对应时才有效
+ * @brief 用于设置4315电机角度
+ */
+void Motor::RSTargetAngle(float _rsTargetAngle){
+    stopFlag = 0;
+    rsTargetAngle = _rsTargetAngle;
+}
+/**
+ * @brief 用于设置4010电机速度，只用当电机控制类型对应时才有效
  * @param _targetSpeed 目标速度
  */
 void Motor::SetTargetSpeed(float _targetSpeed) {
@@ -236,7 +246,7 @@ void Motor::SetTargetSpeed(float _targetSpeed) {
     targetSpeed = _targetSpeed;
 }
 /**
- * @brief 用于设置电机角度，只用当电机控制类型对应时才有效
+ * @brief 用于设置4010电机角度，只用当电机控制类型对应时才有效
  * @param _targetAngle 目标角度
  */
 void Motor::SetTargetAngle(float _targetAngle) {

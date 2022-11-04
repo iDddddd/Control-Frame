@@ -122,6 +122,7 @@ public:
 
     static Motor* motorPtrs[2][8];
     static int16_t motor_intensity[16];
+    static uint32_t motor_angle[16];
     static uint32_t motor_IDs;
     static void Init();
     static void CANPackageSend();
@@ -135,6 +136,7 @@ public:
     MOTOR_STATE_t state;
     MOTOR_CTRL_TYPE_e ctrlType;
 
+    float rsTargetAngle;
     float targetSpeed;
     float targetAngle;
     float reductionRatio;
@@ -147,6 +149,7 @@ public:
     void Handle() override;
     void ErrorHandle() override;
 
+    void RSTargetAngle(float _rsTargetAngle);
     void SetTargetSpeed(float _targetSpeed);
     void SetTargetAngle(float _targetAngle);
     void Stop();
