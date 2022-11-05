@@ -51,6 +51,7 @@ extern float FBVelocity,LRVelocity,RTVelocity;
 
 /*外部函数声明-------------------------------------------------------------*/
 
+void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 void ChassisStop();
 void ChassisSetVelocity(float _fbV,float _lrV,float _rtV);

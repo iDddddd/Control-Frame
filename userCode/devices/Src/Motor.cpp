@@ -7,6 +7,7 @@
 
 Motor* Motor::motorPtrs[2][8] = {0};
 int16_t Motor::motor_intensity[16];
+uint32_t Motor::motor_angle[16];
 uint32_t Motor::motor_IDs;
 
 /**
@@ -64,29 +65,29 @@ void Motor::Init(){
  * @brief CRC16_MODBUS校验
  *
  */
-uint8_t *Motor::CRC16_MODBUS(uint8_t *puchMsg, uint16_t usDataLen){
-    uint8_t *CRC_GET;
-    CRC_GET = new uint8_t [2];
-    uint8_t uchCRCHi = 0xFF;//高CRC字节初始化
-    uint8_t uchCRCLo = 0xFF;//低CRC 字节初始化
-    uint32_t uIndex;//CRC循环中的索引
-    while (usDataLen--)//传输消息缓冲区
+uint16_t Motor::crc16_modbus(uint8_t *data, uint16_t length)
+{
+    uint8_t i;
+    uint16_t crc = 0xffff;        // Initial value
+    while(length--)
     {
-        uIndex = uchCRCHi ^ *puchMsg++;//计算CRC
-        uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
-        uchCRCLo = auchCRCLo[uIndex];
+        crc ^= *data++;            // crc ^= *data; data++;
+        for (i = 0; i < 8; ++i)
+        {
+            if (crc & 1)
+                crc = (crc >> 1) ^ 0xA001;        // 0xA001 = reverse 0x8005
+            else
+                crc = (crc >> 1);
+        }
     }
-    CRC_GET[0] = uchCRCHi;
-    CRC_GET[1] = uchCRCLo;
-
-    return CRC_GET;
+    return crc;
 }
 /**
  * @brief rs485消息包发送任务
  */
 void Motor::RS485PackageSend(){
     static uint8_t rs485Buf[11] = {0};
-    uint8_t *CRC_GET;
+    uint16_t crc;
     rs485Buf[0] = 0x3E;//协议头
     rs485Buf[1] = 0x00;//包序号
 
@@ -101,12 +102,14 @@ void Motor::RS485PackageSend(){
             rs485Buf[8] = motor_angle[motorIndex];//目标位置高字节
         }
     }
-    CRC_GET = CRC16_MODBUS(rs485Buf,9);
-    rs485Buf[9] = CRC_GET[1];//CRC校验低位
-    rs485Buf[10] = CRC_GET[2];//CRC校验高位
+    crc = crc16_modbus(rs485Buf,9);
+    rs485Buf[9] = crc;//CRC校验低位
+    rs485Buf[10] = crc >> 8u;//CRC校验高位
     for (int motorIndex = 0; motorIndex < 4; motorIndex++ ){
-        HAL_UART_Transmit(&huart1, rs485Buf, 11, 100);
-        //HAL_UART_Transmit_DMA(&huart1, rs485Buf, 11);
+				rs485Buf[2] = 0x01 ;
+        //HAL_UART_Transmit(&huart1, rs485Buf, 11, 50);
+        HAL_UART_Transmit_DMA(&huart1, rs485Buf, 11);
+        HAL_GPIO_TogglePin(GPIOH,GPIO_PIN_10);
     }
 }
 
@@ -129,7 +132,7 @@ void Motor::CANPackageSend() {
 
     for(auto motorIndex = 0; motorIndex < 4; motorIndex++) {
         if((1 << motorIndex) & motor_IDs){
-            txHeaderTypeDef.StdId = 0x141 + motorIndex;
+            txHeaderTypeDef.StdId = 0x144 - motorIndex;
 				
             canBuf[0] = 0xA1;
             canBuf[4] = motor_intensity[motorIndex] >> 8u;
@@ -161,6 +164,7 @@ Motor::Motor(MOTOR_INIT_t* _init){
     ctrlType = _init->ctrlType;
     reductionRatio = _init->reductionRatio;
     targetSpeed = 0;
+    rsTargetAngle = 0;
 }
 /**
  * @brief Motor类的构造函数另一重载，可以方便地定义参数相同，ID不同的电机
@@ -185,6 +189,7 @@ Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init) {
     ctrlType = _init->ctrlType;
     reductionRatio = _init->reductionRatio;
     targetSpeed = 0;
+    rsTargetAngle = 0;
 }
 /**
  * @brief 电机类的析构函数
