@@ -85,19 +85,20 @@ void Motor::RS485MessageGenerate() {
     message[0] = 0x3E;//协议头
     message[1] = 0x00;//包序号
     message[2] = deviceID; //ID
-    message[3] = 0x55;//绝对位置闭环控制命令码
+    message[3] = 0x56;//相对位置闭环控制命令码
     message[4] = 2;//数据包长度
 
-    uint16_t tmp = motor_intensity[1][deviceID] - feedback.angle;
+    int16_t tmp = motor_intensity[1][deviceID - 1] - feedback.angle;
     message[5] = tmp >> 8u;
     message[6] = tmp;
-    feedback.angle = motor_intensity[1][deviceID];
+    feedback.angle = motor_intensity[1][deviceID - 1];
 
     uint16_t crc = CRC16Calc(message, 7);
-    message[7] = crc >> 8u;
-    message[8] = crc;
+    message[7] = crc ;
+    message[8] = crc >> 8u;
 
     RS485FIFO.push(message);
+    delete [] message;
 }
 
 /**
@@ -105,21 +106,22 @@ void Motor::RS485MessageGenerate() {
  */
 void Motor::RS485PackageSend() {
 
-    uint8_t* message;
+    uint8_t* message ;
 
     if(!RS485FIFOEmpty) {
         message = RS485FIFO.front();
         delete [] message;
         RS485FIFO.pop();
     }
-
-    message = RS485FIFO.front();
-    if(nullptr != message) {
-        HAL_UART_Transmit_IT(&huart1, message, 9);
-        RS485FIFOEmpty = false;
-    }
     else {
-        RS485FIFOEmpty = true;
+        message = RS485FIFO.front();
+        if (nullptr != message) {
+            HAL_UART_Transmit_IT(&huart1, message, 9);
+            RS485FIFOEmpty = false;
+        } else {
+            RS485FIFOEmpty = true;
+        }
+        delete[] message;
     }
 }
 
@@ -178,6 +180,7 @@ Motor::Motor(MOTOR_INIT_t* _init){
 
         case RS485:
             motorPtrs[1][motorPos % 8] = this;
+            motor_IDs[1] |= _init->_motorID;
 
             break;
     }
@@ -203,6 +206,7 @@ Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init) {
  */
 Motor::~Motor(){
     motor_IDs[0] &= (~deviceID);
+    motor_IDs[1] &= (~deviceID);
 }
 /**
  * @brief 电机类的执行处理函数，囊括每个电机的主要处理任务。此函数需定时执行，否则对应电机无法正常工作
@@ -339,7 +343,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-    if(&huart1 == huart) {
+    if(huart->Instance == USART1) {
         Motor::RS485PackageSend();
     }
 }
