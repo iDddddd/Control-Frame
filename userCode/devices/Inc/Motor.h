@@ -7,8 +7,9 @@
 
 #include "Device.h"
 #include "can.h"
-#include <string.h>
-#include "math.h"
+#include <cstring>
+#include <cmath>
+#include <queue>
 
 #define GET_MOTOR_POS(ID)  (uint32_t)(log2(ID))
 /*枚举类型定义------------------------------------------------------------*/
@@ -17,10 +18,16 @@
  * @example SPEED_Single 单环电机，控制速度
  * @example POSITION_Double 双环电机，控制角度
  */
-typedef enum{
+typedef enum {
+    DIRECT = 0,
     SPEED_Single,
     POSITION_Double
-}MOTOR_CTRL_TYPE_e;
+} MOTOR_CTRL_TYPE_e;
+
+typedef enum {
+    CAN = 0,
+    RS485,
+} MOTOR_COMMU_TYPE_e;
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
@@ -28,9 +35,10 @@ typedef struct {
     int16_t speed;
     int16_t moment;
     int8_t temp;
-}C6x0Rx_t;
+} C6x0Rx_t;
 
 typedef struct PID_Regulator_t {
+
     float ref;
     float fdb;
     float err[4];
@@ -46,6 +54,7 @@ typedef struct PID_Regulator_t {
     float componentKdMax;
     float output;
     float outputMax;
+
 } PID_Regulator_t;
 
 typedef struct {
@@ -55,8 +64,9 @@ typedef struct {
     uint32_t _motorID;//电机ID
     float reductionRatio;//减速比
     MOTOR_CTRL_TYPE_e ctrlType;//控制类型
+    MOTOR_COMMU_TYPE_e commuType;
 
-}MOTOR_INIT_t;
+} MOTOR_INIT_t;
 
 typedef struct {
 
@@ -79,23 +89,22 @@ class Motor :private Device
 public:
 
     static Motor* motorPtrs[2][8];
-    static int16_t motor_intensity[16];
-    static uint32_t motor_angle[16];
-    static uint32_t motor_IDs;
+    static int16_t motor_intensity[2][8];
+    static uint32_t motor_IDs[2];
     static void Init();
     static void CANPackageSend();
-    static uint16_t crc16_modbus(uint8_t *data, uint16_t length);
     static void RS485PackageSend();
+    static void RS485PackageSendReload();
     static void IT_Handle(CAN_HandleTypeDef *hcan);
 
-    uint8_t stopFlag{1};
+    bool stopFlag{true};
     C6x0Rx_t feedback;
     PID speedPID,anglePID;
     MOTOR_STATE_t state;
     MOTOR_CTRL_TYPE_e ctrlType;
+    MOTOR_COMMU_TYPE_e commuType;
 
-    float rsTargetAngle;
-    float targetSpeed;
+    float targetSpeed = 0;
     float targetAngle;
     float reductionRatio;
 
@@ -107,16 +116,21 @@ public:
     void Handle() override;
     void ErrorHandle() override;
 
-    void RSTargetAngle(float _rsTargetAngle);
     void SetTargetSpeed(float _targetSpeed);
     void SetTargetAngle(float _targetAngle);
     void Stop();
 
 private:
 
+    int16_t IntensityCalc();
     void MotorStateUpdate();
 
-    int16_t IntensityCalc();
+    uint16_t CRC16Calc(uint8_t *data, uint16_t length);
+    void RS485MessageGenerate();
+
+    static std::queue<uint8_t*> RS485FIFO;
+
+    static bool RS485FIFOEmpty;
 };
 /*结构体成员取值定义组------------------------------------------------------*/
 

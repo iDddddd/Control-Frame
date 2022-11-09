@@ -216,7 +216,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         CtrlHandle ();
         ChassisHandle();
-        Motor::RS485PackageSend();
+        Motor::RS485PackageSendReload();
         Motor::CANPackageSend();
         UserHandle();
         if(cnt>20){

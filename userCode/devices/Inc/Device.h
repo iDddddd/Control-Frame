@@ -41,9 +41,10 @@ extern void CtrlHandle();
 /*
  * 设备类型枚举
  */
-typedef enum{
-    MOTOR,SERVO
-}DEVICE_TYPE_E;
+typedef enum {
+    MOTOR,
+    SERVO,
+} DEVICE_TYPE_E;
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {

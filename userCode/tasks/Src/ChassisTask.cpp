@@ -3,19 +3,12 @@
 //
 #include "ChassisTask.h"
 
+constexpr float L = 0.2f; //车身长
+constexpr float M = 0.2f; //车身宽
+
 PID_Regulator_t pidRegulator = {//此为储存pid参数的结构体，四个底盘电机共用
         .kp = -0.002f,
         .ki = -0.0002,
-        .kd = 0,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //3508电机输出电流上限，可以调小，勿调大
-};
-
-PID_Regulator_t pidRegulatorInvert = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = -0.004f,
-        .ki = -0.0002f,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -29,21 +22,29 @@ MOTOR_INIT_t chassisMotorInit = {//四个底盘电机共用的初始化结构体
         ._motorID = MOTOR_ID_1,
         .reductionRatio = 1.0f,
         .ctrlType = SPEED_Single,
+        .commuType = CAN,
 };
 
-MOTOR_INIT_t chassisMotorInitInvert = {//四个底盘电机共用的初始化结构体
-        .speedPIDp = &pidRegulatorInvert,
+MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
+        .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         ._motorID = MOTOR_ID_1,
-        .reductionRatio = 5.0f,
-        .ctrlType = SPEED_Single,
+        .reductionRatio = 1.0f,
+        .ctrlType = DIRECT,
+        .commuType = RS485,
 };
-Motor CMFL(MOTOR_ID_1,&chassisMotorInitInvert);//定义左前轮电机
-Motor CMFR(MOTOR_ID_2,&chassisMotorInitInvert);//定义右前轮电机
+
+Motor CMFL(MOTOR_ID_1,&chassisMotorInit);//定义左前轮电机
+Motor CMFR(MOTOR_ID_2,&chassisMotorInit);//定义右前轮电机
 Motor CMBL(MOTOR_ID_3,&chassisMotorInit);//定义左后轮电机
 Motor CMBR(MOTOR_ID_4,&chassisMotorInit);//定义右后轮电机
 
-uint8_t ChassisStopFlag = 1;
+Motor RFL(MOTOR_ID_1, &swerveMotorInit);
+Motor RFR(MOTOR_ID_2, &swerveMotorInit);
+Motor RBL(MOTOR_ID_3, &swerveMotorInit);
+Motor RBR(MOTOR_ID_4, &swerveMotorInit);
+
+bool ChassisStopFlag = true;
 float FBVelocity,LRVelocity,RTVelocity;
 
 void ChassisStart(){
@@ -54,15 +55,15 @@ void ChassisStart(){
  * @callergraph void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) in Device.cpp
  */
 void ChassisHandle() {
-    if(ChassisStopFlag == 0) {
+    if(ChassisStopFlag == false) {
         WheelsSpeedCalc(FBVelocity, LRVelocity, RTVelocity);
-        WheelAngleCalc(FBVelocity, LRVelocity, RTVelocity);
-
     }
     CMFL.Handle();
     CMFR.Handle();
     CMBL.Handle();
     CMBR.Handle();
+
+    RFL.Handle();
 }
 /**
  * @brief 用于控制任务控制底盘速度
@@ -71,7 +72,7 @@ void ChassisHandle() {
  * @param _rtV 底盘旋转速度
  */
 void ChassisSetVelocity(float _fbV,float _lrV,float _rtV){
-    ChassisStopFlag = 0;
+    ChassisStopFlag = false;
     FBVelocity = _fbV;
     LRVelocity = _lrV;
     RTVelocity = _rtV;
@@ -81,46 +82,23 @@ void ChassisSetVelocity(float _fbV,float _lrV,float _rtV){
  * @brief 执行急停模式的底盘任务处理
  */
 void ChassisStop(){
-    ChassisStopFlag = 1;
+    ChassisStopFlag = true;
     CMFL.Stop();
     CMFR.Stop();
     CMBL.Stop();
     CMBR.Stop();
 }
-/**
- * @brief 4315角度计算任务
- */
 
-void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity){
-    float CMFLAngle,CMFRAngle,CMBLAngle,CMBRAngle;
-    float L,M;
-    L = 0.2f;
-    M = 0.2f;
-    rtVelocity = RPM2RADpS(rtVelocity);//参数可能需修改
-    CMFLAngle = atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) )*180/3.1415926f;
-    CMFRAngle = atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) )*180/3.1415926f;
-    CMBLAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) )*180/3.1415926f;
-    CMBRAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) )*180/3.1415926f;
-    CMFLAngle = CMFLAngle/360*16384;
-    CMFRAngle = CMFRAngle/360*16384;
-    CMBLAngle = CMBLAngle/360*16384;
-    CMBRAngle = CMBRAngle/360*16384;
-    CMFL.RSTargetAngle(CMFLAngle);
-    CMFR.RSTargetAngle(CMFRAngle);
-    CMBL.RSTargetAngle(CMBLAngle);
-    CMBR.RSTargetAngle(CMBRAngle);
-
-}
 
 /**
- * @brief 4010速度计算任务
+ * @brief 速度与角度计算任务
  * @param fbVelocity
  * @param lrVelocity
  * @param rtVelocity
  */
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float CMFLSpeed, CMFRSpeed, CMBLSpeed, CMBRSpeed;
-
+    float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
     rtVelocity = RPM2RADpS(rtVelocity);
 
     //计算四个轮子线速度，单位：m/s
@@ -134,20 +112,24 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 //    CMBLSpeed = -fbVelocity + rtVelocity;
 //    CMBRSpeed = fbVelocity + rtVelocity;
 
-    //计算四个轮子速度，M，L待测
+    RFLAngle = atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f;
+    RFRAngle = atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f;
+    RBLAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f;
+    RBRAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f;
 
-      float L,M;
-      L=0.2f;
-      M=0.2f;
-     CMFLSpeed = sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-            (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
-     CMFRSpeed = sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-            (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2));
-     CMBLSpeed = sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-            (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
-     CMBRSpeed = sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-            (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2));
+    RFL.SetTargetAngle(RFLAngle);
+    RFR.SetTargetAngle(RFRAngle);
+    RBL.SetTargetAngle(RBLAngle);
+    RBR.SetTargetAngle(RBRAngle);
 
+    CMFLSpeed = sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
+    CMFRSpeed = sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                     (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2));
+    CMBLSpeed = sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
+    CMBRSpeed = sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+                     (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2));
     //计算四个轮子角速度，单位：rad/s
     CMFLSpeed = CMFLSpeed /(WHEEL_DIAMETER/2.0f);
     CMFRSpeed = CMFRSpeed /(WHEEL_DIAMETER/2.0f);
