@@ -216,13 +216,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         CtrlHandle ();
         ChassisHandle();
-        Motor::RS485PackageSendReload();
         Motor::CANPackageSend();
         UserHandle();
         if(cnt>20){
             if(vccBat<10)HAL_IWDG_Refresh(&hiwdg);
             cnt =0;
         }
+    }
+    if (htim == &htim6){
+        Motor::RS485PackageSend();
     }
 }
 
@@ -279,6 +281,7 @@ int main(void)
     MX_TIM5_Init();
     MX_TIM1_Init();
     MX_TIM4_Init();
+    MX_TIM6_Init();
     MX_TIM10_Init();
     MX_TIM8_Init();
     MX_ADC1_Init();
@@ -305,6 +308,7 @@ int main(void)
     RemoteControl::init();
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);
+    HAL_TIM_Base_Start_IT(&htim6);
     Motor::Init();
     ChassisStart();
     UserInit();

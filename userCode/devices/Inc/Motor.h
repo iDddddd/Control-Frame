@@ -91,16 +91,22 @@ public:
     static Motor* motorPtrs[2][8];
     static int16_t motor_intensity[2][8];
     static uint32_t motor_IDs[2];
+    static uint8_t rsmessage[4][11];
+
+
+
     static void Init();
-    static void CANPackageSend();
+
     static void RS485PackageSend();
-    static void RS485PackageSendReload();
+    static void CANPackageSend();
     static void IT_Handle(CAN_HandleTypeDef *hcan);
+
 
     bool stopFlag{true};
     C6x0Rx_t feedback;
     PID speedPID,anglePID;
     MOTOR_STATE_t state;
+
     MOTOR_CTRL_TYPE_e ctrlType;
     MOTOR_COMMU_TYPE_e commuType;
 
@@ -111,7 +117,6 @@ public:
     explicit Motor(MOTOR_INIT_t* _init);
     Motor(uint32_t _id, MOTOR_INIT_t* _init);
     ~Motor();
-
 
     void Handle() override;
     void ErrorHandle() override;

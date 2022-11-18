@@ -64,6 +64,9 @@ void ChassisHandle() {
     CMBR.Handle();
 
     RFL.Handle();
+    RBL.Handle();
+    RFR.Handle();
+    RBR.Handle();
 }
 /**
  * @brief 用于控制任务控制底盘速度
@@ -112,10 +115,10 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 //    CMBLSpeed = -fbVelocity + rtVelocity;
 //    CMBRSpeed = fbVelocity + rtVelocity;
 
-    RFLAngle = atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f;
-    RFRAngle = atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f;
-    RBLAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f;
-    RBRAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f;
+    RFLAngle = atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
+    RFRAngle = atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
+    RBLAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
+    RBRAngle = atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
 
     RFL.SetTargetAngle(RFLAngle);
     RFR.SetTargetAngle(RFRAngle);

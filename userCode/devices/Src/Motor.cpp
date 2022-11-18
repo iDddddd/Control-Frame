@@ -7,9 +7,10 @@
 Motor* Motor::motorPtrs[2][8] = {nullptr};
 int16_t Motor::motor_intensity[2][8] = {0};
 uint32_t Motor::motor_IDs[2];
+uint8_t Motor::rsmessage[4][11] = {0};
+//static int16_t feedbackangle = 0;
 
-std::queue<uint8_t*> Motor::RS485FIFO;
-bool Motor::RS485FIFOEmpty = true;
+
 
 /**
  * 计算pid算法的控制量
@@ -44,6 +45,7 @@ void Motor::Init() {
     HAL_CAN_Start(&hcan1);
     //HAL_CAN_Start(&hcan2);
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(&hcan1,CAN_IT_TX_MAILBOX_EMPTY);
     //HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 
     CAN_FilterTypeDef canFilterTypeDef;
@@ -81,55 +83,37 @@ uint16_t Motor::CRC16Calc(uint8_t *data, uint16_t length) {
 }
 
 void Motor::RS485MessageGenerate() {
-    uint8_t* message = new uint8_t [9]{0};
-    message[0] = 0x3E;//协议头
-    message[1] = 0x00;//包序号
-    message[2] = deviceID; //ID
-    message[3] = 0x56;//相对位置闭环控制命令码
-    message[4] = 2;//数据包长度
+    int motorIndex = GET_MOTOR_POS(deviceID);
 
-    int16_t tmp = motor_intensity[1][deviceID - 1] - feedback.angle;
-    message[5] = tmp >> 8u;
-    message[6] = tmp;
-    feedback.angle = motor_intensity[1][deviceID - 1];
+    rsmessage[motorIndex][0] = 0x3E;//协议头
+    rsmessage[motorIndex][1] = 0x00;//包序号
+    rsmessage[motorIndex][2] = 0x01 + motorIndex; //ID
+    rsmessage[motorIndex][3] = 0x55;//相对位置闭环控制命令码
+    rsmessage[motorIndex][4] = 0x04;//数据包长度
 
-    uint16_t crc = CRC16Calc(message, 7);
-    message[7] = crc ;
-    message[8] = crc >> 8u;
+    uint32_t tmp = motor_intensity[1][motorIndex] ;
+    rsmessage[motorIndex][8] = tmp >> 24u;
+    rsmessage[motorIndex][7] = tmp >> 16u;
+    rsmessage[motorIndex][6] = tmp >> 8u;
+    rsmessage[motorIndex][5] = tmp;
 
-    RS485FIFO.push(message);
-    delete [] message;
+    uint16_t crc = CRC16Calc(rsmessage[motorIndex], 9);
+    rsmessage[motorIndex][9] = crc;
+    rsmessage[motorIndex][10] = crc >> 8u;
 }
 
 /**
  * @brief rs485消息包发送任务
  */
 void Motor::RS485PackageSend() {
+    static uint8_t rsmotorIndex = 0;
+    rsmotorIndex %= 4;
+    HAL_UART_Transmit_IT(&huart1, rsmessage[rsmotorIndex], 11);
 
-    uint8_t* message ;
+    rsmotorIndex++;
 
-    if(!RS485FIFOEmpty) {
-        message = RS485FIFO.front();
-        delete [] message;
-        RS485FIFO.pop();
-    }
-    else {
-        message = RS485FIFO.front();
-        if (nullptr != message) {
-            HAL_UART_Transmit_IT(&huart1, message, 9);
-            RS485FIFOEmpty = false;
-        } else {
-            RS485FIFOEmpty = true;
-        }
-        delete[] message;
-    }
 }
 
-void Motor::RS485PackageSendReload() {
-    if(RS485FIFOEmpty) {
-        RS485PackageSend();
-    }
-}
 
 /**
  * @brief can消息包发送任务
@@ -137,29 +121,30 @@ void Motor::RS485PackageSendReload() {
  *              in Device.cpp
  */
 void Motor::CANPackageSend() {
-    uint8_t canBuf[8] = {0};
+
 
     CAN_TxHeaderTypeDef txHeaderTypeDef;
+    uint8_t canmessage[8] = {0};
 
-
+    txHeaderTypeDef.StdId = 0x280;
     txHeaderTypeDef.DLC = 0x08;
     txHeaderTypeDef.IDE = CAN_ID_STD;
     txHeaderTypeDef.RTR = CAN_RTR_DATA;
     txHeaderTypeDef.TransmitGlobalTime = DISABLE;
 
-    for(auto motorIndex = 0; motorIndex < 4; motorIndex++) {
-        if((1 << motorIndex) & motor_IDs[0]){
-            txHeaderTypeDef.StdId = 0x144 - motorIndex;
-				
-            canBuf[0] = 0xA1;
-            canBuf[4] = motor_intensity[0][motorIndex] >> 8u;
-            canBuf[5] = motor_intensity[0][motorIndex];
-						while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)==0)
-							;
-            HAL_CAN_AddTxMessage(&hcan1,&txHeaderTypeDef,canBuf,0);
-        }
-    }
+    canmessage[0] = motor_intensity[0][0] >> 8u;
+    canmessage[1] = motor_intensity[0][0];
+    canmessage[2] = motor_intensity[0][1] >> 8u;
+    canmessage[3] = motor_intensity[0][1];
+    canmessage[4] = motor_intensity[0][2] >> 8u;
+    canmessage[5] = motor_intensity[0][2];
+    canmessage[6] = motor_intensity[0][3] >> 8u;
+    canmessage[7] = motor_intensity[0][3];
+
+    HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef,canmessage,0);
 }
+
+
 /**
  * @brief Motor类的构造函数
  * @param _init 类的初始化结构体指针
@@ -342,8 +327,4 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     Motor::IT_Handle(hcan);
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-    if(huart->Instance == USART1) {
-        Motor::RS485PackageSend();
-    }
-}
+
