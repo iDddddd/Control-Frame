@@ -5,6 +5,11 @@
 #include "UserTask.h"
 #include "RemoteControl.h"
 #include "Motor.h"
+#include "IMUTask.h"
+#include "MusicAutoPlay.h"
+#include "Lib_songs.h"
+
+
 void aRGB_led_show(uint32_t aRGB){
     static uint8_t alpha;
     static uint16_t red,green,blue;
@@ -217,6 +222,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         CtrlHandle ();
         ChassisHandle();
         Motor::CANPackageSend();
+
         UserHandle();
         if(cnt>20){
             if(vccBat<10)HAL_IWDG_Refresh(&hiwdg);
@@ -224,7 +230,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
     }
     if (htim == &htim6){
+					
         Motor::RS485PackageSend();
+
+    }
+    if (htim == &htim7){
+        
+    //IMU::BSP_IMU.Handle();
+
     }
 }
 
@@ -282,7 +295,9 @@ int main(void)
     MX_TIM1_Init();
     MX_TIM4_Init();
     MX_TIM6_Init();
+    MX_TIM7_Init();
     MX_TIM10_Init();
+    MX_TIM12_Init();
     MX_TIM8_Init();
     MX_ADC1_Init();
     MX_ADC3_Init();
@@ -293,7 +308,6 @@ int main(void)
     MX_CAN2_Init();
     MX_I2C3_Init();
     MX_SPI1_Init();
-    MX_SPI2_Init();
     MX_IWDG_Init();
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
@@ -309,9 +323,12 @@ int main(void)
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);
     HAL_TIM_Base_Start_IT(&htim6);
+    HAL_TIM_Base_Start_IT(&htim7);
     Motor::Init();
     ChassisStart();
+    IMU::BSP_IMU.Init();
     UserInit();
+    Music_init(&timer_song_1ms, &IronTorrent, (task_s**)0);
     init_Flag = 1;
     /* USER CODE END 2 */
 

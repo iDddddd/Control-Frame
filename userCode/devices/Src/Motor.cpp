@@ -124,7 +124,7 @@ void Motor::CANPackageSend() {
 
 
     CAN_TxHeaderTypeDef txHeaderTypeDef;
-    uint8_t canmessage[8] = {0};
+    static uint8_t canmessage[8] = {0};
 
     txHeaderTypeDef.StdId = 0x280;
     txHeaderTypeDef.DLC = 0x08;
@@ -132,14 +132,14 @@ void Motor::CANPackageSend() {
     txHeaderTypeDef.RTR = CAN_RTR_DATA;
     txHeaderTypeDef.TransmitGlobalTime = DISABLE;
 
-    canmessage[0] = motor_intensity[0][0] >> 8u;
-    canmessage[1] = motor_intensity[0][0];
-    canmessage[2] = motor_intensity[0][1] >> 8u;
-    canmessage[3] = motor_intensity[0][1];
-    canmessage[4] = motor_intensity[0][2] >> 8u;
-    canmessage[5] = motor_intensity[0][2];
-    canmessage[6] = motor_intensity[0][3] >> 8u;
-    canmessage[7] = motor_intensity[0][3];
+    canmessage[0] = motor_intensity[0][0];
+    canmessage[1] = motor_intensity[0][0] >> 8u;
+    canmessage[2] = motor_intensity[0][1] ;
+    canmessage[3] = motor_intensity[0][1] >> 8u;
+    canmessage[4] = motor_intensity[0][2];
+    canmessage[5] = motor_intensity[0][2] >> 8u;
+    canmessage[6] = motor_intensity[0][3];
+    canmessage[7] = motor_intensity[0][3] >> 8u;
 
     HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef,canmessage,0);
 }
@@ -269,7 +269,10 @@ void Motor::ErrorHandle() {
 void Motor::MotorStateUpdate() {
 
     switch(ctrlType) {
-        case SPEED_Single:
+        case SPEED_Single: {
+            state.speed = feedback.speed / reductionRatio;
+        }
+
         case POSITION_Double: {
             state.speed = feedback.speed / reductionRatio;
             state.moment = feedback.moment;

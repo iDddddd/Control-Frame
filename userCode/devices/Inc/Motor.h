@@ -133,9 +133,7 @@ private:
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
     void RS485MessageGenerate();
 
-    static std::queue<uint8_t*> RS485FIFO;
 
-    static bool RS485FIFOEmpty;
 };
 /*结构体成员取值定义组------------------------------------------------------*/
 

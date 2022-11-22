@@ -11,8 +11,8 @@ void CtrlHandle(){
     }else {//其他正常模式
         switch (RemoteControl::rcInfo.sLeft) {
             case UP_POS://左侧一档
-                ChassisSetVelocity(RemoteControl::rcInfo.right_col*42,
-                                   RemoteControl::rcInfo.right_rol*42,RemoteControl::rcInfo.left_rol*300);
+                ChassisSetVelocity(RemoteControl::rcInfo.right_col*2,
+                                   RemoteControl::rcInfo.right_rol*2,RemoteControl::rcInfo.left_rol*60);
                 break;
             case MID_POS://左侧二档
                 uint8_t clawState;
