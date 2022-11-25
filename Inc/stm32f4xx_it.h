@@ -73,21 +73,22 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 void EXTI0_IRQHandler(void);
 void EXTI3_IRQHandler(void);
+void EXTI4_IRQHandler(void);
 void DMA1_Stream1_IRQHandler(void);
-void DMA1_Stream2_IRQHandler(void);
 void DMA1_Stream4_IRQHandler(void);
-void CAN1_TX_IRQHandler(void);
 void CAN1_RX0_IRQHandler(void);
+void EXTI9_5_IRQHandler(void);
 void TIM1_UP_TIM10_IRQHandler(void);
-void SPI1_IRQHandler(void);
+void TIM1_TRG_COM_TIM11_IRQHandler(void);
+void SPI2_IRQHandler(void);
 void USART1_IRQHandler(void);
 void TIM6_DAC_IRQHandler(void);
-void DMA2_Stream0_IRQHandler(void);
+void TIM7_IRQHandler(void);
+
 void DMA2_Stream3_IRQHandler(void);
 void CAN2_RX0_IRQHandler(void);
 void OTG_FS_IRQHandler(void);
 void USART6_IRQHandler(void);
-void I2C3_EV_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

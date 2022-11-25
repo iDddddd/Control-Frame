@@ -50,7 +50,8 @@ extern CHASSIS_CONTROL_T   chassisControl;
 extern float FBVelocity,LRVelocity,RTVelocity;
 
 /*外部函数声明-------------------------------------------------------------*/
-
+int sign(float x);
+float SetAngle(float Angle);
 void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 void ChassisStop();

@@ -100,8 +100,10 @@ void Error_Handler(void);
 #define CS1_ACCEL_GPIO_Port GPIOA
 #define INT1_ACCEL_Pin GPIO_PIN_4
 #define INT1_ACCEL_GPIO_Port GPIOC
+#define INT1_ACCEL_EXTI_IRQn EXTI4_IRQn
 #define INT1_GRYO_Pin GPIO_PIN_5
 #define INT1_GRYO_GPIO_Port GPIOC
+#define INT1_GRYO_EXTI_IRQn EXTI9_5_IRQn
 #define OLED_RST_Pin GPIO_PIN_12
 #define OLED_RST_GPIO_Port GPIOB
 #define CS1_GYRO_Pin GPIO_PIN_0

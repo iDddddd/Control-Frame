@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../userCode/devices/Inc;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;..\userCode\tasks\Inc;..\userCode\devices\Inc</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../userCode/devices/Inc;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;..\userCode\tasks\Inc;..\userCode\devices\Inc;..\userCode\algorithms\Inc;..\userCode\bsp\Inc;..\userCode\drivers\Inc;..\userCode\MiddleWares\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -686,6 +686,66 @@
               <FileName>RemoteControl.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\RemoteControl.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>IMU.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\IMU.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Drivers</GroupName>
+          <Files>
+            <File>
+              <FileName>BMI088driver.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\drivers\Src\BMI088driver.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ist8310driver.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\drivers\Src\ist8310driver.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>BSP</GroupName>
+          <Files>
+            <File>
+              <FileName>bsp_spi.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\bsp\Src\bsp_spi.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Middlewares</GroupName>
+          <Files>
+            <File>
+              <FileName>BMI088Middleware.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\MiddleWares\Src\BMI088Middleware.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ist8310driver_middleware.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\MiddleWares\Src\ist8310driver_middleware.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Algorithms</GroupName>
+          <Files>
+            <File>
+              <FileName>MahonyAHRS.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\algorithms\Src\MahonyAHRS.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>PID.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\algorithms\Src\PID.cpp</FilePath>
             </File>
           </Files>
         </Group>

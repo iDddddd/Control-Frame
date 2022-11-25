@@ -11,32 +11,6 @@ uint8_t Motor::rsmessage[4][11] = {0};
 //static int16_t feedbackangle = 0;
 
 
-
-/**
- * 计算pid算法的控制量
- * @param target 目标量
- * @param feedback 反馈量
- * @return 控制量
- */
-float PID::PIDCalc(float target,float feedback) {
-    PIDInfo.fdb = feedback;
-    PIDInfo.ref = target;
-    PIDInfo.err[3] = PIDInfo.ref - PIDInfo.fdb;
-    PIDInfo.componentKp = PIDInfo.err[3] * PIDInfo.kp;
-    PIDInfo.errSum += PIDInfo.err[3];
-    INRANGE(PIDInfo.errSum, -1 * PIDInfo.componentKiMax / PIDInfo.ki, PIDInfo.componentKiMax / PIDInfo.ki);
-    PIDInfo.componentKi = PIDInfo.errSum * PIDInfo.ki;
-    PIDInfo.componentKd = (PIDInfo.err[3] - PIDInfo.err[2]) * PIDInfo.kd;
-    INRANGE(PIDInfo.componentKp, -1 * PIDInfo.componentKpMax, PIDInfo.componentKpMax);
-    INRANGE(PIDInfo.componentKi, -1 * PIDInfo.componentKiMax, PIDInfo.componentKiMax);
-    INRANGE(PIDInfo.componentKd, -1 * PIDInfo.componentKdMax, PIDInfo.componentKdMax);
-    PIDInfo.output = PIDInfo.componentKp + PIDInfo.componentKi + PIDInfo.componentKd;
-    INRANGE(PIDInfo.output, -1 * PIDInfo.outputMax, PIDInfo.outputMax);
-    PIDInfo.err[2] = PIDInfo.err[3];
-    return PIDInfo.output;
-}
-
-
 /**
  * @brief 电机类的初始化，主要是CAN通信的相关配置
  * @callergraph int main(void) in Device.cpp

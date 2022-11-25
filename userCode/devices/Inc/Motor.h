@@ -7,6 +7,7 @@
 
 #include "Device.h"
 #include "can.h"
+#include "PID.h"
 #include <cstring>
 #include <cmath>
 #include <queue>
@@ -37,26 +38,6 @@ typedef struct {
     int8_t temp;
 } C6x0Rx_t;
 
-typedef struct PID_Regulator_t {
-
-    float ref;
-    float fdb;
-    float err[4];
-    float errSum;
-    float kp;
-    float ki;
-    float kd;
-    float componentKp;
-    float componentKi;
-    float componentKd;
-    float componentKpMax;
-    float componentKiMax;
-    float componentKdMax;
-    float output;
-    float outputMax;
-
-} PID_Regulator_t;
-
 typedef struct {
 
     PID_Regulator_t* speedPIDp;//速度环pid参数结构体指针
@@ -77,12 +58,6 @@ typedef struct {
 
 }MOTOR_STATE_t;
 /*类型定义----------------------------------------------------------------*/
-
-class PID{
-public:
-    PID_Regulator_t PIDInfo;
-    float PIDCalc(float target,float feedback);
-};
 
 class Motor :private Device
 {

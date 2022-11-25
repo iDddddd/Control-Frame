@@ -3,6 +3,7 @@
 //
 #include "ChassisTask.h"
 
+
 constexpr float L = 0.2f; //车身长
 constexpr float M = 0.2f; //车身宽
 
@@ -107,7 +108,20 @@ void ChassisStop(){
     CMBL.Stop();
     CMBR.Stop();
 }
-
+int sign(float x){
+    if (x<0) return -1;
+    if (x>0) return 1;
+    return 0;
+}
+float SetAngle(float Angle){
+    if (Angle > 270.0) {
+		Angle -= 180.0;
+		}
+    if (Angle < 90.0){
+		Angle += 180.0;
+		}
+    return Angle;
+}
 
 /**
  * @brief 速度与角度计算任务
@@ -131,24 +145,25 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 //    CMBLSpeed = -fbVelocity + rtVelocity;
 //    CMBRSpeed = fbVelocity + rtVelocity;
 
-    RFLAngle = -atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
-    RFRAngle = -atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
-    RBLAngle = -atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
-    RBRAngle = -atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 360;
+    RFLAngle =  -atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 180;
+    RFRAngle =  -atan2( (lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f + 180;
+    RBLAngle =  -atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2) ) * 180 / 3.1415926f + 180;
+    RBRAngle =  -atan2( (lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2) ) * 180 / 3.1415926f + 180;
 
-    RFL.SetTargetAngle(RFLAngle);
-    RFR.SetTargetAngle(RFRAngle);
-    RBL.SetTargetAngle(RBLAngle);
-    RBR.SetTargetAngle(RBRAngle);
 
-    CMFLSpeed = sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
-    CMFRSpeed = - sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+    RFL.SetTargetAngle( SetAngle(RFLAngle));
+    RFR.SetTargetAngle( SetAngle(RFRAngle));
+    RBL.SetTargetAngle( SetAngle(RBLAngle));
+    RBR.SetTargetAngle( SetAngle(RBRAngle));
+
+    CMFLSpeed = -sign(fbVelocity - rtVelocity * M /2) * sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
                      (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2));
-    CMBLSpeed = sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+    CMFRSpeed = sign(fbVelocity + rtVelocity * M /2) * sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
                      (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
-    CMBRSpeed = - sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+    CMBLSpeed = -sign(fbVelocity - rtVelocity * M /2) * sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
                      (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2));
+    CMBRSpeed = sign(fbVelocity + rtVelocity * M /2) * sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2));
     //计算四个轮子角速度，单位：rad/s
     CMFLSpeed = CMFLSpeed /(WHEEL_DIAMETER/2.0f);
     CMFRSpeed = CMFRSpeed /(WHEEL_DIAMETER/2.0f);
