@@ -2,7 +2,7 @@
 // Created by LEGION on 2021/10/4.
 //
 #include "ChassisTask.h"
-
+#include "IMU.h"
 
 constexpr float L = 0.2f; //车身长
 constexpr float M = 0.2f; //车身宽
@@ -63,7 +63,7 @@ Motor RBR(MOTOR_ID_3, &swerveMotorInit);
 
 bool ChassisStopFlag = true;
 float FBVelocity,LRVelocity,RTVelocity;
-
+float ZeroYaw;
 void ChassisStart(){
 
 }
@@ -95,6 +95,22 @@ void ChassisSetVelocity(float _fbV,float _lrV,float _rtV){
     ChassisStopFlag = false;
     FBVelocity = _fbV;
     LRVelocity = _lrV;
+    RTVelocity = _rtV;
+}
+
+void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV){
+    ChassisStopFlag = false;
+    FBVelocity = _fbV * cos(IMU::imu.attitude.yaw) - _lrV * sin(IMU::imu.attitude.yaw);
+    LRVelocity = _fbV * sin(IMU::imu.attitude.yaw) + _lrV * cos(IMU::imu.attitude.yaw);
+    RTVelocity = _rtV;
+}
+void Headmemory(){
+    ZeroYaw = IMU::imu.attitude.yaw;
+}
+void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV){
+    ChassisStopFlag = false;
+    FBVelocity = _fbV * cos((IMU::imu.attitude.yaw - ZeroYaw)) - _lrV * sin((IMU::imu.attitude.yaw - ZeroYaw));
+    LRVelocity = _fbV * sin((IMU::imu.attitude.yaw - ZeroYaw)) + _lrV * cos((IMU::imu.attitude.yaw - ZeroYaw));
     RTVelocity = _rtV;
 }
 
@@ -132,7 +148,7 @@ float SetAngle(float Angle){
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float CMFLSpeed, CMFRSpeed, CMBLSpeed, CMBRSpeed;
     float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
-    rtVelocity = RPM2RADpS(rtVelocity);
+    rtVelocity = - RPM2RADpS(rtVelocity);
 
     //计算四个轮子线速度，单位：m/s
     /**

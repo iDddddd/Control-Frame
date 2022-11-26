@@ -13,13 +13,15 @@ void CtrlHandle(){
             case UP_POS://左侧一档
                 ChassisSetVelocity(RemoteControl::rcInfo.right_col*2,
                                    RemoteControl::rcInfo.right_rol*2,RemoteControl::rcInfo.left_rol*60);
+                Headmemory();
                 break;
             case MID_POS://左侧二档
-                uint8_t clawState;
                 if (RemoteControl::rcInfo.sRight == UP_POS){
-                    clawState = 0;
+                    HeadlessSetVelocity(RemoteControl::rcInfo.right_col*2,
+                                        RemoteControl::rcInfo.right_rol*2,RemoteControl::rcInfo.left_rol*60);
                 }else if(RemoteControl::rcInfo.sRight == MID_POS) {
-                    clawState = 1;
+                    HeadkeepSetVelocity(RemoteControl::rcInfo.right_col*2,
+                                        RemoteControl::rcInfo.right_rol*2,RemoteControl::rcInfo.left_rol*60);
                 }
 				break;
 			case DOWN_POS:default:

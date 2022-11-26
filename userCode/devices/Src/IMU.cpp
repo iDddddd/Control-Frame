@@ -161,7 +161,6 @@ void IMU::ITHandle() {
         if(state.gyro_update_flag & (1u << IMU_SPI_SHFITS))
         {
            // SystemEstimator::systemEstimator.ITEstimatorTrigger(MPU_GYRO_IT);
-            state.imu_start_dma_flag = 1;
             state.gyro_update_flag &= ~(1u << IMU_SPI_SHFITS);
             state.gyro_update_flag |= (1u << IMU_UPDATE_SHFITS);
 
@@ -174,7 +173,6 @@ void IMU::ITHandle() {
         if(state.accel_update_flag & (1u << IMU_SPI_SHFITS))
         {
           //  SystemEstimator::systemEstimator.ITEstimatorTrigger(MPU_ACCEL_IT);
-            state.imu_start_dma_flag = 1;
             state.accel_update_flag &= ~(1u << IMU_SPI_SHFITS);
             state.accel_update_flag |= (1u << IMU_UPDATE_SHFITS);
 
@@ -185,7 +183,6 @@ void IMU::ITHandle() {
         if(state.accel_temp_update_flag & (1u << IMU_SPI_SHFITS))
         {
            // SystemEstimator::systemEstimator.ITEstimatorTrigger(MPU_TEMP_IT);
-            state.imu_start_dma_flag = 1;
             state.accel_temp_update_flag &= ~(1u << IMU_SPI_SHFITS);
             state.accel_temp_update_flag |= (1u << IMU_UPDATE_SHFITS);
 

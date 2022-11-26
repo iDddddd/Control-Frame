@@ -223,7 +223,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         CtrlHandle ();
         ChassisHandle();
         Motor::CANPackageSend();
-				IMU::imu.Handle();
+        IMU::imu.Handle();
         UserHandle();
         if(cnt>20){
             if(vccBat<10)HAL_IWDG_Refresh(&hiwdg);
@@ -236,9 +236,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     }
     if (htim == &htim7){
-
-        
-				IMU::imu.ITHandle();
 
     }
 }
@@ -311,7 +308,7 @@ int main(void)
     MX_I2C3_Init();
     MX_SPI1_Init();
     MX_SPI2_Init();
-   // MX_IWDG_Init();
+    MX_IWDG_Init();
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
 
@@ -326,7 +323,7 @@ int main(void)
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);
     HAL_TIM_Base_Start_IT(&htim6);
-    HAL_TIM_Base_Start_IT(&htim7);
+   // HAL_TIM_Base_Start_IT(&htim7);
     Motor::Init();
     IMU::imu.Init();
     ChassisStart();

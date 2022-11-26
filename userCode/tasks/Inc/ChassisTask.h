@@ -48,6 +48,7 @@ extern CHASSIS_STATE_T     chassisState;
 extern CHASSIS_CONTROL_T   chassisControl;
 
 extern float FBVelocity,LRVelocity,RTVelocity;
+extern float ZeroYaw;
 
 /*外部函数声明-------------------------------------------------------------*/
 int sign(float x);
@@ -56,4 +57,7 @@ void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 void ChassisStop();
 void ChassisSetVelocity(float _fbV,float _lrV,float _rtV);
+void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV);
+void Headmemory();
+void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV);
 #endif //RM_FRAME_C_CHASSISTASK_H

@@ -157,66 +157,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>414</LineNumber>
+          <LineNumber>159</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134291142</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\drivers\Src\BMI088driver.cpp</Filename>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\userCode\devices\Src\IMU.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/drivers/Src/BMI088driver.cpp\414</Expression>
+          <Expression></Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>159</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134295456</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\devices\Src\IMU.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/IMU.cpp\159</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>161</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134297200</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\devices\Src\IMU.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/IMU.cpp\161</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
           <LineNumber>152</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220822</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
+          <BreakIfRCount>0</BreakIfRCount>
           <Filename>..\userCode\devices\Src\IMU.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/IMU.cpp\152</Expression>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -480,7 +448,7 @@
 
   <Group>
     <GroupName>Application/User</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
