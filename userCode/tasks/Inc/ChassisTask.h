@@ -60,4 +60,5 @@ void ChassisSetVelocity(float _fbV,float _lrV,float _rtV);
 void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV);
 void Headmemory();
 void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV);
+void AutoSetVelocity();
 #endif //RM_FRAME_C_CHASSISTASK_H

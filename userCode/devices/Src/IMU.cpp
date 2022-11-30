@@ -12,6 +12,7 @@ void IMU::Init() {
     if(ist8310_init() != IST8310_NO_ERROR) Error_Handler();
 #endif
     BMI088_read(rawData.gyro,rawData.accel,&rawData.temp);
+    offset();
     PID_Regulator_t _tempPID = {
             .kp = 340,
             .ki = 0.04,
@@ -31,7 +32,8 @@ void IMU::Init() {
 }
 void IMU::Handle() {
 
-
+    record_accel(position._accel, proData.accel);
+    record_velocity(position._velocity, position.velocity);
     if(state.gyro_update_flag & (1u << IMU_NOTIFY_SHFITS))
     {
         state.gyro_update_flag &= ~(1u << IMU_NOTIFY_SHFITS);
@@ -42,6 +44,7 @@ void IMU::Handle() {
     {
         state.accel_update_flag &= ~(1u << IMU_UPDATE_SHFITS);
         BMI088_accel_read_over(buf.accel_dma_rx_buf + BMI088_ACCEL_RX_BUF_DATA_OFFSET, rawData.accel, &rawData.time);
+        rawData.ay = rawData.accel[1];
     }
 
     if(state.accel_temp_update_flag & (1u << IMU_UPDATE_SHFITS))
@@ -50,8 +53,17 @@ void IMU::Handle() {
         BMI088_temperature_read_over(buf.accel_temp_dma_rx_buf + BMI088_ACCEL_RX_BUF_DATA_OFFSET, &rawData.temp);
         imu_temp_control(rawData.temp);
     }
-
-    AHRS_update(quat, 0.001f, rawData.gyro, rawData.accel, rawData.mag);
+    data_adjust(proData.accel, rawData.accel);
+    //proData.accel[0] = filter(proData.accel[0]);
+    proData.accel[1] = filter(proData.accel[1]);
+    // proData.accel[2] = filter(proData.accel[2]);
+    proData.ay = proData.accel[1];
+    velocityVerify();
+    get_velocity(position.velocity, position._accel, proData.accel);
+    get_displace(position.displace, position._velocity, position.velocity);
+    position.vy = position.velocity[1];
+    position.xy = position.displace[1];
+    AHRS_update(quat, 0.001f, rawData.gyro, proData.accel, rawData.mag);
     get_angle(quat,&attitude.yaw, &attitude.pitch, &attitude.rol);
     attitude.yaw_v = rawData.gyro[2];
     attitude.pitch_v = rawData.gyro[0];
@@ -83,7 +95,6 @@ void IMU::ITHandle(uint16_t GPIO_Pin) {
     else if(GPIO_Pin == IST8310_DRDY_Pin)
     {
         state.mag_update_flag |= 1u << IMU_DR_SHFITS;
-
         if(state.mag_update_flag &= 1u << IMU_DR_SHFITS)
         {
             state.mag_update_flag &= ~(1u<< IMU_DR_SHFITS);
@@ -197,12 +208,17 @@ void IMU::ITHandle() {
             state.gyro_update_flag |= (1u << IMU_NOTIFY_SHFITS);
         }
     }
+
 }
 
 void IMU::ErrorHandle() {
 
 }
-
+/**
+ *
+ * @brief 姿态解算
+ * @param quat[4]:四元数
+ */
 void IMU::AHRS_update(float quat[4], float time, float gyro[3], float accel[3], float mag[3])
 {
 #ifdef IMU_USE_MAG
@@ -268,3 +284,104 @@ void IMU::imu_temp_control(float temp)
 void IMU::IMU_temp_PWM(float pwm) {
     __HAL_TIM_SetCompare(&htim10, TIM_CHANNEL_1, pwm);
 }
+/**
+ * @brief 位置获取
+ * @param _accel 上一次加速度值
+ * @param accel  本次加速度值
+ */
+void IMU::record_accel(float _accel[3], float accel[3]){
+    _accel[0] = accel[0];
+    _accel[1] = accel[1];
+    _accel[2] = accel[2];
+}
+void IMU::get_velocity(float velocity[3],float _accel[3], float accel[3]){
+    velocity[0] += ((_accel[0] + accel[0]) / 2 *0.001f);
+    velocity[1] += ((_accel[1] + accel[1]) / 2 *0.001f);
+    velocity[2] += ((_accel[2] + accel[2]) / 2 *0.001f);
+}
+void IMU::record_velocity(float _velocity[3], float velocity[3]){
+    _velocity[0] = velocity[0];
+    _velocity[1] = velocity[1];
+    _velocity[2] = velocity[2];
+}
+void IMU::get_displace(float displace[3], float _velocity[3], float velocity[3]){
+    displace[0] += ((_velocity[0] + velocity[0]) / 2 * 0.001f);
+    displace[1] += ((_velocity[1] + velocity[1]) / 2 * 0.001f);
+    displace[2] += ((_velocity[2] + velocity[2]) / 2 * 0.001f);
+}
+/**
+ * @brief 数据处理
+ * @param accel
+ * @param _accel
+ */
+void IMU::offset(){
+    float accel[3], gyro[3], temp;
+    for (int i = 0; i<1000; i++){
+        BMI088_read(gyro, accel, &temp);
+        rawData.accel_offset[0] +=accel [0];
+        rawData.accel_offset[1] +=accel [1];
+        rawData.accel_offset[2] +=accel [2];
+    }
+    rawData.accel_offset[0] /= 1000;
+    rawData.accel_offset[1] /= 1000;
+    rawData.accel_offset[2] /= 1000;
+    rawData.offset_ay = rawData.accel_offset[1];
+
+}
+void IMU::data_adjust(float accel[3], float _accel[3]){
+  //  accel[0] = C1 * _accel[0] + C2 * _accel[1] + C3 * _accel[2] + Cx - rawData.accel_offset[0];
+  //  accel[1] = C4 * _accel[0] + C5 * _accel[1] + C6 * _accel[2] + Cy - rawData.accel_offset[1];
+    accel[0] = _accel[0] - rawData.accel_offset[0];
+    accel[1] = _accel[1] - rawData.accel_offset[1];
+    accel[2] = C7 * _accel[0] + C8 * _accel[1] + C9 * _accel[2] + Cz;
+}
+void IMU::velocityVerify(){
+    static int count = 0;
+    if (abs(proData.accel[1]) < 0.2) {
+        count++;
+    }
+    else {
+        count = 0;
+    }
+    if (count >= 50){
+        position.velocity[1] = 0;
+    }
+}
+float IMU::filter(float current){
+    int i,j;
+    float sum = 0;
+
+    if(imuFilter.buff_init == 0)
+    {
+        imuFilter.history[imuFilter.index] = current;
+        imuFilter.index++;
+        if(imuFilter.index >= (SUM_WIN_SIZE-1))
+        {
+            imuFilter.buff_init = 1;//index有效范围是0-5，前面放到5，下一个就可以输出
+        }
+        return 0;//当前无法输出，做个特殊标记区分
+    }
+    else
+    {
+        imuFilter.history[imuFilter.index] = current;
+        imuFilter.index++;
+        if(imuFilter.index >= SUM_WIN_SIZE)
+        {
+            imuFilter.index = 0;//index有效最大5,下次再从0开始循环覆盖
+        }
+
+        j = imuFilter.index;
+        for(i = 0;i < SUM_WIN_SIZE;i++)
+        {
+            //注意i=0的值并不是最早的值
+            sum += imuFilter.history[j] * imuFilter.factor[i];//注意防止数据溢出
+            j++;
+            if(j == SUM_WIN_SIZE)
+            {
+                j = 0;
+            }
+        }
+        return sum / imuFilter.K;
+    }
+}
+

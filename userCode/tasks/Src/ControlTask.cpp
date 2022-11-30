@@ -24,8 +24,13 @@ void CtrlHandle(){
                                         RemoteControl::rcInfo.right_rol*2,RemoteControl::rcInfo.left_rol*60);
                 }
 				break;
-			case DOWN_POS:default:
-				break;
+			case DOWN_POS:
+                if (RemoteControl::rcInfo.sRight == UP_POS){
+                    AutoSetVelocity();
+                }
+                break;
+			default:
+			    break;
         }
 
     }

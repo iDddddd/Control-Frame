@@ -113,6 +113,20 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV){
     LRVelocity = _fbV * sin((IMU::imu.attitude.yaw - ZeroYaw)) + _lrV * cos((IMU::imu.attitude.yaw - ZeroYaw));
     RTVelocity = _rtV;
 }
+void AutoSetVelocity(){
+    ChassisStopFlag = false;
+    if (IMU::imu.position.displace[1] < 1) {
+        FBVelocity = 1;
+        LRVelocity = 0;
+        RTVelocity = 0;
+    }
+    else{
+        FBVelocity = 0;
+        LRVelocity = 0;
+        RTVelocity = 0;
+    }
+
+}
 
 /**
  * @brief 执行急停模式的底盘任务处理

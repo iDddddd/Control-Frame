@@ -419,7 +419,7 @@ void BMI088_gyro_read_over(uint8_t *rx_buf, float gyro[3])
 
 void BMI088_read(float gyro[3], float accel[3], float *temperate)
 {
-    uint8_t buf[8] = {0, 0, 0, 0, 0, 0};
+    uint8_t buf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     int16_t bmi088_raw_temp;
 
     BMI088_accel_read_muli_reg(BMI088_ACCEL_XOUT_L, buf, 6);
