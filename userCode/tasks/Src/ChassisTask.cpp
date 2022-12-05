@@ -4,8 +4,8 @@
 #include "ChassisTask.h"
 #include "IMU.h"
 
-constexpr float L = 0.2f; //车身长
-constexpr float M = 0.2f; //车身宽
+constexpr float L = 0.24f; //车身长
+constexpr float M = 0.24f; //车身宽
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底盘电机共用
         .kp = -2.0f,
@@ -116,7 +116,7 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV){
 void AutoSetVelocity(){
     ChassisStopFlag = false;
     if (IMU::imu.position.displace[1] < 1) {
-        FBVelocity = 1;
+        FBVelocity = 0.5;
         LRVelocity = 0;
         RTVelocity = 0;
     }
@@ -147,7 +147,7 @@ float SetAngle(float Angle){
     if (Angle > 270.0) {
 		Angle -= 180.0;
 		}
-    if (Angle < 90.0){
+    if (Angle <= 90.0){
 		Angle += 180.0;
 		}
     return Angle;

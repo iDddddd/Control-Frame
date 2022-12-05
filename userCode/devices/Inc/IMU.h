@@ -35,7 +35,7 @@
 //平均滤波采样值
 #define SUM_WIN_SIZE 8
 #define MPU6500_TEMP_PWM_MAX 1000 //mpu6500控制温度的设置TIM的重载值，即给PWM最大为 MPU6500_TEMP_PWM_MAX - 1
-//轴偏
+/*//轴偏
 constexpr float C1 = 1.010006001930344f;
 constexpr float C2 = -0.007492008326987f;
 constexpr float C3 = -0.009254187692463f;
@@ -48,14 +48,18 @@ constexpr float C9 = 1.016633267989222f;
 constexpr float Cx = 0.099323298159297f;
 constexpr float Cy = 0.017485774998530f;
 constexpr float Cz = -0.166100036392575f;
+//椭球误差
+#define SCALE_X 1.008558673981405
+#define SCALE_Y 1.004707252860914
+#define SCALE_Z 1.005737679878631
 //零偏
 constexpr float zero_ax = 0.19184339;
 constexpr float zero_ay = 0.0227739215;
-constexpr float zero_az = 9.63659286f;
+constexpr float zero_az = 9.63659286f;*/
 /*枚举类型定义------------------------------------------------------------*/
 /*结构体定义--------------------------------------------------------------*/
 typedef struct{
-    float accel[3],gyro[3],temp,time,mag[3],accel_offset[3],ay,offset_ay;
+    float accel[3],gyro[3],temp,time,mag[3],accel_offset[3], ax, ay, az;
 }IMU_Raw_Data_t;
 typedef struct{
     float accel[3],gyro[3],temp,time,mag[3],ay;
@@ -86,6 +90,7 @@ typedef struct{
     float xy;
 }IMU_Position_t;
 typedef struct {
+    float current;
     float history[SUM_WIN_SIZE];//历史值，其中history[SUM_WIN_SIZE-1]为最近的记录
 
     int buff_init = 0; //前SUM_WIN_SIZE-1次填充后才能开始输出
@@ -119,7 +124,7 @@ class IMU : private Device
 
     IMU_state_t state;
     void imu_cmd_spi_dma(void);
-    float filter(float current);
+    void filter(float *current, IMU_Filter_t Filter);
     //数据处理
     void offset();    //获取加速度零偏值
     void data_adjust(float accel[3], float _accel[3]);
@@ -150,7 +155,8 @@ public:
     IMU_Pro_Data_t proData;
     IMU_Attitude_t attitude;
     IMU_Position_t position;
-    IMU_Filter_t imuFilter;
+    IMU_Filter_t axFilter;
+    IMU_Filter_t ayFilter;
 };
 
 

@@ -5,7 +5,6 @@
 #include "IMU.h"
 
 IMU IMU::imu;
-
 void IMU::Init() {
     if (BMI088_init() != BMI088_NO_ERROR) Error_Handler();
 #ifdef IMU_USE_MAG
@@ -44,7 +43,12 @@ void IMU::Handle() {
     {
         state.accel_update_flag &= ~(1u << IMU_UPDATE_SHFITS);
         BMI088_accel_read_over(buf.accel_dma_rx_buf + BMI088_ACCEL_RX_BUF_DATA_OFFSET, rawData.accel, &rawData.time);
+        rawData.ax = rawData.accel[0];
         rawData.ay = rawData.accel[1];
+        rawData.az = rawData.accel[2];
+        ax = rawData.accel[0];
+        ay = rawData.accel[1];
+        az = rawData.accel[2];
     }
 
     if(state.accel_temp_update_flag & (1u << IMU_UPDATE_SHFITS))
@@ -54,9 +58,10 @@ void IMU::Handle() {
         imu_temp_control(rawData.temp);
     }
     data_adjust(proData.accel, rawData.accel);
-    //proData.accel[0] = filter(proData.accel[0]);
-    proData.accel[1] = filter(proData.accel[1]);
-    // proData.accel[2] = filter(proData.accel[2]);
+
+    filter(&proData.accel[0], axFilter);
+    filter(&proData.accel[1], ayFilter);
+
     proData.ay = proData.accel[1];
     velocityVerify();
     get_velocity(position.velocity, position._accel, proData.accel);
@@ -325,63 +330,71 @@ void IMU::offset(){
     rawData.accel_offset[0] /= 1000;
     rawData.accel_offset[1] /= 1000;
     rawData.accel_offset[2] /= 1000;
-    rawData.offset_ay = rawData.accel_offset[1];
-
 }
 void IMU::data_adjust(float accel[3], float _accel[3]){
   //  accel[0] = C1 * _accel[0] + C2 * _accel[1] + C3 * _accel[2] + Cx - rawData.accel_offset[0];
   //  accel[1] = C4 * _accel[0] + C5 * _accel[1] + C6 * _accel[2] + Cy - rawData.accel_offset[1];
     accel[0] = _accel[0] - rawData.accel_offset[0];
     accel[1] = _accel[1] - rawData.accel_offset[1];
-    accel[2] = C7 * _accel[0] + C8 * _accel[1] + C9 * _accel[2] + Cz;
+    accel[2] = _accel[2];
 }
 void IMU::velocityVerify(){
-    static int count = 0;
+    static int xcount = 0;
+    static int ycount = 0;
+    if (abs(proData.accel[0]) < 0.2) {
+        xcount++;
+    }
+    else {xcount = 0;
+    }
+    if (xcount >= 50){
+        position.velocity[0] = 0;
+    }
     if (abs(proData.accel[1]) < 0.2) {
-        count++;
+        ycount++;
     }
-    else {
-        count = 0;
+    else {ycount = 0;
     }
-    if (count >= 50){
+    if (ycount >= 50){
         position.velocity[1] = 0;
     }
+
 }
-float IMU::filter(float current){
+void IMU::filter(float *current, IMU_Filter_t Filter){
+
     int i,j;
     float sum = 0;
-
-    if(imuFilter.buff_init == 0)
+    Filter.current = *current;
+    if(Filter.buff_init == 0)
     {
-        imuFilter.history[imuFilter.index] = current;
-        imuFilter.index++;
-        if(imuFilter.index >= (SUM_WIN_SIZE-1))
+        Filter.history[Filter.index] = Filter.current;
+        Filter.index++;
+        if(Filter.index >= (SUM_WIN_SIZE-1))
         {
-            imuFilter.buff_init = 1;//index有效范围是0-5，前面放到5，下一个就可以输出
+            Filter.buff_init = 1;//index有效范围是0-5，前面放到5，下一个就可以输出
         }
-        return 0;//当前无法输出，做个特殊标记区分
+        return ;//当前无法输出，做个特殊标记区分
     }
     else
     {
-        imuFilter.history[imuFilter.index] = current;
-        imuFilter.index++;
-        if(imuFilter.index >= SUM_WIN_SIZE)
+        Filter.history[Filter.index] = Filter.current;
+        Filter.index++;
+        if(Filter.index >= SUM_WIN_SIZE)
         {
-            imuFilter.index = 0;//index有效最大5,下次再从0开始循环覆盖
+            Filter.index = 0;//index有效最大5,下次再从0开始循环覆盖
         }
 
-        j = imuFilter.index;
+        j = Filter.index;
         for(i = 0;i < SUM_WIN_SIZE;i++)
         {
             //注意i=0的值并不是最早的值
-            sum += imuFilter.history[j] * imuFilter.factor[i];//注意防止数据溢出
+            sum += Filter.history[j] * Filter.factor[i];//注意防止数据溢出
             j++;
             if(j == SUM_WIN_SIZE)
             {
                 j = 0;
             }
         }
-        return sum / imuFilter.K;
+        *current = sum / Filter.K;
     }
 }
 

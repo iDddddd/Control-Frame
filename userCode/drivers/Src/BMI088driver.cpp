@@ -395,11 +395,11 @@ void BMI088_accel_read_over(uint8_t *rx_buf, float accel[3], float *time)
     int16_t bmi088_raw_temp;
     uint32_t sensor_time;
     bmi088_raw_temp = (int16_t)((rx_buf[1]) << 8) | rx_buf[0];
-    accel[0] = bmi088_raw_temp * BMI088_ACCEL_SEN;
+    accel[0] = bmi088_raw_temp * BMI088_ACCEL_SEN * SCALE_X;
     bmi088_raw_temp = (int16_t)((rx_buf[3]) << 8) | rx_buf[2];
-    accel[1] = bmi088_raw_temp * BMI088_ACCEL_SEN;
+    accel[1] = bmi088_raw_temp * BMI088_ACCEL_SEN * SCALE_Y;
     bmi088_raw_temp = (int16_t)((rx_buf[5]) << 8) | rx_buf[4];
-    accel[2] = bmi088_raw_temp * BMI088_ACCEL_SEN;
+    accel[2] = bmi088_raw_temp * BMI088_ACCEL_SEN * SCALE_Z;
     //sensor_time = (uint32_t)((rx_buf[8] << 16) | (rx_buf[7] << 8) | rx_buf[6]); ¹Ù·½´úÂëÒÉËÆ³¬½ç
     sensor_time = (uint32_t)( rx_buf[6]);
     *time = sensor_time * 39.0625f;
@@ -425,11 +425,11 @@ void BMI088_read(float gyro[3], float accel[3], float *temperate)
     BMI088_accel_read_muli_reg(BMI088_ACCEL_XOUT_L, buf, 6);
 
     bmi088_raw_temp = (int16_t)((buf[1]) << 8) | buf[0];
-    accel[0] = bmi088_raw_temp * BMI088_ACCEL_SEN;
+    accel[0] = bmi088_raw_temp * BMI088_ACCEL_SEN * SCALE_X;
     bmi088_raw_temp = (int16_t)((buf[3]) << 8) | buf[2];
-    accel[1] = bmi088_raw_temp * BMI088_ACCEL_SEN;
+    accel[1] = bmi088_raw_temp * BMI088_ACCEL_SEN * SCALE_Y;
     bmi088_raw_temp = (int16_t)((buf[5]) << 8) | buf[4];
-    accel[2] = bmi088_raw_temp * BMI088_ACCEL_SEN;
+    accel[2] = bmi088_raw_temp * BMI088_ACCEL_SEN * SCALE_Z;
 
     BMI088_gyro_read_muli_reg(BMI088_GYRO_CHIP_ID, buf, 8);
     if(buf[0] == BMI088_GYRO_CHIP_ID_VALUE)
