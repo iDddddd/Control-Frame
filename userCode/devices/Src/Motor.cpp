@@ -6,9 +6,13 @@
 
 Motor* Motor::motorPtrs[2][8] = {nullptr};
 int16_t Motor::motor_intensity[2][8] = {0};
-uint32_t Motor::motor_IDs[2];
+uint32_t Motor::motor_IDs[3];
 uint8_t Motor::rsmessage[4][11] = {0};
-//static int16_t feedbackangle = 0;
+uint8_t Motor::arm1message[8] = {0};
+uint8_t Motor::arm2message[8] = {0};
+uint8_t Motor::arm3message[8] = {0};
+uint8_t Motor::traymessage[3][8];
+uint8_t Motor::arm1_Initmessage[3] = {0x01, 0x30, 0x6B};
 
 
 /**
@@ -17,10 +21,10 @@ uint8_t Motor::rsmessage[4][11] = {0};
  */
 void Motor::Init() {
     HAL_CAN_Start(&hcan1);
-    //HAL_CAN_Start(&hcan2);
+    HAL_CAN_Start(&hcan2);
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
-    HAL_CAN_ActivateNotification(&hcan1,CAN_IT_TX_MAILBOX_EMPTY);
-    //HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 
     CAN_FilterTypeDef canFilterTypeDef;
 
@@ -36,7 +40,7 @@ void Motor::Init() {
     canFilterTypeDef.SlaveStartFilterBank = 0;
 
     HAL_CAN_ConfigFilter(&hcan1, &canFilterTypeDef);
-    //HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
+    HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
 }
 /**
  * @brief CRC16_MODBUS校验
@@ -77,7 +81,7 @@ void Motor::RS485MessageGenerate() {
 }
 
 /**
- * @brief rs485消息包发送任务
+ * @brief 底盘rs485消息包发送任务
  */
 void Motor::RS485PackageSend() {
     static uint8_t rsmotorIndex = 0;
@@ -90,7 +94,7 @@ void Motor::RS485PackageSend() {
 
 
 /**
- * @brief can消息包发送任务
+ * @brief 底盘can消息包发送任务
  * @callergraph void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  *              in Device.cpp
  */
@@ -117,8 +121,125 @@ void Motor::CANPackageSend() {
 
     HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef,canmessage,0);
 }
+/**
+ * @brief 步进电机初始化，读取编码值
+ */
+void Motor::ARM1_Init(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+
+    txHeaderTypeDef.StdId = 0x01;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm1_Initmessage,0);
+}
 
 
+/**
+ * @brief 机械臂can步进电机消息获取
+ */
+void Motor::ARMCAN1MessageGenerate(){
+
+
+    arm1message[0] = 0xFD;
+    arm1message[1] = 0x14;
+    arm1message[2] = 0xFF;//1代表方向，4FF代表速度
+    arm1message[3] = 0x00;//加速度，0为不启用，加速度为255
+    arm1message[4] = 0;
+    arm1message[5] = 0;
+    arm1message[6] = 0;//4~6为脉冲数
+    arm1message[7] = 0x6B;
+
+}
+/**
+ * @brief 机械臂can步进电机发送任务
+ */
+void Motor::ARMCAN1PackageSend(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+
+    txHeaderTypeDef.StdId = 0x01;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm1message,0);
+}
+
+/**
+ * @brief 机械臂can4310电机消息获取
+ */
+void Motor::ARMCAN2MessageGenerate(){
+
+    arm2message[0] = 0;//位置低字节
+    arm2message[1] = 0;
+    arm2message[2] = 0;
+    arm2message[3] = 0;//位置高字节
+    arm2message[4] = 0;//速度低字节
+    arm2message[5] = 0;
+    arm2message[6] = 0;
+    arm2message[7] = 0;//速度高字节
+
+}
+/**
+ * @brief 机械臂can4310电机发送任务
+ */
+void Motor::ARMCAN2PackageSend(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+
+    txHeaderTypeDef.StdId = 0x101;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm2message,0);
+}
+/**
+ * @brief 机械臂can4010电机消息获取
+ */
+void Motor::ARMCAN3MessageGenerate(){
+
+    arm3message[0] = 0xA4;
+    arm3message[1] = 0x00;
+    arm3message[2] = 0;//速度低字节
+    arm3message[3] = 0;//速度高字节
+    arm3message[4] = 0;//位置低字节
+    arm3message[5] = 0;
+    arm3message[6] = 0;
+    arm3message[7] = 0;//位置高字节
+
+}
+/**
+ * @brief 机械臂can4010电机发送任务
+ */
+void Motor::ARMCAN3PackageSend(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+
+    txHeaderTypeDef.StdId = 0x141;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm3message,0);
+}
+/**
+ * @brief 托盘电机发送任务
+ */
+void Motor::TrayPackageSend(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+
+    txHeaderTypeDef.StdId = 0x142;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,traymessage[1],0);
+}
 /**
  * @brief Motor类的构造函数
  * @param _init 类的初始化结构体指针
@@ -134,14 +255,35 @@ Motor::Motor(MOTOR_INIT_t* _init){
             motorPtrs[0][motorPos % 8] = this;
             //TODO 检查电机ID冲突
             motor_IDs[0] |= _init->_motorID;
-
             break;
 
         case RS485:
             motorPtrs[1][motorPos % 8] = this;
             motor_IDs[1] |= _init->_motorID;
+            break;
+
+        case ARMCAN1://设置电机序号时设置为2，以下设置为1，
+            ARM1_Init();
+            motorPtrs[2][motorPos % 8] = this;
+            motor_IDs[2] |= _init->_motorID;
 
             break;
+
+        case ARMCAN2://ID为0x101
+            motorPtrs[2][motorPos % 8] = this;
+            motor_IDs[2] |= _init->_motorID;
+            break;
+
+        case ARMCAN3://ID为0x141
+            motorPtrs[2][motorPos % 8] = this;
+            motor_IDs[2] |= _init->_motorID;
+            break;
+
+        case TRAY://ID为0x142
+            motorPtrs[2][motorPos % 8] = this;
+            motor_IDs[2] |= _init->_motorID;
+            break;
+
     }
 
     memset(&feedback, 0, sizeof(C6x0Rx_t));
@@ -166,6 +308,8 @@ Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init) {
 Motor::~Motor(){
     motor_IDs[0] &= (~deviceID);
     motor_IDs[1] &= (~deviceID);
+    motor_IDs[2] &= (~deviceID);
+    motor_IDs[3] &= (~deviceID);
 }
 /**
  * @brief 电机类的执行处理函数，囊括每个电机的主要处理任务。此函数需定时执行，否则对应电机无法正常工作
@@ -188,6 +332,17 @@ void Motor::Handle(){
         case RS485:
             RS485MessageGenerate();
             break;
+
+        case ARMCAN1:
+            ARMCAN1MessageGenerate();
+            break;
+
+        case ARMCAN2:
+            ARMCAN2MessageGenerate();
+            break;
+        case ARMCAN3:
+            ARMCAN3MessageGenerate();
+            break;
     }
 }
 
@@ -202,14 +357,18 @@ void Motor::IT_Handle(CAN_HandleTypeDef *hcan) {
     uint8_t canPos,motorPos;
     if(hcan == &hcan1){
         canPos = 0;
-    }else {
-        canPos = 1;
+        motorPos = rx_header.StdId - 0x141;
+        motorPtrs[canPos][motorPos]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
+        motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
+        motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
+        motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
+    }else if(hcan == &hcan2 && rx_header.StdId == 0x01){
+        canPos = 2;
+        motorPos = 1;
+        motorPtrs[canPos][motorPos]->feedback.moment = (uint16_t) (canBuf[2] << 8 | canBuf[1] );
+        HAL_CAN_DeactivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
     }
-    motorPos = rx_header.StdId - 0x141;
-    motorPtrs[canPos][motorPos]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
-    motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
-    motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
-    motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
+
 }
 
 /**
@@ -301,7 +460,12 @@ int16_t Motor::IntensityCalc() {
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    Motor::IT_Handle(hcan);
+    if(hcan == &hcan1) {
+        Motor::IT_Handle(hcan);
+    }
+    else if (hcan == &hcan2){
+        Motor::IT_Handle(hcan);
+    }
 }
 
 

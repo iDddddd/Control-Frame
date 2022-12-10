@@ -13,6 +13,7 @@
 #include <queue>
 
 #define GET_MOTOR_POS(ID)  (uint32_t)(log2(ID))
+
 /*枚举类型定义------------------------------------------------------------*/
 /**
  * @enum 控制电机的方式
@@ -28,6 +29,10 @@ typedef enum {
 typedef enum {
     CAN = 0,
     RS485,
+    ARMCAN1,
+    ARMCAN2,
+    ARMCAN3,
+    TRAY,
 } MOTOR_COMMU_TYPE_e;
 
 /*结构体定义--------------------------------------------------------------*/
@@ -65,15 +70,32 @@ public:
 
     static Motor* motorPtrs[2][8];
     static int16_t motor_intensity[2][8];
-    static uint32_t motor_IDs[2];
+    static uint32_t motor_IDs[3];
+    //message
+    static uint8_t arm1_Initmessage[3];
     static uint8_t rsmessage[4][11];
+    static uint8_t arm1message[8];
+    static uint8_t arm2message[8];
+    static uint8_t arm3message[8];
+    static uint8_t traymessage[3][8];
 
 
 
     static void Init();
-
+    //底盘4315发送
     static void RS485PackageSend();
+    //底盘4010发送
     static void CANPackageSend();
+    //机械臂4310发送
+    static void ARMCAN1PackageSend();
+    //机械臂4010发送
+    static void ARMCAN2PackageSend();
+    //机械臂步进发送
+    static void ARMCAN3PackageSend();
+    //底盘旋转4010发送
+    static void TrayPackageSend();
+
+
     static void IT_Handle(CAN_HandleTypeDef *hcan);
 
 
@@ -107,7 +129,10 @@ private:
 
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
     void RS485MessageGenerate();
-
+    void ARM1_Init();
+    void ARMCAN1MessageGenerate();
+    void ARMCAN2MessageGenerate();
+    void ARMCAN3MessageGenerate();
 
 };
 /*结构体成员取值定义组------------------------------------------------------*/

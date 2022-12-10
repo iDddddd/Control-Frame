@@ -38,7 +38,7 @@ typedef struct {
     float right_col,right_rol;
     float dialWheel;
     SWITCH_STATE_E sLeft;
-    uint32_t pat;//TODO 有bug，暂时用一个占位符解决
+    uint32_t pat;//TODO 有 bug，暂时用一个占位符解决
     SWITCH_STATE_E sRight;
 }RC_Info_t;
 /*类型定义----------------------------------------------------------------*/
