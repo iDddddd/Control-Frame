@@ -4,16 +4,17 @@
 
 #include "Motor.h"
 
-Motor* Motor::motorPtrs[2][8] = {nullptr};
+Motor* Motor::motorPtrs[3][8] = {nullptr};
 int16_t Motor::motor_intensity[2][8] = {0};
 uint32_t Motor::motor_IDs[3];
 uint8_t Motor::rsmessage[4][11] = {0};
 uint8_t Motor::arm1message[8] = {0};
 uint8_t Motor::arm2message[8] = {0};
 uint8_t Motor::arm3message[8] = {0};
-uint8_t Motor::traymessage[3][8];
+uint8_t Motor::traymessage[3][8] = {0};
 uint8_t Motor::arm1_Initmessage[3] = {0x01, 0x30, 0x6B};
-
+uint8_t Motor::arm2_Initmessage[8] = {0xFF, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0xFC};
+uint8_t Motor::trayflag;
 
 /**
  * @brief 电机类的初始化，主要是CAN通信的相关配置
@@ -41,6 +42,8 @@ void Motor::Init() {
 
     HAL_CAN_ConfigFilter(&hcan1, &canFilterTypeDef);
     HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
+    //ARM1_Init();
+    ARM2_Init();
 }
 /**
  * @brief CRC16_MODBUS校验
@@ -69,11 +72,11 @@ void Motor::RS485MessageGenerate() {
     rsmessage[motorIndex][3] = 0x55;//相对位置闭环控制命令码
     rsmessage[motorIndex][4] = 0x04;//数据包长度
 
-    uint32_t tmp = motor_intensity[1][motorIndex] ;
-    rsmessage[motorIndex][8] = tmp >> 24u;
-    rsmessage[motorIndex][7] = tmp >> 16u;
-    rsmessage[motorIndex][6] = tmp >> 8u;
+    uint32_t tmp = motor_intensity[1][motorIndex];
     rsmessage[motorIndex][5] = tmp;
+    rsmessage[motorIndex][6] = tmp >> 8u;
+    rsmessage[motorIndex][7] = tmp >> 16u;
+    rsmessage[motorIndex][8] = tmp >> 24u;
 
     uint16_t crc = CRC16Calc(rsmessage[motorIndex], 9);
     rsmessage[motorIndex][9] = crc;
@@ -167,20 +170,33 @@ void Motor::ARMCAN1PackageSend(){
 
     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm1message,0);
 }
+/**
+ * @brief 机械臂can4310初始化任务，将电机使能
+ */
+void Motor::ARM2_Init(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
 
+    txHeaderTypeDef.StdId = 0x101;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm2_Initmessage,0);
+}
 /**
  * @brief 机械臂can4310电机消息获取
  */
 void Motor::ARMCAN2MessageGenerate(){
-
-    arm2message[0] = 0;//位置低字节
-    arm2message[1] = 0;
-    arm2message[2] = 0;
-    arm2message[3] = 0;//位置高字节
-    arm2message[4] = 0;//速度低字节
-    arm2message[5] = 0;
-    arm2message[6] = 0;
-    arm2message[7] = 0;//速度高字节
+//    uint32_t tmp = motor_intensity[1][0];
+    arm2message[0] = 0x00;//位置低字节
+    arm2message[1] = 0x00;
+    arm2message[2] = 0x00;
+    arm2message[3] = 0x41;//位置高字节
+    arm2message[4] = 0x00;//速度低字节
+    arm2message[5] = 0x00;
+    arm2message[6] = 0x40;
+    arm2message[7] = 0x40 ;//速度高字节
 
 }
 /**
@@ -201,15 +217,16 @@ void Motor::ARMCAN2PackageSend(){
  * @brief 机械臂can4010电机消息获取
  */
 void Motor::ARMCAN3MessageGenerate(){
-
+    uint16_t v = 90;
+    int32_t angle = 18000;
     arm3message[0] = 0xA4;
     arm3message[1] = 0x00;
-    arm3message[2] = 0;//速度低字节
-    arm3message[3] = 0;//速度高字节
-    arm3message[4] = 0;//位置低字节
-    arm3message[5] = 0;
-    arm3message[6] = 0;
-    arm3message[7] = 0;//位置高字节
+    arm3message[2] = v;//速度低字节
+    arm3message[3] = v >> 8u;//速度高字节
+    arm3message[4] = angle ;//位置低字节
+    arm3message[5] = angle >> 8u;
+    arm3message[6] = angle >> 16u;
+    arm3message[7] = angle >> 24u;//位置高字节
 
 }
 /**
@@ -224,7 +241,13 @@ void Motor::ARMCAN3PackageSend(){
     txHeaderTypeDef.RTR = CAN_RTR_DATA;
     txHeaderTypeDef.TransmitGlobalTime = DISABLE;
 
-    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm3message,0);
+    HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, arm3message,0);
+}
+/**
+ * @brief 托盘电机消息获取
+ */
+void Motor::TRAYFlagGenerate(){
+    trayflag = 0;
 }
 /**
  * @brief 托盘电机发送任务
@@ -238,17 +261,27 @@ void Motor::TrayPackageSend(){
     txHeaderTypeDef.RTR = CAN_RTR_DATA;
     txHeaderTypeDef.TransmitGlobalTime = DISABLE;
 
-    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,traymessage[1],0);
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,traymessage[trayflag],0);
+}
+/**
+ * @brief Motor统一发送函数
+ */
+void Motor::PackageSend(){
+   // CANPackageSend();
+   // ARMCAN1PackageSend();
+   // ARMCAN2PackageSend();
+    ARMCAN3PackageSend();
+    //TrayPackageSend();
 }
 /**
  * @brief Motor类的构造函数
  * @param _init 类的初始化结构体指针
  */
-Motor::Motor(MOTOR_INIT_t* _init){
+Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init){
 
     deviceID = _init->_motorID;
     deviceType = MOTOR;
-
+    _init->_motorID = _id;
     uint8_t motorPos = GET_MOTOR_POS(_init->_motorID);
     switch(_init->commuType) {
         case CAN:
@@ -263,13 +296,13 @@ Motor::Motor(MOTOR_INIT_t* _init){
             break;
 
         case ARMCAN1://设置电机序号时设置为2，以下设置为1，
-            ARM1_Init();
+
             motorPtrs[2][motorPos % 8] = this;
             motor_IDs[2] |= _init->_motorID;
-
             break;
 
         case ARMCAN2://ID为0x101
+
             motorPtrs[2][motorPos % 8] = this;
             motor_IDs[2] |= _init->_motorID;
             break;
@@ -284,6 +317,7 @@ Motor::Motor(MOTOR_INIT_t* _init){
             motor_IDs[2] |= _init->_motorID;
             break;
 
+
     }
 
     memset(&feedback, 0, sizeof(C6x0Rx_t));
@@ -293,15 +327,15 @@ Motor::Motor(MOTOR_INIT_t* _init){
     commuType = _init->commuType;
     reductionRatio = _init->reductionRatio;
 }
-/**
- * @brief Motor类的构造函数另一重载，可以方便地定义参数相同，ID不同的电机
- * @param _id 电机ID
- * @param _init 电机初始化结构体指针
- */
-Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init) {
-    _init->_motorID = _id;
-    new (this) Motor(_init);
-}
+//**
+// * @brief Motor类的构造函数另一重载，可以方便地定义参数相同，ID不同的电机
+// * @param _id 电机ID
+// * @param _init 电机初始化结构体指针
+// */
+//Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init) {
+//    _init->_motorID = _id;
+//    new (this) Motor(_init);
+//}
 /**
  * @brief 电机类的析构函数
  */
@@ -309,7 +343,6 @@ Motor::~Motor(){
     motor_IDs[0] &= (~deviceID);
     motor_IDs[1] &= (~deviceID);
     motor_IDs[2] &= (~deviceID);
-    motor_IDs[3] &= (~deviceID);
 }
 /**
  * @brief 电机类的执行处理函数，囊括每个电机的主要处理任务。此函数需定时执行，否则对应电机无法正常工作
@@ -340,8 +373,13 @@ void Motor::Handle(){
         case ARMCAN2:
             ARMCAN2MessageGenerate();
             break;
+
         case ARMCAN3:
             ARMCAN3MessageGenerate();
+            break;
+
+        case TRAY:
+            TRAYFlagGenerate();
             break;
     }
 }

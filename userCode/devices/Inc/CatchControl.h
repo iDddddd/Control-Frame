@@ -4,6 +4,7 @@
 
 #ifndef RM_FRAME_C_CATCHCONTROL_H
 #define RM_FRAME_C_CATCHCONTROL_H
+
 #include "Device.h"
 
 #define BUFF_SIZE 100

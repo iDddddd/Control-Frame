@@ -6,11 +6,13 @@
 #define RM_FRAME_C_ARMTASK_H
 
 
-
+#include "main.h"
+#include "Device.h"
 #include "Motor.h"
 
 
 void AngleCalc();
+
 void ArmStop();
 
 

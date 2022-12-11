@@ -11,6 +11,7 @@
 
 
 
+
 void aRGB_led_show(uint32_t aRGB){
     static uint8_t alpha;
     static uint16_t red,green,blue;
@@ -189,7 +190,7 @@ void bsp_flash_write(flash_data_t *_flashData){
     eraseInit.Sector = FLASH_SECTOR_9;
     eraseInit.NbSectors = 1;
     eraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-    HAL_FLASHEx_Erase(&eraseInit,NULL);
+    HAL_FLASHEx_Erase(&eraseInit,nullptr);
     uint32_t flash_ptr = FLASH_SECTOR_9_ADDRESS;
 
     for (uint32_t *ptr = (uint32_t*)_flashData;ptr < (uint32_t*)(sizeof(flash_data_t)/4 + _flashData);ptr++){
@@ -222,7 +223,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         CtrlHandle ();
         ChassisHandle();
-        Motor::CANPackageSend();
+        ARMHandle();
+        Motor::PackageSend();
 
         UserHandle();
         if(cnt>20){
@@ -308,7 +310,7 @@ int main(void)
     MX_I2C3_Init();
     MX_SPI1_Init();
     MX_SPI2_Init();
-    //MX_IWDG_Init();
+   // MX_IWDG_Init();
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
 

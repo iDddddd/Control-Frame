@@ -6,6 +6,7 @@
 
 CC_ctrl_t CatchControl::cc_ctrl;
 uint8_t CatchControl::data_length;
+uint8_t CatchControl::rx_buff[BUFF_SIZE];
 
 void CatchControl::Init() {
     //enable the DMA transfer for the receiver request

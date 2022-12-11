@@ -37,6 +37,7 @@
 extern void ChassisStart();
 extern void ChassisHandle();
 extern void CtrlHandle();
+extern void ARMHandle();
 
 /*
  * 设备类型枚举

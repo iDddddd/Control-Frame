@@ -9,8 +9,8 @@
 #include "can.h"
 #include "PID.h"
 #include <cstring>
-#include <cmath>
-#include <queue>
+
+
 
 #define GET_MOTOR_POS(ID)  (uint32_t)(log2(ID))
 
@@ -68,20 +68,26 @@ class Motor :private Device
 {
 public:
 
-    static Motor* motorPtrs[2][8];
+    static Motor* motorPtrs[3][8];
     static int16_t motor_intensity[2][8];
     static uint32_t motor_IDs[3];
     //message
     static uint8_t arm1_Initmessage[3];
+    static uint8_t arm2_Initmessage[8];
     static uint8_t rsmessage[4][11];
     static uint8_t arm1message[8];
     static uint8_t arm2message[8];
     static uint8_t arm3message[8];
     static uint8_t traymessage[3][8];
+    static uint8_t trayflag;
 
 
 
     static void Init();
+    static void ARM1_Init();
+    static void ARM2_Init();
+    //发送函数
+    static void PackageSend();
     //底盘4315发送
     static void RS485PackageSend();
     //底盘4010发送
@@ -111,7 +117,7 @@ public:
     float targetAngle;
     float reductionRatio;
 
-    explicit Motor(MOTOR_INIT_t* _init);
+
     Motor(uint32_t _id, MOTOR_INIT_t* _init);
     ~Motor();
 
@@ -129,10 +135,10 @@ private:
 
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
     void RS485MessageGenerate();
-    void ARM1_Init();
     void ARMCAN1MessageGenerate();
     void ARMCAN2MessageGenerate();
     void ARMCAN3MessageGenerate();
+    void TRAYFlagGenerate();
 
 };
 /*结构体成员取值定义组------------------------------------------------------*/
