@@ -50,6 +50,24 @@ extern CHASSIS_CONTROL_T   chassisControl;
 extern float FBVelocity,LRVelocity,RTVelocity;
 extern float ZeroYaw;
 
+class Move
+{
+    static float t;
+    static float v;
+    static float x;
+    float d1 = 0;
+    float d2 = 0;
+    float d_max;
+    static float a;
+    static float v_max;
+public:
+    float v_rel ;
+    Move(float d);
+    ~Move();
+    void Handle();
+
+
+};
 /*外部函数声明-------------------------------------------------------------*/
 int sign(float x);
 float SetAngle(float Angle);
