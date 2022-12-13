@@ -46,6 +46,9 @@ void IMU::Handle() {
         rawData.ax = rawData.accel[0];
         rawData.ay = rawData.accel[1];
         rawData.az = rawData.accel[2];
+        ax = rawData.accel[0];
+        ay = rawData.accel[1];
+        az = rawData.accel[2];
     }
 
     if(state.accel_temp_update_flag & (1u << IMU_UPDATE_SHFITS))
