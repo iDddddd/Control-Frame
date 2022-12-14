@@ -1,0 +1,90 @@
+//
+// Created by mac on 2022/12/14.
+//
+
+#ifndef RM_FRAME_C_OTHERMOTOR_H
+#define RM_FRAME_C_OTHERMOTOR_H
+
+#include "Device.h"
+#include "can.h"
+typedef enum {
+    ARM1 = 0,
+    ARM2,
+    ARM3
+} MOTOR_TYPE_e;
+
+
+class ARMMotor :private Device
+{
+public:
+    static float angle[3];
+    static float speed[3];
+    static uint8_t arm1_Initmessage[3];
+    static uint8_t arm2_Initmessage[8];
+
+    static uint8_t arm1message[8];
+    static uint8_t arm2message[8];
+    static uint8_t arm3message[8];
+
+    static float feedback_moment[3];
+
+    static void Init();
+
+    static void ARM1_Init();
+    static void ARM2_Init();
+    //机械臂4310发送
+    static void ARMCAN1PackageSend();
+    //机械臂4010发送
+    static void ARMCAN2PackageSend();
+    //机械臂步进发送
+    static void ARMCAN3PackageSend();
+
+    static void IT_Handle(CAN_HandleTypeDef *hcan);
+    bool stopFlag{true};
+
+    MOTOR_TYPE_e Type;
+    float targetSpeed = 0;
+    float targetAngle = 0;
+
+    ARMMotor(MOTOR_TYPE_e* MotorType);
+    ~ARMMotor();
+
+    void Handle() override;
+    void ErrorHandle() override;
+    void SetTargetSpeed(float _targetSpeed);
+    void SetTargetAngle(float _targetAngle);
+
+    void Stop();
+
+private:
+
+    int16_t AngleGenerate();
+    int16_t SpeedGenerate();
+
+    void ARMCAN1MessageGenerate();
+    void ARMCAN2MessageGenerate();
+    void ARMCAN3MessageGenerate();
+};
+
+
+class TRAYMotor :private Device{
+public:
+    static uint8_t traymessage[3][8];
+    static uint8_t trayflag;
+
+    //底盘旋转4010发送
+    static void TrayPackageSend();
+
+    TRAYMotor();
+    ~TRAYMotor();
+
+    void Handle() override;
+    void ErrorHandle() override;
+
+private:
+    void MotorStateUpdate();
+
+    void TRAYFlagGenerate();
+
+};
+#endif //RM_FRAME_C_OTHERMOTOR_H

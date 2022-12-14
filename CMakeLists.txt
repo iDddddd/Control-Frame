@@ -14,7 +14,7 @@ set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 
-SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F407IGHx_FLASH.ld)
+SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F407IGHx_FLASH.ld userCode/devices/Src/OtherMotor.cpp userCode/devices/Inc/OtherMotor.h userCode/devices/Src/CatchControl.cpp userCode/devices/Inc/CatchControl.h userCode/tasks/Src/ArmTask.cpp userCode/tasks/Inc/ArmTask.h)
 
 #Uncomment for hardware floating point
 #SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")

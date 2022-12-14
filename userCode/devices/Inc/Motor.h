@@ -9,8 +9,8 @@
 #include "can.h"
 #include "PID.h"
 #include <cstring>
-#include <cmath>
-#include <queue>
+
+
 
 #define GET_MOTOR_POS(ID)  (uint32_t)(log2(ID))
 /*枚举类型定义------------------------------------------------------------*/
