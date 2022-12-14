@@ -89,7 +89,6 @@ public:
     float targetAngle;
     float reductionRatio;
 
-    explicit Motor(MOTOR_INIT_t* _init);
     Motor(uint32_t _id, MOTOR_INIT_t* _init);
     ~Motor();
 

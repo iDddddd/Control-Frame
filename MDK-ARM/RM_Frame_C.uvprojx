@@ -662,6 +662,11 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\tasks\Src\UserTask.cpp</FilePath>
             </File>
+            <File>
+              <FileName>ArmTask.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\tasks\Src\ArmTask.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -691,6 +696,16 @@
               <FileName>IMU.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\IMU.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>CatchControl.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\CatchControl.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>OtherMotor.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\OtherMotor.cpp</FilePath>
             </File>
           </Files>
         </Group>

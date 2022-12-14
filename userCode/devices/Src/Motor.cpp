@@ -123,8 +123,8 @@ void Motor::CANPackageSend() {
  * @brief Motor类的构造函数
  * @param _init 类的初始化结构体指针
  */
-Motor::Motor(MOTOR_INIT_t* _init){
-
+Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init){
+    _init->_motorID = _id;
     deviceID = _init->_motorID;
     deviceType = MOTOR;
 
@@ -151,15 +151,7 @@ Motor::Motor(MOTOR_INIT_t* _init){
     commuType = _init->commuType;
     reductionRatio = _init->reductionRatio;
 }
-/**
- * @brief Motor类的构造函数另一重载，可以方便地定义参数相同，ID不同的电机
- * @param _id 电机ID
- * @param _init 电机初始化结构体指针
- */
-Motor::Motor(uint32_t _id, MOTOR_INIT_t* _init) {
-    _init->_motorID = _id;
-    new (this) Motor(_init);
-}
+
 /**
  * @brief 电机类的析构函数
  */

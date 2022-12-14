@@ -17,8 +17,7 @@ typedef enum {
 class ARMMotor :private Device
 {
 public:
-    static float angle[3];
-    static float speed[3];
+
     static uint8_t arm1_Initmessage[3];
     static uint8_t arm2_Initmessage[8];
 
@@ -27,7 +26,8 @@ public:
     static uint8_t arm3message[8];
 
     static float feedback_moment[3];
-
+    float angle[3];
+    float speed[3];
     static void Init();
 
     static void ARM1_Init();

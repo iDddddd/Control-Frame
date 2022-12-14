@@ -36,5 +36,13 @@ public:
 
 };
 
-extern void DMA2_Stream0_IRQHandler(void);
+/*外部函数声明-------------------------------------------------------------*/
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern void DMA2_Stream1_IRQHandler(void);
+#ifdef __cplusplus
+}
+#endif
+
 #endif //RM_FRAME_C_CATCHCONTROL_H

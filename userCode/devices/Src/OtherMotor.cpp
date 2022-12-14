@@ -11,6 +11,8 @@ uint8_t ARMMotor::arm1_Initmessage[3] = {0x01, 0x30, 0x6B};
 uint8_t ARMMotor::arm2_Initmessage[8] = {0xFF, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0xFC};
 uint8_t TRAYMotor::traymessage[3][8] = {0};
 uint8_t TRAYMotor::trayflag;
+float ARMMotor::feedback_moment[3];
+
 
 
 
