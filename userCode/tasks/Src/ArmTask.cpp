@@ -13,6 +13,8 @@ ARMMotor ARMMotor1(&arm1Type);
 ARMMotor ARMMotor2(&arm2Type);
 ARMMotor ARMMotor3(&arm3Type);
 
+bool ArmStopFlag = true;
+
 void ARMHandle(){
     ARMMotor1.Handle();
     ARMMotor2.Handle();

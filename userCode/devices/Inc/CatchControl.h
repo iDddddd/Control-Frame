@@ -12,27 +12,30 @@
 #define BUFF_SIZE 100
 
 typedef struct {
-    uint16_t velocity;
+    uint16_t speed;
     uint16_t angle;
 }ARM_col_t;
 typedef struct {
     ARM_col_t ARM1;
     ARM_col_t ARM2;
     ARM_col_t ARM3;
+    uint16_t x;
+    uint16_t y;
     uint8_t TrayFlag;
+    uint8_t ChassisStopFlag;
+    uint8_t ClawFlag;
 }CC_ctrl_t;
-
 
 class CatchControl : public Device {
 public:
     static CC_ctrl_t cc_ctrl;
-    static uint8_t data_length;
-    static uint8_t rx_buff[BUFF_SIZE];
+    static uint16_t data_length;
+    static uint8_t rx_buff[2][BUFF_SIZE];
 
 
     static void Init();
     static void IT_Handle();
-    static void GET_Data();
+    static void GET_Data(const volatile uint8_t *buf);
 
 };
 

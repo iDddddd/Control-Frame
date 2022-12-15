@@ -7,7 +7,7 @@
 uint8_t ARMMotor::arm1message[8] = {0};
 uint8_t ARMMotor::arm2message[8] = {0};
 uint8_t ARMMotor::arm3message[8] = {0};
-uint8_t ARMMotor::arm1_Initmessage[3] = {0x01, 0x30, 0x6B};
+uint8_t ARMMotor::arm1_Initmessage[2] = {0x30, 0x6B};
 uint8_t ARMMotor::arm2_Initmessage[8] = {0xFF, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0xFC};
 uint8_t TRAYMotor::traymessage[3][8] = {0};
 uint8_t TRAYMotor::trayflag;
@@ -42,12 +42,12 @@ void ARMMotor::ARMCAN1MessageGenerate(){
 
 
     arm1message[0] = 0xFD;
-    arm1message[1] = 0x14;
-    arm1message[2] = 0xFF;//1代表方向，4FF代表速度
-    arm1message[3] = 0x00;//加速度，0为不启用，加速度为255
-    arm1message[4] = 0;
-    arm1message[5] = 0;
-    arm1message[6] = 0;//4~6为脉冲数
+    arm1message[1] = 0x12;//1代表正转，0代表反转
+    arm1message[2] = 0xFF;//4FF代表速度
+    arm1message[3] = 0x00;//加速度，0为不启用,若需较快，改为0x96
+    arm1message[4] = CatchControl::cc_ctrl.ARM1.angle;
+    arm1message[5] = CatchControl::cc_ctrl.ARM1.angle >> 8u;
+    arm1message[6] = CatchControl::cc_ctrl.ARM1.angle >> 16u;//4~6为脉冲数,3200为一圈，对应z轴8mm
     arm1message[7] = 0x6B;
 
 }
@@ -86,12 +86,12 @@ void ARMMotor::ARMCAN2MessageGenerate(){
 //    uint32_t tmp = motor_intensity[1][0];
     arm2message[0] = 0x00;//位置低字节
     arm2message[1] = 0x00;
-    arm2message[2] = 0x00;
-    arm2message[3] = 0x41;//位置高字节
+    arm2message[2] = CatchControl::cc_ctrl.ARM2.angle;
+    arm2message[3] = CatchControl::cc_ctrl.ARM2.angle >> 8u;//位置高字节
     arm2message[4] = 0x00;//速度低字节
     arm2message[5] = 0x00;
-    arm2message[6] = 0x40;
-    arm2message[7] = 0x40 ;//速度高字节
+    arm2message[6] = CatchControl::cc_ctrl.ARM2.angle ;
+    arm2message[7] = CatchControl::cc_ctrl.ARM2.angle >> 8u;//速度高字节
 
 }
 /**
@@ -112,16 +112,16 @@ void ARMMotor::ARMCAN2PackageSend(){
  * @brief 机械臂can4010电机消息获取
  */
 void ARMMotor::ARMCAN3MessageGenerate(){
+
     uint16_t v = 90;
-    int32_t angle = 18000;
     arm3message[0] = 0xA4;
     arm3message[1] = 0x00;
     arm3message[2] = v;//速度低字节
     arm3message[3] = v >> 8u;//速度高字节
-    arm3message[4] = angle ;//位置低字节
-    arm3message[5] = angle >> 8u;
-    arm3message[6] = angle >> 16u;
-    arm3message[7] = angle >> 24u;//位置高字节
+    arm3message[4] = 0x00;//位置低字节
+    arm3message[5] = 0x00;
+    arm3message[6] = CatchControl::cc_ctrl.ARM3.angle;
+    arm3message[7] = CatchControl::cc_ctrl.ARM3.angle >> 8u;//位置高字节
 
 }
 /**
@@ -138,61 +138,88 @@ void ARMMotor::ARMCAN3PackageSend(){
 
     HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, arm3message,0);
 }
+void ARMMotor::ARMStop(){
+    arm1message[0] = 0xFD;
+    arm1message[1] = 0x12;//1代表正转，0代表反转
+    arm1message[2] = 0xFF;//4FF代表速度
+    arm1message[3] = 0x00;//加速度，0为不启用,若需较快，改为0x96
+    arm1message[4] = 0x00;
+    arm1message[5] = 0x00;
+    arm1message[6] = 0x00;//4~6为脉冲数,3200为一圈，对应z轴8mm
+    arm1message[7] = 0x6B;
 
-/**
+    arm2message[0] = 0x00;//位置低字节
+    arm2message[1] = 0x00;
+    arm2message[2] = 0x00;
+    arm2message[3] = 0x00;//位置高字节
+    arm2message[4] = 0x00;//速度低字节
+    arm2message[5] = 0x00;
+    arm2message[6] = 0x00 ;
+    arm2message[7] = 0x00;//速度高字节
+
+    arm3message[0] = 0xA4;
+    arm3message[1] = 0x00;
+    arm3message[2] = 0x00;//速度低字节
+    arm3message[3] = 0x00;//速度高字节
+    arm3message[4] = 0x00;//位置低字节
+    arm3message[5] = 0x00;
+    arm3message[6] = 0x00;
+    arm3message[7] = 0x00;//位置高字节
+}
+/*
+*//**
  * @brief 用于设置电机速度
  * @param _targetSpeed 目标速度
- */
+ *//*
 void ARMMotor::SetTargetSpeed(float _targetSpeed) {
     stopFlag = 0;
     targetSpeed = _targetSpeed;
 }
-/**
+*//**
  * @brief 用于设置电机角度
  * @param _targetAngle 目标角度
- */
+ *//*
 void ARMMotor::SetTargetAngle(float _targetAngle) {
     stopFlag = false;
     targetAngle = _targetAngle;
 }
 int16_t ARMMotor::AngleGenerate(){
     int16_t Angle;
-    switch (Type) {
+    switch (motorType) {
         case ARM1:
-            Angle = targetAngle;
+            Angle = CatchControl::cc_ctrl.ARM1.angle;
             break;
         case ARM2:
-            Angle = targetAngle;
+            Angle = CatchControl::cc_ctrl.ARM2.angle;
             break;
         case ARM3:
-            Angle = targetAngle;
+            Angle = CatchControl::cc_ctrl.ARM3.angle;
             break;
-
     }
     return Angle;
 }
 int16_t ARMMotor::SpeedGenerate(){
     int16_t Speed;
-    switch (Type) {
+    switch (motorType) {
         case ARM1:
-            Speed = targetSpeed;
+            Speed = CatchControl::cc_ctrl.ARM1.speed;
             break;
         case ARM2:
-            Speed = targetSpeed;
+            Speed = CatchControl::cc_ctrl.ARM2.speed;
             break;
         case ARM3:
-            Speed = targetSpeed;
+            Speed = CatchControl::cc_ctrl.ARM3.speed;
             break;
 
     }
     return Speed;
-}
+}*/
 /**
 * @brief ARMMotor类的构造函数
  * @param
 */
 ARMMotor::ARMMotor(MOTOR_TYPE_e* MotorType){
-    Type = *MotorType;
+    motorType = *MotorType;
 
 }
 /**
@@ -203,32 +230,26 @@ ARMMotor::~ARMMotor(){
 
 }
 
-void ARMMotor::Handle(){
+void ARMMotor::Handle() {
 
-    int16_t Angle = AngleGenerate();
-    int16_t Speed = SpeedGenerate();
-    if (stopFlag == 1){
-        angle[Type] = 0;
-        speed[Type] = 0;
-    }else {
-        angle[Type] = Angle;
-        speed[Type] = Speed;
-    }
 
-    switch(Type) {
+    if (stopFlag == 1) {
+        ARMStop();
+    } else {
+        switch (motorType) {
 
-        case ARM1:
-            ARMCAN1MessageGenerate();
-            break;
+            case ARM1:
+                ARMCAN1MessageGenerate();
+                break;
 
-        case ARM2:
-            ARMCAN2MessageGenerate();
-            break;
+            case ARM2:
+                ARMCAN2MessageGenerate();
+                break;
 
-        case ARM3:
-            ARMCAN3MessageGenerate();
-            break;
-
+            case ARM3:
+                ARMCAN3MessageGenerate();
+                break;
+        }
     }
 }
 /**

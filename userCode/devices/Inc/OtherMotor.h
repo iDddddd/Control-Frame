@@ -7,6 +7,7 @@
 
 #include "Device.h"
 #include "can.h"
+#include "CatchControl.h"
 typedef enum {
     ARM1 = 0,
     ARM2,
@@ -18,7 +19,7 @@ class ARMMotor :private Device
 {
 public:
 
-    static uint8_t arm1_Initmessage[3];
+    static uint8_t arm1_Initmessage[2];
     static uint8_t arm2_Initmessage[8];
 
     static uint8_t arm1message[8];
@@ -26,8 +27,6 @@ public:
     static uint8_t arm3message[8];
 
     static float feedback_moment[3];
-    float angle[3];
-    float speed[3];
     static void Init();
 
     static void ARM1_Init();
@@ -42,7 +41,7 @@ public:
     static void IT_Handle(CAN_HandleTypeDef *hcan);
     bool stopFlag{true};
 
-    MOTOR_TYPE_e Type;
+    MOTOR_TYPE_e motorType;
     float targetSpeed = 0;
     float targetAngle = 0;
 
@@ -51,15 +50,11 @@ public:
 
     void Handle() override;
     void ErrorHandle() override;
-    void SetTargetSpeed(float _targetSpeed);
-    void SetTargetAngle(float _targetAngle);
 
     void Stop();
 
 private:
-
-    int16_t AngleGenerate();
-    int16_t SpeedGenerate();
+    void ARMStop();
 
     void ARMCAN1MessageGenerate();
     void ARMCAN2MessageGenerate();
