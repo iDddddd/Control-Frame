@@ -60,6 +60,10 @@ void Move::Handle(){
     }
 
 }
+void Move::ErrorHandle(){
+
+}
+
 Move::~Move(){
 
 }

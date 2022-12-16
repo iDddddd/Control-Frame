@@ -707,6 +707,11 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\OtherMotor.cpp</FilePath>
             </File>
+            <File>
+              <FileName>AutoMove.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\AutoMove.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

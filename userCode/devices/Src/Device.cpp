@@ -6,6 +6,7 @@
 #include "RemoteControl.h"
 #include "Motor.h"
 #include "IMU.h"
+#include "OtherMotor.h"
 
 
 
@@ -222,8 +223,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         CtrlHandle ();
         ChassisHandle();
+        ARMHandle();
         Motor::CANPackageSend();
-
+        ARMMotor::PackageSend();
         UserHandle();
         if(cnt>20){
             if(vccBat<10)HAL_IWDG_Refresh(&hiwdg);
@@ -308,7 +310,7 @@ int main(void)
     MX_I2C3_Init();
     MX_SPI1_Init();
     MX_SPI2_Init();
-    //MX_IWDG_Init();
+    MX_IWDG_Init();
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
 
@@ -328,6 +330,7 @@ int main(void)
     IMU::imu.Init();
     ChassisStart();
     UserInit();
+
     init_Flag = 1;
     /* USER CODE END 2 */
 

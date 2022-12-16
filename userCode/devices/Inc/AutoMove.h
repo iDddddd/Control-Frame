@@ -5,8 +5,9 @@
 #ifndef RM_FRAME_C_AUTOMOVE_H
 #define RM_FRAME_C_AUTOMOVE_H
 #include "IMU.h"
+#include "Device.h"
 
-class Move
+class Move: public Device
 {
     static float t;
     static float v;
@@ -22,7 +23,8 @@ public:
     float v_rel ;
     Move(float d);
     ~Move();
-    void Handle();
+    void Handle() override;
+    void ErrorHandle() override;
 
 };
 

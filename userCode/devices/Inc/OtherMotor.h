@@ -37,6 +37,7 @@ public:
     static void ARMCAN2PackageSend();
     //机械臂步进发送
     static void ARMCAN3PackageSend();
+    static void PackageSend();
 
     static void IT_Handle(CAN_HandleTypeDef *hcan);
     bool stopFlag{true};
