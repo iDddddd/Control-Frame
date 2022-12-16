@@ -7,6 +7,7 @@
 #include "Motor.h"
 #include "IMU.h"
 #include "OtherMotor.h"
+#include "ServoTask.h"
 
 
 
@@ -221,10 +222,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         static uint32_t cnt = 0;
         cnt++;
 
-        CtrlHandle ();
+        CtrlHandle();
         ChassisHandle();
         ARMHandle();
+       // ServoHandle();
         Motor::CANPackageSend();
+        Motor::ARMPackageSend();
         ARMMotor::PackageSend();
         UserHandle();
         if(cnt>20){
@@ -320,6 +323,10 @@ int main(void)
     HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_3);
 
+  //  HAL_TIM_Base_Start_IT(&htim1);
+   // HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
+    //HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
+
     //TODO adc校准？
     RemoteControl::init();
     bsp_flash_read(&flashData);
@@ -327,6 +334,7 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_TIM_Base_Start_IT(&htim7);
     Motor::Init();
+    ARMMotor::Init();
     IMU::imu.Init();
     ChassisStart();
     UserInit();

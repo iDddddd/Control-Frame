@@ -6,10 +6,11 @@
 
 uint8_t ARMMotor::arm1message[8] = {0};
 uint8_t ARMMotor::arm2message[8] = {0};
-uint8_t ARMMotor::arm3message[8] = {0};
 uint8_t ARMMotor::arm1_Initmessage[2] = {0x30, 0x6B};
 uint8_t ARMMotor::arm2_Initmessage[8] = {0xFF, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0xFC};
-uint8_t TRAYMotor::traymessage[3][8] = {0};
+uint8_t TRAYMotor::traymessage[3][8] = {{0xA4, 0x00, 0x2C, 0x01, 0x90, 0x65, 0x00, 0x00},
+                                        {0xA4, 0x00, 0x2C, 0x01, 0xB0, 0x36, 0x00, 0x00},
+                                        {0xA4, 0x00, 0x2C, 0x01, 0xD0, 0x07, 0x00, 0x00}};
 uint8_t TRAYMotor::trayflag;
 float ARMMotor::feedback_moment[3];
 
@@ -17,7 +18,7 @@ float ARMMotor::feedback_moment[3];
 
 
 void ARMMotor::Init(){
-    ARM1_Init();
+    //ARM1_Init();
     ARM2_Init();
 }
 /**
@@ -86,12 +87,16 @@ void ARMMotor::ARMCAN2MessageGenerate(){
 //    uint32_t tmp = motor_intensity[1][0];
     arm2message[0] = 0x00;//位置低字节
     arm2message[1] = 0x00;
-    arm2message[2] = CatchControl::cc_ctrl.ARM2.angle;
-    arm2message[3] = CatchControl::cc_ctrl.ARM2.angle >> 8u;//位置高字节
+//    arm2message[2] = CatchControl::cc_ctrl.ARM2.angle;
+//    arm2message[3] = CatchControl::cc_ctrl.ARM2.angle >> 8u;//位置高字节
+    arm2message[2] = 0x00;
+    arm2message[3] = 0x00;//位置高字节
     arm2message[4] = 0x00;//速度低字节
     arm2message[5] = 0x00;
-    arm2message[6] = CatchControl::cc_ctrl.ARM2.angle ;
-    arm2message[7] = CatchControl::cc_ctrl.ARM2.angle >> 8u;//速度高字节
+//    arm2message[6] = CatchControl::cc_ctrl.ARM2.angle ;
+//    arm2message[7] = CatchControl::cc_ctrl.ARM2.angle >> 8u;//速度高字节
+    arm2message[6] = 0x00 ;
+    arm2message[7] = 0x3F;//速度高字节
 
 }
 /**
@@ -108,36 +113,7 @@ void ARMMotor::ARMCAN2PackageSend(){
 
     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,arm2message,0);
 }
-/**
- * @brief 机械臂can4010电机消息获取
- */
-void ARMMotor::ARMCAN3MessageGenerate(){
 
-    uint16_t v = 90;
-    arm3message[0] = 0xA4;
-    arm3message[1] = 0x00;
-    arm3message[2] = v;//速度低字节
-    arm3message[3] = v >> 8u;//速度高字节
-    arm3message[4] = 0x00;//位置低字节
-    arm3message[5] = 0x00;
-    arm3message[6] = CatchControl::cc_ctrl.ARM3.angle;
-    arm3message[7] = CatchControl::cc_ctrl.ARM3.angle >> 8u;//位置高字节
-
-}
-/**
- * @brief 机械臂can4010电机发送任务
- */
-void ARMMotor::ARMCAN3PackageSend(){
-    CAN_TxHeaderTypeDef txHeaderTypeDef;
-
-    txHeaderTypeDef.StdId = 0x141;
-    txHeaderTypeDef.DLC = 0x08;
-    txHeaderTypeDef.IDE = CAN_ID_STD;
-    txHeaderTypeDef.RTR = CAN_RTR_DATA;
-    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-
-    HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, arm3message,0);
-}
 void ARMMotor::ARMStop(){
     arm1message[0] = 0xFD;
     arm1message[1] = 0x12;//1代表正转，0代表反转
@@ -157,14 +133,14 @@ void ARMMotor::ARMStop(){
     arm2message[6] = 0x00 ;
     arm2message[7] = 0x00;//速度高字节
 
-    arm3message[0] = 0xA4;
-    arm3message[1] = 0x00;
-    arm3message[2] = 0x00;//速度低字节
-    arm3message[3] = 0x00;//速度高字节
-    arm3message[4] = 0x00;//位置低字节
-    arm3message[5] = 0x00;
-    arm3message[6] = 0x00;
-    arm3message[7] = 0x00;//位置高字节
+
+}
+/**
+ * @brief 统一发送函数
+ */
+void ARMMotor::PackageSend() {
+   // ARMCAN1PackageSend();
+    ARMCAN2PackageSend();
 }
 /*
 *//**
@@ -246,9 +222,6 @@ void ARMMotor::Handle() {
                 ARMCAN2MessageGenerate();
                 break;
 
-            case ARM3:
-                ARMCAN3MessageGenerate();
-                break;
         }
     }
 }

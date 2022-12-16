@@ -54,7 +54,7 @@ void CatchControl::GET_Data(const volatile uint8_t *buf){
         cc_ctrl.ARM3.angle = (buf[i + 6] << 8u)|buf[i + 7];
     }
     else if(buf[i + 1] == 0x03){
-        cc_ctrl.ClawFlag = buf[i + 2];
+        cc_ctrl.ArmServoFlag = buf[i + 2];
     }
     else if(buf[i + 1] == 0x04){
         cc_ctrl.ChassisStopFlag = buf[i + 2];

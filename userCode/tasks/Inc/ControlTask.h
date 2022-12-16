@@ -10,6 +10,8 @@
 #include "Motor.h"
 #include "UserTask.h"
 #include "RemoteControl.h"
+#include "ServoTask.h"
+
 
 /*枚举类型定义------------------------------------------------------------*/
 

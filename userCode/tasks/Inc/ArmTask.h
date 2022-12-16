@@ -9,6 +9,7 @@
 #include "Device.h"
 #include "Motor.h"
 #include "OtherMotor.h"
+#include "Servo.h"
 
 void AngleCalc();
 

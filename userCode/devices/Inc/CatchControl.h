@@ -23,7 +23,7 @@ typedef struct {
     uint16_t y;
     uint8_t TrayFlag;
     uint8_t ChassisStopFlag;
-    uint8_t ClawFlag;
+    uint8_t ArmServoFlag;
 }CC_ctrl_t;
 
 class CatchControl : public Device {

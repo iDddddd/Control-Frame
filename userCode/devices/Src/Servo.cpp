@@ -87,7 +87,7 @@ void Servo::SetTargetSpeed(float _targetSpeed) {
  */
 void Servo::Handle() {
     if (servoType == POSITION_180){
-        duty = AFFINE(0,180,0.025,0.125,targetAngle);
+        duty = targetAngle;
         auto pos = GET_SERVO_POS(deviceID);
 
         __HAL_TIM_SET_COMPARE(servoInfo[pos].handleTypeDef,servoInfo[pos].timChannel,

@@ -667,6 +667,11 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\tasks\Src\ArmTask.cpp</FilePath>
             </File>
+            <File>
+              <FileName>ServoTask.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\tasks\Src\ServoTask.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

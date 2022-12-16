@@ -11,7 +11,6 @@
 typedef enum {
     ARM1 = 0,
     ARM2,
-    ARM3
 } MOTOR_TYPE_e;
 
 
@@ -35,12 +34,11 @@ public:
     static void ARMCAN1PackageSend();
     //机械臂4010发送
     static void ARMCAN2PackageSend();
-    //机械臂步进发送
-    static void ARMCAN3PackageSend();
+
     static void PackageSend();
 
     static void IT_Handle(CAN_HandleTypeDef *hcan);
-    bool stopFlag{true};
+    bool stopFlag{false};
 
     MOTOR_TYPE_e motorType;
     float targetSpeed = 0;
@@ -60,7 +58,6 @@ private:
 
     void ARMCAN1MessageGenerate();
     void ARMCAN2MessageGenerate();
-    void ARMCAN3MessageGenerate();
 
 };
 
