@@ -74,6 +74,7 @@ public:
 
     static void RS485PackageSend();
     static void CANPackageSend();
+    static void ARMPackageSend();
     static void IT_Handle(CAN_HandleTypeDef *hcan);
 
 

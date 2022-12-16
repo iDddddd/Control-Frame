@@ -117,6 +117,30 @@ void Motor::CANPackageSend() {
 
     HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef,canmessage,0);
 }
+/**
+ * @brief 机械臂4010电机发送任务
+ */
+void Motor::ARMPackageSend(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+    static uint8_t armmessage[8] = {0};
+
+    txHeaderTypeDef.StdId = 0x142;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    armmessage[0] = 0xA1;
+    armmessage[1] = 0x00;
+    armmessage[2] = 0x00;
+    armmessage[3] = 0x00;
+    armmessage[4] = motor_intensity[0][4];
+    armmessage[5] = motor_intensity[0][4] >> 8u;
+    armmessage[6] = 0x00;
+    armmessage[7] = 0x00;
+
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef,armmessage,0);
+}
 
 
 /**
@@ -194,14 +218,19 @@ void Motor::IT_Handle(CAN_HandleTypeDef *hcan) {
     uint8_t canPos,motorPos;
     if(hcan == &hcan1){
         canPos = 0;
+        motorPos = rx_header.StdId - 0x141;
+        motorPtrs[canPos][motorPos]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
+        motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
+        motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
+        motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
     }else {
-        canPos = 1;
+        canPos = 0;
+        motorPtrs[canPos][4]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
+        motorPtrs[canPos][4]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
+        motorPtrs[canPos][4]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
+        motorPtrs[canPos][4]->feedback.temp = canBuf[1];
     }
-    motorPos = rx_header.StdId - 0x141;
-    motorPtrs[canPos][motorPos]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
-    motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
-    motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
-    motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
+
 }
 
 /**
@@ -288,6 +317,7 @@ int16_t Motor::IntensityCalc() {
             float _targetSpeed = anglePID.PIDCalc(targetAngle, state.angle);
             intensity = speedPID.PIDCalc(_targetSpeed, state.speed);
             break;
+
     }
     return intensity;
 }
