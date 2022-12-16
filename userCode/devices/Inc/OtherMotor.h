@@ -24,7 +24,7 @@ public:
 
     static uint8_t arm1message[8];
     static uint8_t arm2message[8];
-    static uint8_t arm3message[8];
+
 
     static float feedback_moment[3];
     static void Init();
@@ -55,11 +55,13 @@ public:
     void Stop();
 
 private:
+
     void ARMStop();
 
     void ARMCAN1MessageGenerate();
     void ARMCAN2MessageGenerate();
     void ARMCAN3MessageGenerate();
+
 };
 
 
