@@ -658,11 +658,6 @@
               <FilePath>..\userCode\tasks\Src\ControlTask.cpp</FilePath>
             </File>
             <File>
-              <FileName>UserTask.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\userCode\tasks\Src\UserTask.cpp</FilePath>
-            </File>
-            <File>
               <FileName>ArmTask.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\tasks\Src\ArmTask.cpp</FilePath>

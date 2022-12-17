@@ -222,8 +222,8 @@ void Motor::IT_Handle(CAN_HandleTypeDef *hcan) {
         motorPtrs[canPos][motorPos]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
         motorPtrs[canPos][motorPos]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
         motorPtrs[canPos][motorPos]->feedback.temp = canBuf[1];
-    }else {
-        canPos = rx_header.StdId - 0x137;
+    }else if(hcan == &hcan2 && rx_header.StdId == 0x142){
+        canPos = 0;
         motorPtrs[canPos][4]->feedback.angle = canBuf[6] | (canBuf[7]<<8u);
         motorPtrs[canPos][4]->feedback.speed = canBuf[4] | (canBuf[5]<<8u);
         motorPtrs[canPos][4]->feedback.moment = canBuf[2] | (canBuf[3]<<8u);
@@ -271,24 +271,23 @@ void Motor::MotorStateUpdate() {
             state.speed = feedback.speed / reductionRatio;
             state.moment = feedback.moment;
             state.temperature = feedback.temp;
-
-            float realAngle = state.angle;
-            float thisAngle = feedback.angle;
-            static int32_t lastRead = 0;
-            if (thisAngle <= lastRead) {
-                if (lastRead - thisAngle > 8000)
-                    realAngle += (thisAngle + 16384 - lastRead) / reductionRatio;
-                else
-                    realAngle -= (lastRead - thisAngle) / reductionRatio;
-            } else {
-                if (thisAngle - lastRead > 8000)
-                    realAngle -= (lastRead + 16384 - thisAngle) / reductionRatio;
-                else
-                    realAngle += (thisAngle - lastRead) / reductionRatio;
-            }
-
-            state.angle = realAngle;
-            lastRead = feedback.angle;
+            state.angle = feedback.angle * 360 / 16384;
+ //           float realAngle = state.angle;
+//            float thisAngle = feedback.angle;
+//            static int32_t lastRead = 0;
+//            if (thisAngle <= lastRead) {
+//                if (lastRead - thisAngle > 8000)
+//                    realAngle += (thisAngle + 16384 - lastRead) / reductionRatio;
+//                else
+//                    realAngle -= (lastRead - thisAngle) / reductionRatio;
+//            } else {
+//                if (thisAngle - lastRead > 8000)
+//                    realAngle -= (lastRead + 16384 - thisAngle) / reductionRatio;
+//                else
+//                    realAngle += (thisAngle - lastRead) / reductionRatio;
+//            }
+//            state.angle = realAngle;
+//            lastRead = feedback.angle;
             break;
         }
 

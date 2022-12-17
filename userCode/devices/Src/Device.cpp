@@ -2,7 +2,6 @@
 // Created by LEGION on 2021/10/4.
 //
 #include "Device.h"
-#include "UserTask.h"
 #include "RemoteControl.h"
 #include "Motor.h"
 #include "IMU.h"
@@ -224,12 +223,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         CtrlHandle();
         ChassisHandle();
-        ARMHandle();
+        //ARMHandle();
        // ServoHandle();
         Motor::CANPackageSend();
-        Motor::ARMPackageSend();
-        ARMMotor::PackageSend();
-        UserHandle();
+       // Motor::ARMPackageSend();
+        //ARMMotor::PackageSend();
         if(cnt>20){
             if(vccBat<10)HAL_IWDG_Refresh(&hiwdg);
             cnt =0;
@@ -277,7 +275,7 @@ int main(void)
     /* USER CODE END 1 */
 
 
-    /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--、、、、、、------------------------------------------------------*/
 
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     HAL_Init();
@@ -337,7 +335,6 @@ int main(void)
     ARMMotor::Init();
     IMU::imu.Init();
     ChassisStart();
-    UserInit();
 
     init_Flag = 1;
     /* USER CODE END 2 */
