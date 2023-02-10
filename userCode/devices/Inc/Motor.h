@@ -9,10 +9,9 @@
 #include "can.h"
 #include "PID.h"
 #include <cstring>
+#include <map>
 
 
-
-#define GET_MOTOR_POS(ID)  (uint32_t)(log2(ID))
 /*枚举类型定义------------------------------------------------------------*/
 /**
  * @enum 控制电机的方式
@@ -25,11 +24,6 @@ typedef enum {
     POSITION_Double
 } MOTOR_CTRL_TYPE_e;
 
-typedef enum {
-    CAN = 0,
-    RS485,
-} MOTOR_COMMU_TYPE_e;
-
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
     uint16_t angle;
@@ -39,13 +33,15 @@ typedef struct {
 } C6x0Rx_t;
 
 typedef struct {
-
     PID_Regulator_t* speedPIDp;//速度环pid参数结构体指针
     PID_Regulator_t* anglePIDp;//角度环pid参数结构体指针
     float reductionRatio;//减速比
-    MOTOR_COMMU_TYPE_e commuType;
-
 } MOTOR_INIT_t;
+
+typedef struct {
+    uint16_t _id;//电机ID
+    MOTOR_CTRL_TYPE_e ctrlType;
+}COMMU_INIT_t;
 
 typedef struct {
 
@@ -68,11 +64,31 @@ public:
 
 protected:
     PID speedPID,anglePID;
-    MOTOR_COMMU_TYPE_e commuType;
     float reductionRatio;
 
 };
+/*CAN类------------------------------------------------------------------*/
+class CAN{
+public:
+    static CAN* motorPtrs[8];
+    uint16_t motor_ID;
+    static uint8_t canmessage[8];
 
+    static void CANInit();
+
+    CAN(COMMU_INIT_t* _init,uint8_t* RxMessage);
+    ~CAN();
+
+    static void CANPackageSend();
+    static void Rx_Handle(CAN_HandleTypeDef *hcan);
+    virtual void CANMessageGenerate() = 0;
+
+protected:
+    MOTOR_STATE_t state{};
+    MOTOR_CTRL_TYPE_e ctrlType;
+    static std::map<uint16_t,uint8_t*> dict;
+
+};
 /*RS485类------------------------------------------------------------------*/
 class RS485
 {
@@ -111,33 +127,46 @@ private:
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
 
 };
+
+/*4010电机类------------------------------------------------------------------*/
+class Motor_4010:public Motor, public CAN{
+public:
+    uint8_t RxMessage[8]{};
+    static int16_t motor4010_intensity[8];
+
+    C6x0Rx_t feedback{};
+    bool stopFlag{true};
+    float targetSpeed = 0;
+    float targetAngle = 0;
+
+    void CANMessageGenerate() override;
+    void Handle() override;
+
+    void SetTargetSpeed(float _targetSpeed);
+    void SetTargetAngle(float _targetAngle);
+    void Stop();
+
+    Motor_4010(COMMU_INIT_t* commu_init,MOTOR_INIT_t* motor_init);
+    ~Motor_4010();
+private:
+
+    void MotorStateUpdate();
+    int16_t IntensityCalc();
+};
 /*结构体成员取值定义组------------------------------------------------------*/
 
 /**
  * @defgroup motor_IDs
  * @brief 电机ID前八个对应C型开发板can1上1到8的ID，9到16对应C型开发板can2上的1到8
  */
-#define MOTOR_ID_1 0x00000001u
-#define MOTOR_ID_2 0x00000002u
-#define MOTOR_ID_3 0x00000004u
-#define MOTOR_ID_4 0x00000008u
-#define MOTOR_ID_5 0x00000016u
-#define MOTOR_ID_6 0x00000020u
-#define MOTOR_ID_7 0x00000040u
-#define MOTOR_ID_8 0x00000080u
-
-#define MOTOR_ID_9  0x00000100u
-#define MOTOR_ID_10 0x00000200u
-#define MOTOR_ID_11 0x00000400u
-#define MOTOR_ID_12 0x00000800u
-#define MOTOR_ID_13 0x00001000u
-#define MOTOR_ID_14 0x00002000u
-#define MOTOR_ID_15 0x00004000u
-#define MOTOR_ID_16 0x00008000u
-#define MOTOR_ID_CAN1_1_MASK MOTOR_ID_1|MOTOR_ID_2|MOTOR_ID_3|MOTOR_ID_4
-#define MOTOR_ID_CAN1_2_MASK MOTOR_ID_5|MOTOR_ID_6|MOTOR_ID_7|MOTOR_ID_8
-#define MOTOR_ID_CAN2_1_MASK MOTOR_ID_9|MOTOR_ID_10|MOTOR_ID_11|MOTOR_ID_12
-#define MOTOR_ID_CAN2_2_MASK MOTOR_ID_13|MOTOR_ID_14|MOTOR_ID_15|MOTOR_ID_16
+#define MOTOR_ID_1 0
+#define MOTOR_ID_2 1
+#define MOTOR_ID_3 2
+#define MOTOR_ID_4 3
+#define MOTOR_ID_5 4
+#define MOTOR_ID_6 5
+#define MOTOR_ID_7 6
+#define MOTOR_ID_8 7
 
 /*外部变量声明-------------------------------------------------------------*/
 /*外部函数声明-------------------------------------------------------------*/

@@ -4,41 +4,120 @@
 
 #include "Motor.h"
 
-uint8_t RS485::rsmessage[4][11];
+CAN* CAN::motorPtrs[8] = {nullptr};
+uint8_t CAN::canmessage[8] = {0};
+uint8_t RS485::rsmessage[4][11] = {0};
 int16_t Motor_4315::motor4315_intensity[8];
+int16_t Motor_4010::motor4010_intensity[8];
+std::map<uint16_t,uint8_t*> CAN::dict;
 
 /*Motor类----------------------------------------------------------------*/
 /**
  * @brief Motor类的构造函数
  * @param _init 类的初始化结构体指针
  */
-Motor::Motor(MOTOR_INIT_t *_init) {
+Motor::Motor(MOTOR_INIT_t* _init) {
     deviceType = MOTOR;
 
     if(_init->speedPIDp) speedPID.PIDInfo = *_init->speedPIDp;
     if(_init->anglePIDp) anglePID.PIDInfo = *_init->anglePIDp;
     reductionRatio = _init->reductionRatio;
-    commuType = _init->commuType;
+
 }
 /**
 * @brief Motor类的析构函数
 */
-Motor::~Motor(){}
+Motor::~Motor()= default;
+
 void Motor::Handle(){}
 void Motor::ErrorHandle(){}
+
+/*CAN类------------------------------------------------------------------*/
+/**
+ * @brief CAN通信的初始化，主要是CAN通信的相关配置
+ */
+void CAN::CANInit(){
+    HAL_CAN_Start(&hcan1);
+    HAL_CAN_Start(&hcan2);
+    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+    CAN_FilterTypeDef canFilterTypeDef;
+
+    canFilterTypeDef.FilterMode = CAN_FILTERMODE_IDMASK;
+    canFilterTypeDef.FilterScale = CAN_FILTERSCALE_32BIT;
+    canFilterTypeDef.FilterIdHigh = 0x0000;
+    canFilterTypeDef.FilterIdLow = 0x0000;
+    canFilterTypeDef.FilterMaskIdHigh = 0x0000;
+    canFilterTypeDef.FilterMaskIdLow = 0x0000;
+    canFilterTypeDef.FilterFIFOAssignment = CAN_RX_FIFO0;
+    canFilterTypeDef.FilterActivation = ENABLE;
+    canFilterTypeDef.FilterBank = 0;
+    canFilterTypeDef.SlaveStartFilterBank = 0;
+
+    HAL_CAN_ConfigFilter(&hcan1, &canFilterTypeDef);
+    HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
+}
+/**
+ * @brief CAN类的构造函数
+ */
+CAN::CAN(COMMU_INIT_t* _init,uint8_t* RxMessage) {
+    motor_ID = _init -> _id;
+    ctrlType = _init -> ctrlType;
+    uint8_t motorPos = _init -> _id;
+    motorPtrs[motorPos % 8] = this;
+    dict.insert({motor_ID,RxMessage});
+
+}
+
+/**
+ * @brief CAN类的析构函数
+ */
+CAN::~CAN() = default;
+/**
+ * @brief can消息包发送任务
+ * @callergraph void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+ *              in Device.cpp
+ */
+void CAN::CANPackageSend(){
+    CAN_TxHeaderTypeDef txHeaderTypeDef;
+
+    txHeaderTypeDef.StdId = 0x280;
+    txHeaderTypeDef.DLC = 0x08;
+    txHeaderTypeDef.IDE = CAN_ID_STD;
+    txHeaderTypeDef.RTR = CAN_RTR_DATA;
+    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef,canmessage,0);
+}
+/**
+ * @brief can中断处理函数，用于电调返回数据的接受
+ * @param hcan
+ */
+void CAN::Rx_Handle(CAN_HandleTypeDef *hcan){
+    uint8_t canBuf[8];
+    CAN_RxHeaderTypeDef rx_header;
+    uint8_t motorPos;
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);
+    if(hcan == &hcan1) {
+        motorPos = rx_header.StdId - 0x141;
+        memcpy(dict[motorPtrs[motorPos]->motor_ID],canBuf,sizeof(canBuf));
+    }
+
+}
+
 /*RS485类------------------------------------------------------------------*/
 /**
  * @brief RS485类的构造函数
  */
 RS485::RS485(uint16_t _id){
-    motor_ID = GET_MOTOR_POS(_id);
+    motor_ID = _id;
+    ctrlType = DIRECT;
 }
 /**
  * @brief RS485类的析构函数
  */
-RS485::~RS485(){
-
-}
+RS485::~RS485()= default;
 /**
  * @brief RS485消息包发送任务
  */
@@ -49,6 +128,138 @@ void RS485::RS485PackageSend(){
 
     rsmotorIndex++;
 }
+/*4010电机类------------------------------------------------------------------*/
+/**
+ * @brief Motor_4010类的构造函数
+ */
+Motor_4010::Motor_4010(COMMU_INIT_t* commu_init,MOTOR_INIT_t* motor_init) : Motor(motor_init), CAN(commu_init,RxMessage){
+
+}
+/**
+ * @brief Motor_4010类的析构函数
+ */
+Motor_4010::~Motor_4010()= default;
+/**
+ * @brief 4010电机类的执行处理函数
+ */
+void Motor_4010::Handle(){
+    MotorStateUpdate();
+
+    int16_t intensity = IntensityCalc();
+
+    if (stopFlag == 1){
+        motor4010_intensity[motor_ID] = 0;
+    }else {
+        motor4010_intensity[motor_ID] = intensity;
+    }
+
+    CANMessageGenerate();
+}
+/**
+ * @brief 4010电机类的消息包获取任务
+ */
+void Motor_4010::CANMessageGenerate(){
+
+    canmessage[0] = motor4010_intensity[0];
+    canmessage[1] = motor4010_intensity[0] >> 8u;
+    canmessage[2] = motor4010_intensity[1];
+    canmessage[3] = motor4010_intensity[1] >> 8u;
+    canmessage[4] = motor4010_intensity[2];
+    canmessage[5] = motor4010_intensity[2] >> 8u;
+    canmessage[6] = motor4010_intensity[3];
+    canmessage[7] = motor4010_intensity[3] >> 8u;
+
+}
+
+/**
+ * @brief 用于设置4010电机速度
+ * @param _targetSpeed 目标速度
+ */
+void Motor_4010::SetTargetSpeed(float _targetSpeed) {
+    stopFlag = false;
+    targetSpeed = _targetSpeed;
+}
+/**
+ * @brief 用于设置4010电机角度
+ * @param _targetAngle 目标角度
+ */
+void Motor_4010::SetTargetAngle(float _targetAngle){
+    stopFlag = false;
+    targetSpeed = _targetAngle;
+}
+/**
+ * @brief 用于使4010电机停止
+ */
+void Motor_4010::Stop() {
+    stopFlag = true;
+}
+/**
+ * @brief 更新电机的相关状态
+ * @callergraph this->Handle()
+ */
+void Motor_4010::MotorStateUpdate() {
+
+    feedback.angle = RxMessage[6] | (RxMessage[7]<<8u);
+    feedback.speed = RxMessage[4] | (RxMessage[5]<<8u);
+    feedback.moment = RxMessage[2] | (RxMessage[3]<<8u);
+    feedback.temp = RxMessage[1];
+
+    switch (ctrlType) {
+        case SPEED_Single: {
+            state.speed = feedback.speed / reductionRatio;
+        }
+        case POSITION_Double: {
+            state.speed = feedback.speed / reductionRatio;
+            state.moment = feedback.moment;
+            state.temperature = feedback.temp;
+            state.angle = feedback.angle * 360 / 16384;
+            float realAngle = state.angle;
+            float thisAngle = feedback.angle;
+            static int32_t lastRead = 0;
+            if (thisAngle <= lastRead) {
+                if (lastRead - thisAngle > 8000)
+                    realAngle += (thisAngle + 16384 - lastRead) * 360.0f / 16384.0f / reductionRatio;
+                else
+                    realAngle -= (lastRead - thisAngle) * 360.0f / 16384.0f / reductionRatio;
+            } else {
+                if (thisAngle - lastRead > 8000)
+                    realAngle -= (lastRead + 16384 - thisAngle) * 360.0f / 16384.0f / reductionRatio;
+                else
+                    realAngle += (thisAngle - lastRead) * 360.0f / 16384.0f / reductionRatio;
+            }
+            state.angle = realAngle;
+            lastRead = feedback.angle;
+            break;
+        }
+        case DIRECT:
+
+            break;
+    }
+
+}
+/**
+ * @brief 计算电机实际控制电流
+ * @return 控制电流值
+ */
+int16_t Motor_4010::IntensityCalc() {
+    int16_t intensity;
+    switch (ctrlType) {
+        case DIRECT:
+            intensity = targetAngle * 16384 / 360.0f;
+            break;
+
+        case SPEED_Single:
+            intensity = speedPID.PIDCalc(targetSpeed, state.speed);
+            break;
+
+        case POSITION_Double:
+            float _targetSpeed = anglePID.PIDCalc(targetAngle, state.angle);
+            intensity = speedPID.PIDCalc(_targetSpeed, state.speed);
+            break;
+    }
+    return intensity;
+}
+
 
 /*4315电机类------------------------------------------------------------------*/
 /**
@@ -61,9 +272,7 @@ Motor_4315::Motor_4315(uint16_t _id,MOTOR_INIT_t* _init) : Motor(_init), RS485(_
 /**
  * @brief Motor_4315类的析构函数
  */
-Motor_4315::~Motor_4315(){
-
-}
+Motor_4315::~Motor_4315()= default;
 /**
  * @brief 4315电机消息包获取任务
  */
@@ -135,10 +344,10 @@ uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
 
 
 
-
-/*
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    Motor::IT_Handle(hcan);
-}*/
 
+    Motor_4010::Rx_Handle(hcan);
+
+
+}
 

@@ -32,7 +32,6 @@ MOTOR_INIT_t chassisMotorInit3 = {//四个底盘电机共用的初始化结构�
      //   ._motorID = MOTOR_ID_1,
         .reductionRatio = 1.0f,
      //   .ctrlType = POSITION_Double,
-        .commuType = CAN,
 };
 
 ARMMotor ARMMotor1(&arm1Type);

@@ -14,7 +14,7 @@ PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
-        .outputMax = 2000 //3508电机输出电流上限，可以调小，勿调大
+        .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底盘电机共用
         .kp = 1.5f,
@@ -28,33 +28,46 @@ PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底
 MOTOR_INIT_t chassisMotorInit1 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator1,
         .anglePIDp = nullptr,
-        .reductionRatio = 1.0f,
-        .commuType = CAN,
+        .reductionRatio = 1.0f
 };
 MOTOR_INIT_t chassisMotorInit2 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator2,
         .anglePIDp = nullptr,
-        .reductionRatio = 1.0f,
-        .commuType = CAN,
+        .reductionRatio = 1.0f
 };
 
 MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
-        .reductionRatio = 1.0f,
-        .commuType = RS485,
+        .reductionRatio = 1.0f
 };
-/*
-Motor CMFL(MOTOR_ID_1,&chassisMotorInit1);//定义左前轮电机
-Motor CMFR(MOTOR_ID_2,&chassisMotorInit1);//定义右前轮电机
-Motor CMBL(MOTOR_ID_4,&chassisMotorInit2);//定义左后轮电机
-Motor CMBR(MOTOR_ID_3,&chassisMotorInit2);//定义右后轮电机
-*/
+COMMU_INIT_t chassisCommuInit1 = {
+        ._id = MOTOR_ID_1,
+        .ctrlType = SPEED_Single
+};
+COMMU_INIT_t chassisCommuInit2 = {
+        ._id = MOTOR_ID_2,
+        .ctrlType = SPEED_Single
+};
+COMMU_INIT_t chassisCommuInit3 = {
+        ._id = MOTOR_ID_3,
+        .ctrlType = SPEED_Single
+};
+COMMU_INIT_t chassisCommuInit4 = {
+        ._id = MOTOR_ID_4,
+        .ctrlType = SPEED_Single
+};
+
+Motor_4010 CMFL(&chassisCommuInit1,&chassisMotorInit1);//定义左前轮电机
+Motor_4010 CMFR(&chassisCommuInit2,&chassisMotorInit1);//定义右前轮电机
+Motor_4010 CMBR(&chassisCommuInit3,&chassisMotorInit2);//定义右后轮电机
+Motor_4010 CMBL(&chassisCommuInit4,&chassisMotorInit2);//定义左后轮电机
+
 
 Motor_4315 RFL(MOTOR_ID_1, &swerveMotorInit);
 Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
-Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
+Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 
 Move move(2.0);
 bool ChassisStopFlag = true;
@@ -68,15 +81,15 @@ void ChassisStart(){
  * @callergraph void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) in Device.cpp
  */
 void ChassisHandle() {
-    if(ChassisStopFlag == false) {
+    if(!ChassisStopFlag) {
         WheelsSpeedCalc(FBVelocity, LRVelocity, RTVelocity);
     }
-/*
+
     CMFL.Handle();
     CMFR.Handle();
     CMBL.Handle();
     CMBR.Handle();
-*/
+
 
     RFL.Handle();
     RBL.Handle();
@@ -132,10 +145,14 @@ void AutoSetVelocity(){
  */
 void ChassisStop(){
     ChassisStopFlag = true;
-/*    CMFL.Stop();
+    CMFL.Stop();
     CMFR.Stop();
     CMBL.Stop();
-    CMBR.Stop();*/
+    CMBR.Stop();
+    RFL.Stop();
+    RFR.Stop();
+    RBL.Stop();
+    RBR.Stop();
 }
 int sign(float x){
     if (x<0) return -1;
@@ -199,8 +216,8 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     CMBLSpeed = CMBLSpeed /(WHEEL_DIAMETER/2.0f);
     CMBRSpeed = CMBRSpeed /(WHEEL_DIAMETER/2.0f);
     //控制底盘电机转速
-    /*CMFL.SetTargetSpeed(CMFLSpeed * 180 / 3.1415926f);
+    CMFL.SetTargetSpeed(CMFLSpeed * 180 / 3.1415926f);
     CMFR.SetTargetSpeed(CMFRSpeed * 180 / 3.1415926f);
     CMBL.SetTargetSpeed(CMBLSpeed * 180 / 3.1415926f);
-    CMBR.SetTargetSpeed(CMBRSpeed * 180 / 3.1415926f);*/
+    CMBR.SetTargetSpeed(CMBRSpeed * 180 / 3.1415926f);
 }
