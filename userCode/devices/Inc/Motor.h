@@ -42,9 +42,7 @@ typedef struct {
 
     PID_Regulator_t* speedPIDp;//速度环pid参数结构体指针
     PID_Regulator_t* anglePIDp;//角度环pid参数结构体指针
-    uint32_t _motorID;//电机ID
     float reductionRatio;//减速比
-    MOTOR_CTRL_TYPE_e ctrlType;//控制类型
     MOTOR_COMMU_TYPE_e commuType;
 
 } MOTOR_INIT_t;
@@ -59,55 +57,58 @@ typedef struct {
 }MOTOR_STATE_t;
 /*类型定义----------------------------------------------------------------*/
 
+/*Motor类----------------------------------------------------------------*/
 class Motor :private Device
 {
 public:
-
-    static Motor* motorPtrs[2][8];
-    static int16_t motor_intensity[2][8];
-    static uint32_t motor_IDs[2];
-    static uint8_t rsmessage[4][11];
-
-
-
-    static void Init();
-
-    static void RS485PackageSend();
-    static void CANPackageSend();
-    static void ARMPackageSend();
-    static void IT_Handle(CAN_HandleTypeDef *hcan);
-
-
-    bool stopFlag{true};
-    C6x0Rx_t feedback;
-    PID speedPID,anglePID;
-    MOTOR_STATE_t state;
-
-    MOTOR_CTRL_TYPE_e ctrlType;
-    MOTOR_COMMU_TYPE_e commuType;
-
-    float targetSpeed = 0;
-    float targetAngle;
-    float reductionRatio;
-
-    Motor(uint32_t _id, MOTOR_INIT_t* _init);
+    explicit Motor(MOTOR_INIT_t* _init);
     ~Motor();
-
     void Handle() override;
     void ErrorHandle() override;
 
-    void SetTargetSpeed(float _targetSpeed);
+protected:
+    PID speedPID,anglePID;
+    MOTOR_COMMU_TYPE_e commuType;
+    float reductionRatio;
+
+};
+
+/*RS485类------------------------------------------------------------------*/
+class RS485
+{
+public:
+    uint16_t motor_ID;
+    static uint8_t rsmessage[4][11];
+
+    explicit RS485(uint16_t _id);
+    ~RS485();
+
+    static void RS485PackageSend();
+    virtual void RS485MessageGenerate() = 0;
+
+protected:
+    MOTOR_CTRL_TYPE_e ctrlType;
+
+};
+
+/*4315电机类------------------------------------------------------------------*/
+class Motor_4315:public Motor, public RS485{
+public:
+    static int16_t motor4315_intensity[8];
+    bool stopFlag{true};
+    float targetAngle = 0;
+
+    void RS485MessageGenerate() override;
+    void Handle() override;
+
     void SetTargetAngle(float _targetAngle);
     void Stop();
 
+    Motor_4315(uint16_t _id,MOTOR_INIT_t* _init);
+    ~Motor_4315();
+
 private:
-
-    int16_t IntensityCalc();
-    void MotorStateUpdate();
-
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
-    void RS485MessageGenerate();
-
 
 };
 /*结构体成员取值定义组------------------------------------------------------*/

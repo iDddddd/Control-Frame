@@ -225,7 +225,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         ChassisHandle();
         //ARMHandle();
        // ServoHandle();
-        Motor::CANPackageSend();
+       // Motor::CANPackageSend();
        // Motor::ARMPackageSend();
         //ARMMotor::PackageSend();
         if(cnt>20){
@@ -235,7 +235,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     if (htim == &htim6){
 					
-        Motor::RS485PackageSend();
+        Motor_4315::RS485PackageSend();
 
     }
     if (htim == &htim7){
@@ -331,8 +331,8 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim10);
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_TIM_Base_Start_IT(&htim7);
-    Motor::Init();
-    ARMMotor::Init();
+    //Motor::Init();
+  //  ARMMotor::Init();
     IMU::imu.Init();
     ChassisStart();
 

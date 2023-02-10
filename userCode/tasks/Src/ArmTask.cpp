@@ -29,23 +29,23 @@ PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体，四个底
 MOTOR_INIT_t chassisMotorInit3 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator3,
         .anglePIDp = &pidRegulator4,
-        ._motorID = MOTOR_ID_1,
+     //   ._motorID = MOTOR_ID_1,
         .reductionRatio = 1.0f,
-        .ctrlType = POSITION_Double,
+     //   .ctrlType = POSITION_Double,
         .commuType = CAN,
 };
 
 ARMMotor ARMMotor1(&arm1Type);
 ARMMotor ARMMotor2(&arm2Type);
-Motor ARMMotor3(MOTOR_ID_5,&chassisMotorInit3);
+//Motor ARMMotor3(MOTOR_ID_5,&chassisMotorInit3);
 
 bool ArmStopFlag = true;
 
 void ARMHandle(){
-    ARMMotor3.SetTargetAngle(16000);
+  //  ARMMotor3.SetTargetAngle(16000);
     //ARMMotor1.Handle();
     ARMMotor2.Handle();
-    ARMMotor3.Handle();
+  //  ARMMotor3.Handle();
 
 }
 
