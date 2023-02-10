@@ -39,7 +39,7 @@ typedef struct {
 } MOTOR_INIT_t;
 
 typedef struct {
-    uint16_t _id;//电机ID
+    uint16_t _id;//canID
     MOTOR_CTRL_TYPE_e ctrlType;
 }COMMU_INIT_t;
 
@@ -70,8 +70,8 @@ protected:
 /*CAN类------------------------------------------------------------------*/
 class CAN{
 public:
-    static CAN* motorPtrs[8];
-    uint16_t motor_ID;
+    static CAN* canPtrs[8];
+    uint16_t can_ID;
     static uint8_t canmessage[8];
 
     static void CANInit();
@@ -93,7 +93,7 @@ protected:
 class RS485
 {
 public:
-    uint16_t motor_ID;
+    uint16_t rs485_ID;
     static uint8_t rsmessage[4][11];
 
     explicit RS485(uint16_t _id);

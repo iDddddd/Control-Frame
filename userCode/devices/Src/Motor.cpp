@@ -4,7 +4,7 @@
 
 #include "Motor.h"
 
-CAN* CAN::motorPtrs[8] = {nullptr};
+CAN* CAN::canPtrs[8] = {nullptr};
 uint8_t CAN::canmessage[8] = {0};
 uint8_t RS485::rsmessage[4][11] = {0};
 int16_t Motor_4315::motor4315_intensity[8];
@@ -62,11 +62,11 @@ void CAN::CANInit(){
  * @brief CAN类的构造函数
  */
 CAN::CAN(COMMU_INIT_t* _init,uint8_t* RxMessage) {
-    motor_ID = _init -> _id;
+    can_ID = _init -> _id;
     ctrlType = _init -> ctrlType;
-    uint8_t motorPos = _init -> _id;
-    motorPtrs[motorPos % 8] = this;
-    dict.insert({motor_ID,RxMessage});
+    uint8_t canPos = _init -> _id;
+    canPtrs[canPos % 8] = this;
+    dict.insert({can_ID,RxMessage});
 
 }
 
@@ -97,11 +97,11 @@ void CAN::CANPackageSend(){
 void CAN::Rx_Handle(CAN_HandleTypeDef *hcan){
     uint8_t canBuf[8];
     CAN_RxHeaderTypeDef rx_header;
-    uint8_t motorPos;
+    uint8_t canPos;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);
     if(hcan == &hcan1) {
-        motorPos = rx_header.StdId - 0x141;
-        memcpy(dict[motorPtrs[motorPos]->motor_ID],canBuf,sizeof(canBuf));
+        canPos = rx_header.StdId - 0x141;
+        memcpy(dict[canPtrs[canPos]->can_ID],canBuf,sizeof(canBuf));
     }
 
 }
@@ -111,7 +111,7 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan){
  * @brief RS485类的构造函数
  */
 RS485::RS485(uint16_t _id){
-    motor_ID = _id;
+    rs485_ID = _id;
     ctrlType = DIRECT;
 }
 /**
@@ -148,9 +148,9 @@ void Motor_4010::Handle(){
     int16_t intensity = IntensityCalc();
 
     if (stopFlag == 1){
-        motor4010_intensity[motor_ID] = 0;
+        motor4010_intensity[can_ID] = 0;
     }else {
-        motor4010_intensity[motor_ID] = intensity;
+        motor4010_intensity[can_ID] = intensity;
     }
 
     CANMessageGenerate();
@@ -277,7 +277,7 @@ Motor_4315::~Motor_4315()= default;
  * @brief 4315电机消息包获取任务
  */
 void Motor_4315::RS485MessageGenerate() {
-    int motorIndex = motor_ID;
+    int motorIndex = rs485_ID;
 
     rsmessage[motorIndex][0] = 0x3E;//协议头
     rsmessage[motorIndex][1] = 0x00;//包序号
@@ -303,9 +303,9 @@ void Motor_4315::Handle(){
     int16_t intensity = targetAngle;
 
     if (stopFlag == 1){
-        motor4315_intensity[motor_ID] = 0;
+        motor4315_intensity[rs485_ID] = 0;
     }else {
-        motor4315_intensity[motor_ID] = intensity;
+        motor4315_intensity[rs485_ID] = intensity;
     }
 
     RS485MessageGenerate();
@@ -316,7 +316,7 @@ void Motor_4315::Handle(){
  * @param _targetAngle 目标角度
  */
 void Motor_4315::SetTargetAngle(float _targetAngle){
-    stopFlag = 0;
+    stopFlag = false;
     targetAngle = _targetAngle * 16384 / 360.0f;
 }
 
@@ -345,9 +345,6 @@ uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
 
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-
-    Motor_4010::Rx_Handle(hcan);
-
-
+    CAN::Rx_Handle(hcan);
 }
 
