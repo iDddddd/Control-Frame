@@ -64,12 +64,12 @@ void CatchControl::GET_Data(const volatile uint8_t *buf){
 
 }
 void CatchControl::IT_Handle() {
-    if (huart3.Instance->SR & UART_FLAG_RXNE)//接收到数据
+    if (huart6.Instance->SR & UART_FLAG_RXNE)//接收到数据
     {
-        __HAL_UART_CLEAR_PEFLAG(&huart3);
-    } else if (USART3->SR & UART_FLAG_IDLE) {
+        __HAL_UART_CLEAR_PEFLAG(&huart6);
+    } else if (USART6->SR & UART_FLAG_IDLE) {
 
-        __HAL_UART_CLEAR_PEFLAG(&huart3);
+        __HAL_UART_CLEAR_PEFLAG(&huart6);
 
         if ((hdma_usart6_rx.Instance->CR & DMA_SxCR_CT) == RESET) {
             /* Current memory buffer used is Memory 0 */

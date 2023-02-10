@@ -79,6 +79,7 @@ void Motor::RS485MessageGenerate() {
  * @brief rs485消息包发送任务
  */
 void Motor::RS485PackageSend() {
+
     static uint8_t rsmotorIndex = 0;
     rsmotorIndex %= 4;
     HAL_UART_Transmit_IT(&huart1, rsmessage[rsmotorIndex], 11);
