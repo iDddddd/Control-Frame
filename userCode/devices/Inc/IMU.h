@@ -58,38 +58,38 @@ constexpr float zero_ay = 0.0227739215;
 constexpr float zero_az = 9.63659286f;*/
 /*枚举类型定义------------------------------------------------------------*/
 /*结构体定义--------------------------------------------------------------*/
-typedef struct{
+struct IMU_Raw_Data_t{
     float accel[3],gyro[3],temp,time,mag[3],accel_offset[3], ax, ay, az;
-}IMU_Raw_Data_t;
-typedef struct{
+};
+struct IMU_Pro_Data_t{
     float accel[3],gyro[3],temp,time,mag[3],ay;
-}IMU_Pro_Data_t;
+};
 
-typedef struct{
+struct IMU_Attitude_t{
     float yaw,pitch,rol;
     float yaw_v,pitch_v,rol_v;
     float neg_yaw_v,neg_pitch_v,neg_rol_v;
-}IMU_Attitude_t;
+};
 
-typedef struct{
+struct IMU_state_t{
 	
-    volatile uint8_t gyro_update_flag = 0;
-    volatile uint8_t accel_update_flag = 0;
-    volatile uint8_t accel_temp_update_flag = 0;
-    volatile uint8_t mag_update_flag = 0;
-    volatile uint8_t imu_start_dma_flag = 0;
+    volatile uint8_t gyro_update_flag;
+    volatile uint8_t accel_update_flag;
+    volatile uint8_t accel_temp_update_flag;
+    volatile uint8_t mag_update_flag;
+    volatile uint8_t imu_start_dma_flag;
 	
-}IMU_state_t;
+};
 
-typedef struct{
+struct IMU_Position_t{
     float _accel[3] = {0};
     float velocity[3] = {0};
     float _velocity[3] = {0};
     float displace[3] = {0};
     float vy;
     float xy;
-}IMU_Position_t;
-typedef struct {
+};
+struct IMU_Filter_t{
     float current;
     float history[SUM_WIN_SIZE];//历史值，其中history[SUM_WIN_SIZE-1]为最近的记录
 
@@ -98,8 +98,8 @@ typedef struct {
 
     int factor[SUM_WIN_SIZE] = {1,2,3,4,5,6,7,8}; //加权系数
     int K=36; //1+2+3+4+5+6+7+8
-}IMU_Filter_t;
-typedef struct{
+};
+struct IMU_buffer_t{
 	
     uint8_t gyro_dma_rx_buf[SPI_DMA_GYRO_LENGHT];
     uint8_t gyro_dma_tx_buf[SPI_DMA_GYRO_LENGHT] = {0x82,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
@@ -109,7 +109,7 @@ typedef struct{
 
     uint8_t accel_temp_dma_rx_buf[SPI_DMA_ACCEL_TEMP_LENGHT];
     uint8_t accel_temp_dma_tx_buf[SPI_DMA_ACCEL_TEMP_LENGHT] = {0xA2,0xFF,0xFF,0xFF};
-}IMU_buffer_t;
+};
 
 /*类型定义----------------------------------------------------------------*/
 
@@ -122,7 +122,14 @@ class IMU : private Device
     //读取数据
     IMU_buffer_t buf;
 
-    IMU_state_t state;
+    struct IMU_state_t state = {
+            .gyro_update_flag = 0,
+            .accel_update_flag = 0,
+            .accel_temp_update_flag = 0,
+            .mag_update_flag = 0,
+            .imu_start_dma_flag = 0
+    };
+
     void imu_cmd_spi_dma(void);
     void filter(float *current, IMU_Filter_t Filter);
     //数据处理
