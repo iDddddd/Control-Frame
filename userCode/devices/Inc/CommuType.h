@@ -6,7 +6,7 @@
 #define RM_FRAME_C_COMMUTYPE_H
 
 #include "Device.h"
-#include <map>
+#include "Map.h"
 /*结构体定义--------------------------------------------------------------*/
 typedef enum {
     DIRECT = 0,
@@ -43,7 +43,7 @@ public:
 protected:
 
     MOTOR_CTRL_TYPE_e ctrlType;
-    static std::map<uint16_t, uint8_t *> dict;
+    static MyMap<uint16_t, uint8_t *> dict;
 
     void ID_Bind_Rx(uint8_t *RxMessage);
 

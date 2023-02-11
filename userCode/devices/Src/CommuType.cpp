@@ -4,6 +4,9 @@
 
 #include "CommuType.h"
 
+MyMap<uint16_t, uint8_t *> CAN::dict;
+
+
 /*CAN类------------------------------------------------------------------*/
 /**
  * @brief CAN通信的初始化，主要是CAN通信的相关配置
@@ -83,15 +86,15 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
 }
 
 void CAN::ID_Bind_Rx(uint8_t *RxMessage) {
-    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID, RxMessage));
+    dict.insert(can_ID, RxMessage);
 }
 
 void CAN::FOURID_Bind_Rx(uint16_t *canIDs, uint8_t (*RxMessage)[8]) {
 
-    dict.insert(std::pair<uint16_t, uint8_t *>(canIDs[0], RxMessage[0]));
-    dict.insert(std::pair<uint16_t, uint8_t *>(canIDs[1], RxMessage[1]));
-    dict.insert(std::pair<uint16_t, uint8_t *>(canIDs[2], RxMessage[2]));
-    dict.insert(std::pair<uint16_t, uint8_t *>(canIDs[3], RxMessage[3]));
+    dict.insert(canIDs[0], RxMessage[0]);
+    dict.insert(canIDs[1], RxMessage[1]);
+    dict.insert(canIDs[2], RxMessage[2]);
+    dict.insert(canIDs[3], RxMessage[3]);
 }
 
 

@@ -6,7 +6,6 @@
 
 uint8_t CAN::canmessage[8] = {0};
 uint8_t RS485::rsmessage[4][11] = {0};
-std::map<uint16_t, uint8_t *> CAN::dict;
 Motor_Object_t *Motor::head_;
 
 /*Motor类----------------------------------------------------------------*/
