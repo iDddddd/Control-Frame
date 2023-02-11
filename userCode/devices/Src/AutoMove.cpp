@@ -11,59 +11,54 @@ float Move::a = 2.0;
 float Move::v_max = 1.0;
 
 
-Move::Move(float d){
+Move::Move(float d) {
     d_max = d;
     d1 = v_max * v_max / (2 * a);
     d2 = d - 2 * d1;
-    if (d2 < 0){
+    if (d2 < 0) {
         d1 = d / 2;
     }
 }
-void Move::Handle(){
+
+void Move::Handle() {
     t += 0.001;
 
     if (d2 >= 0) {
         if (x < d1) {
             v += a * 0.001;
             x += (2 * v - a * 0.001) / 2 * 0.001;
-        }
-        else if (x > (d1 + d2)) {
+        } else if (x > (d1 + d2)) {
             v -= a * 0.001;
             x += (2 * v + a * 0.001) / 2 * 0.001;
-        }
-        else if (x > d1 && x < (d1 + d2)){
-            x += v*0.001;
-        }
-        else if(x >= d_max){
-            v = 0 ;
+        } else if (x > d1 && x < (d1 + d2)) {
+            x += v * 0.001;
+        } else if (x >= d_max) {
+            v = 0;
         }
 
-        if(IMU::imu.position.displace[1] < x){
+        if (IMU::imu.position.displace[1] < x) {
             v_rel = v + 0.001 * a;
-        }
-        else if (IMU::imu.position.displace[1] > x){
+        } else if (IMU::imu.position.displace[1] > x) {
             v_rel = v - 0.001 * a;
-        }
-        else if (v < 0){
+        } else if (v < 0) {
             v_rel = 0;
-        }
-        else{
+        } else {
             v_rel = v;
         }
-        if (v_rel > v_max){
+        if (v_rel > v_max) {
             v_rel = v_max;
         }
 
-    }
-    else if (d2 < 0){
+    } else if (d2 < 0) {
         v_rel = 0;
     }
 
 }
-void Move::ErrorHandle(){
+
+void Move::ErrorHandle() {
 
 }
 
-Move::~Move(){
+Move::~Move() {
 
 }

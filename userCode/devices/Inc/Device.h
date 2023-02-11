@@ -4,6 +4,7 @@
 
 #ifndef RM_FRAME_C_DEVICE_H
 #define RM_FRAME_C_DEVICE_H
+
 #include "main.h"
 
 #include "adc.h"
@@ -32,12 +33,17 @@
         NUM=MAX;\
     }\
 }
+
 /*枚举类型定义------------------------------------------------------------*/
 
 extern void ChassisStart();
+
 extern void ChassisHandle();
+
 extern void CtrlHandle();
+
 extern void ARMHandle();
+
 extern void ServoHandle();
 
 /*
@@ -54,12 +60,13 @@ typedef struct {
     uint32_t yaw_zero;
     uint32_t pitch_zero;
     uint32_t pat[125];
-}flash_data_t;
+} flash_data_t;
 
 typedef struct {
-    float x,y,z;
+    float x, y, z;
     float temp;
-}ist8310_t;
+} ist8310_t;
+
 /*类型定义----------------------------------------------------------------*/
 
 class Device {

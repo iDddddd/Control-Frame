@@ -11,36 +11,37 @@
 #define RC_FRAME_LENGTH 18u
 #define RC_CH_VALUE_OFFSET 1024
 /*枚举类型定义------------------------------------------------------------*/
-typedef enum{
-    UP_POS = 1u,MID_POS = 3u,DOWN_POS = 2u
-}SWITCH_STATE_E;
+typedef enum {
+    UP_POS = 1u, MID_POS = 3u, DOWN_POS = 2u
+} SWITCH_STATE_E;
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
     int32_t ch[5];
     uint32_t s[2];
-}rc_t;
+} rc_t;
 
 typedef struct {
-    int32_t x,y,z,press_l,press_r;
-}mouse_t;
+    int32_t x, y, z, press_l, press_r;
+} mouse_t;
 
 typedef struct {
     uint32_t v;
-}keyboard_t;
+} keyboard_t;
 
 typedef struct {
     rc_t rc;
     mouse_t mouse;
     keyboard_t key;
-}RC_ctrl_t;
+} RC_ctrl_t;
 typedef struct {
-    float left_col,left_rol;
-    float right_col,right_rol;
+    float left_col, left_rol;
+    float right_col, right_rol;
     float dialWheel;
     SWITCH_STATE_E sLeft;
     uint32_t pat;//TODO 有bug，暂时用一个占位符解决
     SWITCH_STATE_E sRight;
-}RC_Info_t;
+} RC_Info_t;
+
 /*类型定义----------------------------------------------------------------*/
 class RemoteControl : public Device {
 public:
@@ -48,8 +49,11 @@ public:
     static RC_ctrl_t rc_ctrl;
 
     static void init();
+
     static void ITHandle();
+
     static uint8_t sbus_rx_buf[2][SBUS_RX_BUF_NUM];
+
     static void sbus_to_rc(volatile const uint8_t *sbus_buf);
 };
 

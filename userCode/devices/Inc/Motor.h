@@ -33,15 +33,15 @@ typedef struct {
 } C6x0Rx_t;
 
 typedef struct {
-    PID_Regulator_t* speedPIDp;//速度环pid参数结构体指针
-    PID_Regulator_t* anglePIDp;//角度环pid参数结构体指针
+    PID_Regulator_t *speedPIDp;//速度环pid参数结构体指针
+    PID_Regulator_t *anglePIDp;//角度环pid参数结构体指针
     float reductionRatio;//减速比
 } MOTOR_INIT_t;
 
 typedef struct {
     uint16_t _id;//canID
     MOTOR_CTRL_TYPE_e ctrlType;
-}COMMU_INIT_t;
+} COMMU_INIT_t;
 
 typedef struct {
 
@@ -50,56 +50,73 @@ typedef struct {
     float moment;//转矩电流的相对值，具体值参考电调手册
     float temperature;//电机温度，单位摄氏度
 
-}MOTOR_STATE_t;
+} MOTOR_STATE_t;
+
+class Motor;
+
+struct Motor_Object_t {
+    Motor *motor_object;
+    Motor_Object_t *next;
+};
+
 /*类型定义----------------------------------------------------------------*/
 
 /*Motor类----------------------------------------------------------------*/
-class Motor :private Device
-{
+class Motor : private Device {
 public:
-    explicit Motor(MOTOR_INIT_t* _init);
+    Motor(MOTOR_INIT_t *_init, Motor *motor);
+
     ~Motor();
-    void Handle() override;
+
     void ErrorHandle() override;
 
-protected:
-    PID speedPID,anglePID;
-    float reductionRatio;
+    static void MotorsHandle();
 
+protected:
+    PID speedPID, anglePID;
+    float reductionRatio;
+private:
+    static Motor_Object_t *head_;
 };
+
 /*CAN类------------------------------------------------------------------*/
-class CAN{
+class CAN {
 public:
-    static CAN* canPtrs[8];
+    static CAN *canPtrs[8];
     uint16_t can_ID;
     static uint8_t canmessage[8];
 
     static void CANInit();
 
-    CAN(COMMU_INIT_t* _init,uint8_t* RxMessage);
+    CAN(COMMU_INIT_t *_init, uint8_t *RxMessage);
+
     ~CAN();
 
     static void CANPackageSend();
+
     static void Rx_Handle(CAN_HandleTypeDef *hcan);
+
     virtual void CANMessageGenerate() = 0;
 
 protected:
     MOTOR_STATE_t state{};
     MOTOR_CTRL_TYPE_e ctrlType;
-    static std::map<uint16_t,uint8_t*> dict;
+    static std::map<uint16_t, uint8_t *> dict;
 
 };
+
 /*RS485类------------------------------------------------------------------*/
-class RS485
-{
+class RS485 {
 public:
     uint16_t rs485_ID;
     static uint8_t rsmessage[4][11];
 
     explicit RS485(uint16_t _id);
+
     ~RS485();
 
     static void RS485PackageSend();
+
     virtual void RS485MessageGenerate() = 0;
 
 protected:
@@ -108,19 +125,22 @@ protected:
 };
 
 /*4315电机类------------------------------------------------------------------*/
-class Motor_4315:public Motor, public RS485{
+class Motor_4315 : public Motor, public RS485 {
 public:
     static int16_t motor4315_intensity[8];
     bool stopFlag{true};
     float targetAngle = 0;
 
     void RS485MessageGenerate() override;
+
     void Handle() override;
 
     void SetTargetAngle(float _targetAngle);
+
     void Stop();
 
-    Motor_4315(uint16_t _id,MOTOR_INIT_t* _init);
+    Motor_4315(uint16_t _id, MOTOR_INIT_t *_init);
+
     ~Motor_4315();
 
 private:
@@ -129,7 +149,7 @@ private:
 };
 
 /*4010电机类------------------------------------------------------------------*/
-class Motor_4010:public Motor, public CAN{
+class Motor_4010 : public Motor, public CAN {
 public:
     uint8_t RxMessage[8]{};
     static int16_t motor4010_intensity[8];
@@ -140,17 +160,23 @@ public:
     float targetAngle = 0;
 
     void CANMessageGenerate() override;
+
     void Handle() override;
 
     void SetTargetSpeed(float _targetSpeed);
+
     void SetTargetAngle(float _targetAngle);
+
     void Stop();
 
-    Motor_4010(COMMU_INIT_t* commu_init,MOTOR_INIT_t* motor_init);
+    Motor_4010(COMMU_INIT_t *commu_init, MOTOR_INIT_t *motor_init);
+
     ~Motor_4010();
+
 private:
 
     void MotorStateUpdate();
+
     int16_t IntensityCalc();
 };
 /*结构体成员取值定义组------------------------------------------------------*/

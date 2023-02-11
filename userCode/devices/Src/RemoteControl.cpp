@@ -19,17 +19,16 @@ void RemoteControl::init() {
     //disable DMA
     //失效 DMA
     __HAL_DMA_DISABLE(&hdma_usart3_rx);
-    while(hdma_usart3_rx.Instance->CR & DMA_SxCR_EN)
-    {
+    while (hdma_usart3_rx.Instance->CR & DMA_SxCR_EN) {
         __HAL_DMA_DISABLE(&hdma_usart3_rx);
     }
-    hdma_usart3_rx.Instance->PAR = (uint32_t) & (USART3->DR);
+    hdma_usart3_rx.Instance->PAR = (uint32_t) &(USART3->DR);
     //memory buffer 1
     //内存缓冲区 1
-    hdma_usart3_rx.Instance->M0AR = (uint32_t)(sbus_rx_buf[0]);
+    hdma_usart3_rx.Instance->M0AR = (uint32_t) (sbus_rx_buf[0]);
     //memory buffer 2
     //内存缓冲区 2
-    hdma_usart3_rx.Instance->M1AR = (uint32_t)(sbus_rx_buf[1]);
+    hdma_usart3_rx.Instance->M1AR = (uint32_t) (sbus_rx_buf[1]);
     //data length
     //数据长度
     hdma_usart3_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
@@ -47,7 +46,7 @@ void RemoteControl::sbus_to_rc(const volatile uint8_t *sbus_buf) {
     rc_ctrl.rc.ch[0] = (sbus_buf[0] | (sbus_buf[1] << 8)) & 0x07ff; //!< Channel 0
     rc_ctrl.rc.ch[1] = ((sbus_buf[1] >> 3) | (sbus_buf[2] << 5)) & 0x07ff; //!< Channel 1
     rc_ctrl.rc.ch[2] = ((sbus_buf[2] >> 6) | (sbus_buf[3] << 2) | //!< Channel 2
-                      (sbus_buf[4] << 10)) &0x07ff;
+                        (sbus_buf[4] << 10)) & 0x07ff;
     rc_ctrl.rc.ch[3] = ((sbus_buf[4] >> 1) | (sbus_buf[5] << 7)) & 0x07ff; //!< Channel 3
     rc_ctrl.rc.s[0] = ((sbus_buf[5] >> 4) & 0x0003); //!< Switch left
     rc_ctrl.rc.s[1] = ((sbus_buf[5] >> 4) & 0x000C) >> 2; //!< Switch right
@@ -64,15 +63,16 @@ void RemoteControl::sbus_to_rc(const volatile uint8_t *sbus_buf) {
     rc_ctrl.rc.ch[3] -= RC_CH_VALUE_OFFSET;
     rc_ctrl.rc.ch[4] -= RC_CH_VALUE_OFFSET;
     //TODO 数值超界检查
-    rcInfo.right_rol = rc_ctrl.rc.ch[0]/660.0f;
-    rcInfo.right_col = rc_ctrl.rc.ch[1]/660.0f;
-    rcInfo.left_rol = rc_ctrl.rc.ch[2]/660.0f;
-    rcInfo.left_col = rc_ctrl.rc.ch[3]/660.0f;
-    rcInfo.dialWheel = rc_ctrl.rc.ch[4]/660.0f;
-    rcInfo.sRight = (SWITCH_STATE_E)rc_ctrl.rc.s[0];
-    rcInfo.sLeft = (SWITCH_STATE_E)rc_ctrl.rc.s[1];
+    rcInfo.right_rol = rc_ctrl.rc.ch[0] / 660.0f;
+    rcInfo.right_col = rc_ctrl.rc.ch[1] / 660.0f;
+    rcInfo.left_rol = rc_ctrl.rc.ch[2] / 660.0f;
+    rcInfo.left_col = rc_ctrl.rc.ch[3] / 660.0f;
+    rcInfo.dialWheel = rc_ctrl.rc.ch[4] / 660.0f;
+    rcInfo.sRight = (SWITCH_STATE_E) rc_ctrl.rc.s[0];
+    rcInfo.sLeft = (SWITCH_STATE_E) rc_ctrl.rc.s[1];
 
 }
+
 void RemoteControl::ITHandle() {
     HAL_IWDG_Refresh(&hiwdg);
     if (huart3.Instance->SR & UART_FLAG_RXNE)//接收到数据
@@ -138,11 +138,11 @@ void RemoteControl::ITHandle() {
         }
     }
 }
+
 /**
   * @brief This function handles USART3 global interrupt.
   */
 
-void USART3_IRQHandler(void)
-{
+void USART3_IRQHandler(void) {
     RemoteControl::ITHandle();
 }

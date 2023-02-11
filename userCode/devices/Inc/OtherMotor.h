@@ -8,14 +8,14 @@
 #include "Device.h"
 #include "can.h"
 #include "CatchControl.h"
+
 typedef enum {
     ARM1 = 0,
     ARM2,
 } MOTOR_TYPE_e;
 
 
-class ARMMotor :private Device
-{
+class ARMMotor : private Device {
 public:
 
     static uint8_t arm1_Initmessage[2];
@@ -26,28 +26,35 @@ public:
 
 
     static float feedback_moment[3];
+
     static void Init();
 
     static void ARM1_Init();
+
     static void ARM2_Init();
+
     //机械臂4310发送
     static void ARMCAN1PackageSend();
+
     //机械臂4010发送
     static void ARMCAN2PackageSend();
 
     static void PackageSend();
 
     static void IT_Handle(CAN_HandleTypeDef *hcan);
+
     bool stopFlag{false};
 
     MOTOR_TYPE_e motorType;
     float targetSpeed = 0;
     float targetAngle = 0;
 
-    ARMMotor(MOTOR_TYPE_e* MotorType);
+    ARMMotor(MOTOR_TYPE_e *MotorType);
+
     ~ARMMotor();
 
     void Handle() override;
+
     void ErrorHandle() override;
 
     void Stop();
@@ -57,12 +64,13 @@ private:
     void ARMStop();
 
     void ARMCAN1MessageGenerate();
+
     void ARMCAN2MessageGenerate();
 
 };
 
 
-class TRAYMotor :private Device{
+class TRAYMotor : private Device {
 public:
     static uint8_t traymessage[3][8];
     static uint8_t trayflag;
@@ -71,9 +79,11 @@ public:
     static void TrayPackageSend();
 
     TRAYMotor();
+
     ~TRAYMotor();
 
     void Handle() override;
+
     void ErrorHandle() override;
 
 private:
@@ -82,4 +92,5 @@ private:
     void TRAYFlagGenerate();
 
 };
+
 #endif //RM_FRAME_C_OTHERMOTOR_H

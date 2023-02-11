@@ -6,7 +6,6 @@
 #define RM_FRAME_C_CATCHCONTROL_H
 
 
-
 #include "Device.h"
 
 #define BUFF_SIZE 100
@@ -14,7 +13,7 @@
 typedef struct {
     uint16_t speed;
     uint16_t angle;
-}ARM_col_t;
+} ARM_col_t;
 typedef struct {
     ARM_col_t ARM1;
     ARM_col_t ARM2;
@@ -24,7 +23,7 @@ typedef struct {
     uint8_t TrayFlag;
     uint8_t ChassisStopFlag;
     uint8_t ArmServoFlag;
-}CC_ctrl_t;
+} CC_ctrl_t;
 
 class CatchControl : public Device {
 public:
@@ -34,7 +33,9 @@ public:
 
 
     static void Init();
+
     static void IT_Handle();
+
     static void GET_Data(const volatile uint8_t *buf);
 
 };

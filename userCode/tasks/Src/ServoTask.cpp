@@ -37,10 +37,10 @@ Servo trayServo(&TrayServo);
     __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,
                           htim1.Instance->ARR*930);
 }*/
-void ServoHandle(){
-    __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,
+void ServoHandle() {
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
                           1300);
-    __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,
                           930);
 }
 

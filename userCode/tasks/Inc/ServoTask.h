@@ -4,6 +4,7 @@
 
 #ifndef RM_FRAME_C_SERVOTASK_H
 #define RM_FRAME_C_SERVOTASK_H
+
 #include "Servo.h"
 #include "CatchControl.h"
 #include "Device.h"

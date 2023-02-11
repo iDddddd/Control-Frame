@@ -15,6 +15,7 @@ const SERVO_HANDLE_T servoInfo[7]={
 };
 
 uint32_t Servo::servo_IDs;
+
 /**
  * @brief 舵机类的初始化函数，开启了相关定时器
  */

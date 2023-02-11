@@ -4,6 +4,7 @@
 
 #ifndef RM_FRAME_C_CHASSISTASK_H
 #define RM_FRAME_C_CHASSISTASK_H
+
 #include "main.h"
 #include "Motor.h"
 #include "AutoMove.h"
@@ -19,48 +20,58 @@
 /*
  * 底盘任务错误信息枚举
  */
-typedef enum{
+typedef enum {
     NONE
-}CHASSIS_ERROR_E;
+} CHASSIS_ERROR_E;
 
 /*结构体定义--------------------------------------------------------------*/
 
 /*
  * 底盘任务状态结构体
  */
-typedef struct{
+typedef struct {
 
-}CHASSIS_STATE_T;
+} CHASSIS_STATE_T;
 
 /*
  * 底盘任务控制结构体
  */
-typedef struct{
+typedef struct {
 
 
-}CHASSIS_CONTROL_T;
+} CHASSIS_CONTROL_T;
 
 
 
 /*结构体成员取值定义组------------------------------------------------------*/
 /*外部变量声明-------------------------------------------------------------*/
 
-extern CHASSIS_STATE_T     chassisState;
-extern CHASSIS_CONTROL_T   chassisControl;
+extern CHASSIS_STATE_T chassisState;
+extern CHASSIS_CONTROL_T chassisControl;
 
-extern float FBVelocity,LRVelocity,RTVelocity;
+extern float FBVelocity, LRVelocity, RTVelocity;
 extern float ZeroYaw;
 
 
 /*外部函数声明-------------------------------------------------------------*/
 int sign(float x);
+
 float SetAngle(float Angle);
+
 void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity);
+
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
+
 void ChassisStop();
-void ChassisSetVelocity(float _fbV,float _lrV,float _rtV);
+
+void ChassisSetVelocity(float _fbV, float _lrV, float _rtV);
+
 void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV);
+
 void Headmemory();
+
 void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV);
+
 void AutoSetVelocity();
+
 #endif //RM_FRAME_C_CHASSISTASK_H

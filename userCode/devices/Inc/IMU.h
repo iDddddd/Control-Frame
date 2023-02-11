@@ -58,30 +58,30 @@ constexpr float zero_ay = 0.0227739215;
 constexpr float zero_az = 9.63659286f;*/
 /*枚举类型定义------------------------------------------------------------*/
 /*结构体定义--------------------------------------------------------------*/
-struct IMU_Raw_Data_t{
-    float accel[3],gyro[3],temp,time,mag[3],accel_offset[3], ax, ay, az;
+struct IMU_Raw_Data_t {
+    float accel[3], gyro[3], temp, time, mag[3], accel_offset[3], ax, ay, az;
 };
-struct IMU_Pro_Data_t{
-    float accel[3],gyro[3],temp,time,mag[3],ay;
-};
-
-struct IMU_Attitude_t{
-    float yaw,pitch,rol;
-    float yaw_v,pitch_v,rol_v;
-    float neg_yaw_v,neg_pitch_v,neg_rol_v;
+struct IMU_Pro_Data_t {
+    float accel[3], gyro[3], temp, time, mag[3], ay;
 };
 
-struct IMU_state_t{
-	
+struct IMU_Attitude_t {
+    float yaw, pitch, rol;
+    float yaw_v, pitch_v, rol_v;
+    float neg_yaw_v, neg_pitch_v, neg_rol_v;
+};
+
+struct IMU_state_t {
+
     volatile uint8_t gyro_update_flag;
     volatile uint8_t accel_update_flag;
     volatile uint8_t accel_temp_update_flag;
     volatile uint8_t mag_update_flag;
     volatile uint8_t imu_start_dma_flag;
-	
+
 };
 
-struct IMU_Position_t{
+struct IMU_Position_t {
     float _accel[3] = {0};
     float velocity[3] = {0};
     float _velocity[3] = {0};
@@ -89,32 +89,31 @@ struct IMU_Position_t{
     float vy;
     float xy;
 };
-struct IMU_Filter_t{
+struct IMU_Filter_t {
     float current;
     float history[SUM_WIN_SIZE];//历史值，其中history[SUM_WIN_SIZE-1]为最近的记录
 
     int buff_init = 0; //前SUM_WIN_SIZE-1次填充后才能开始输出
     int index = 0; //环形数组可放数据的位置
 
-    int factor[SUM_WIN_SIZE] = {1,2,3,4,5,6,7,8}; //加权系数
-    int K=36; //1+2+3+4+5+6+7+8
+    int factor[SUM_WIN_SIZE] = {1, 2, 3, 4, 5, 6, 7, 8}; //加权系数
+    int K = 36; //1+2+3+4+5+6+7+8
 };
-struct IMU_buffer_t{
-	
+struct IMU_buffer_t {
+
     uint8_t gyro_dma_rx_buf[SPI_DMA_GYRO_LENGHT];
-    uint8_t gyro_dma_tx_buf[SPI_DMA_GYRO_LENGHT] = {0x82,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+    uint8_t gyro_dma_tx_buf[SPI_DMA_GYRO_LENGHT] = {0x82, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     uint8_t accel_dma_rx_buf[SPI_DMA_ACCEL_LENGHT];
-    uint8_t accel_dma_tx_buf[SPI_DMA_ACCEL_LENGHT] = {0x92,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+    uint8_t accel_dma_tx_buf[SPI_DMA_ACCEL_LENGHT] = {0x92, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     uint8_t accel_temp_dma_rx_buf[SPI_DMA_ACCEL_TEMP_LENGHT];
-    uint8_t accel_temp_dma_tx_buf[SPI_DMA_ACCEL_TEMP_LENGHT] = {0xA2,0xFF,0xFF,0xFF};
+    uint8_t accel_temp_dma_tx_buf[SPI_DMA_ACCEL_TEMP_LENGHT] = {0xA2, 0xFF, 0xFF, 0xFF};
 };
 
 /*类型定义----------------------------------------------------------------*/
 
-class IMU : private Device
-{
+class IMU : private Device {
 
 
     void ErrorHandle();
@@ -131,33 +130,50 @@ class IMU : private Device
     };
 
     void imu_cmd_spi_dma(void);
+
     void filter(float *current, IMU_Filter_t Filter);
+
     //数据处理
     void offset();    //获取加速度零偏值
     void data_adjust(float accel[3], float _accel[3]);
+
     void velocityVerify();
+
     //姿态解算
     float quat[4];
+
     void AHRS_update(float quat[4], float time, float gyro[3], float accel[3], float mag[3]);
+
     void get_angle(float q[4], float *yaw, float *pitch, float *roll);
+
     //温度控制
     PID tempPid;
     uint8_t first_temperate;
+
     void imu_temp_control(float temp);
+
     void IMU_temp_PWM(float pwm);
+
     //位移获取
     void record_accel(float _accel[3], float accel[3]);
-    void get_velocity(float velocity[3],float _accel[3], float accel[3]);
+
+    void get_velocity(float velocity[3], float _accel[3], float accel[3]);
+
     void record_velocity(float _velocity[3], float velocity[3]);
+
     void get_displace(float displace[3], float _velocity[3], float velocity[3]);
 
 public:
     void Handle();
+
     void ITHandle(uint16_t GPIO_Pin);
+
     void ITHandle(void);
+
     static IMU imu;
 
     void Init();
+
     IMU_Raw_Data_t rawData;
     IMU_Pro_Data_t proData;
     IMU_Attitude_t attitude;
