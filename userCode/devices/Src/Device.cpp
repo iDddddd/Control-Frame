@@ -220,7 +220,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         Motor::MotorsHandle();
         //ARMHandle();
         // ServoHandle();
-        Motor_4010::CANPackageSend();
+        FOUR_Motor_4010::CANPackageSend();
         // Motor::ARMPackageSend();
         //ARMMotor::PackageSend();
         if (cnt > 20) {

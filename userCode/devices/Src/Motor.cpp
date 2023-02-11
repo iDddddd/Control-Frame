@@ -6,8 +6,6 @@
 
 uint8_t CAN::canmessage[8] = {0};
 uint8_t RS485::rsmessage[4][11] = {0};
-int16_t Motor_4315::motor4315_intensity[8];
-int16_t Motor_4010::motor4010_intensity[8];
 std::map<uint16_t, uint8_t *> CAN::dict;
 Motor_Object_t *Motor::head_;
 
@@ -77,10 +75,14 @@ void CAN::CANInit() {
 /**
  * @brief CAN类的构造函数
  */
-CAN::CAN(COMMU_INIT_t *_init, uint8_t *RxMessage) {
+CAN::CAN() {
+    can_ID = 0x280;
+    ctrlType = SPEED_Single;
+}
+
+CAN::CAN(COMMU_INIT_t *_init) {
     can_ID = _init->_id;
     ctrlType = _init->ctrlType;
-    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID, RxMessage));
 
 }
 
@@ -121,6 +123,19 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
 
 }
 
+void CAN::ID_Bind_Rx(uint8_t *RxMessage) {
+    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID, RxMessage));
+}
+
+void CAN::FOURID_Bind_Rx(uint16_t *can_ID, uint8_t (*RxMessage)[8]) {
+
+    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID[0], RxMessage[0]));
+    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID[1], RxMessage[1]));
+    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID[2], RxMessage[2]));
+    dict.insert(std::pair<uint16_t, uint8_t *>(can_ID[3], RxMessage[3]));
+}
+
+
 /*RS485类------------------------------------------------------------------*/
 /**
  * @brief RS485类的构造函数
@@ -149,38 +164,51 @@ void RS485::RS485PackageSend() {
 /**
  * @brief Motor_4010类的构造函数
  */
-Motor_4010::Motor_4010(COMMU_INIT_t *commu_init, MOTOR_INIT_t *motor_init) : Motor(motor_init, this),
-                                                                             CAN(commu_init, RxMessage) {
-
+FOUR_Motor_4010::FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_init2,
+                                 COMMU_INIT_t *commu_init3, COMMU_INIT_t *commu_init4, MOTOR_INIT_t *motor_init1,
+                                 MOTOR_INIT_t *motor_init2)
+        : Motor(motor_init2, this) {
+    canIDs[0] = commu_init1->_id;
+    canIDs[1] = commu_init2->_id;
+    canIDs[2] = commu_init3->_id;
+    canIDs[3] = commu_init4->_id;
+    if (motor_init1->speedPIDp) speedPIDs[0].PIDInfo = *motor_init1->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[1].PIDInfo = *motor_init1->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[2].PIDInfo = *motor_init2->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[3].PIDInfo = *motor_init2->speedPIDp;
+    FOURID_Bind_Rx(canIDs, RxMessage);
 
 }
 
 /**
  * @brief Motor_4010类的析构函数
  */
-Motor_4010::~Motor_4010() = default;
+FOUR_Motor_4010::~FOUR_Motor_4010() = default;
 
 /**
  * @brief 4010电机类的执行处理函数
  */
-void Motor_4010::Handle() {
-    MotorStateUpdate();
+void FOUR_Motor_4010::Handle() {
+    int16_t intensity[4];
+    uint16_t id;
 
-    int16_t intensity = IntensityCalc();
-
-    if (stopFlag == 1) {
-        motor4010_intensity[can_ID - 0x141] = 0;
-    } else {
-        motor4010_intensity[can_ID - 0x141] = intensity;
+    for (auto canID: canIDs) {
+        id = canID - 0x141;
+        MotorStateUpdate(id);
+        intensity[id] = IntensityCalc(id);
+        if (stopFlag == 1) {
+            motor4010_intensity[id] = 0;
+        } else {
+            motor4010_intensity[id] = intensity[id];
+        }
     }
-
     CANMessageGenerate();
 }
 
 /**
  * @brief 4010电机类的消息包获取任务
  */
-void Motor_4010::CANMessageGenerate() {
+void FOUR_Motor_4010::CANMessageGenerate() {
 
     canmessage[0] = motor4010_intensity[0];
     canmessage[1] = motor4010_intensity[0] >> 8u;
@@ -197,24 +225,20 @@ void Motor_4010::CANMessageGenerate() {
  * @brief 用于设置4010电机速度
  * @param _targetSpeed 目标速度
  */
-void Motor_4010::SetTargetSpeed(float _targetSpeed) {
+void FOUR_Motor_4010::SetTargetSpeed(float *_targetSpeed) {
     stopFlag = false;
-    targetSpeed = _targetSpeed;
+    targetSpeed[0] = _targetSpeed[0];
+    targetSpeed[1] = _targetSpeed[1];
+    targetSpeed[2] = _targetSpeed[2];
+    targetSpeed[3] = _targetSpeed[3];
+
 }
 
-/**
- * @brief 用于设置4010电机角度
- * @param _targetAngle 目标角度
- */
-void Motor_4010::SetTargetAngle(float _targetAngle) {
-    stopFlag = false;
-    targetSpeed = _targetAngle;
-}
 
 /**
  * @brief 用于使4010电机停止
  */
-void Motor_4010::Stop() {
+void FOUR_Motor_4010::Stop() {
     stopFlag = true;
 }
 
@@ -222,24 +246,23 @@ void Motor_4010::Stop() {
  * @brief 更新电机的相关状态
  * @callergraph this->Handle()
  */
-void Motor_4010::MotorStateUpdate() {
-
-    feedback.angle = RxMessage[6] | (RxMessage[7] << 8u);
-    feedback.speed = RxMessage[4] | (RxMessage[5] << 8u);
-    feedback.moment = RxMessage[2] | (RxMessage[3] << 8u);
-    feedback.temp = RxMessage[1];
+void FOUR_Motor_4010::MotorStateUpdate(uint16_t id) {
+    feedback[id].angle = RxMessage[id][6] | (RxMessage[id][7] << 8u);
+    feedback[id].speed = RxMessage[id][4] | (RxMessage[id][5] << 8u);
+    feedback[id].moment = RxMessage[id][2] | (RxMessage[id][3] << 8u);
+    feedback[id].temp = RxMessage[id][1];
 
     switch (ctrlType) {
         case SPEED_Single: {
-            state.speed = feedback.speed / reductionRatio;
+            state[id].speed = feedback[id].speed / reductionRatio;
         }
         case POSITION_Double: {
-            state.speed = feedback.speed / reductionRatio;
-            state.moment = feedback.moment;
-            state.temperature = feedback.temp;
-            state.angle = feedback.angle * 360 / 16384;
-            float realAngle = state.angle;
-            float thisAngle = feedback.angle;
+            state[id].speed = feedback[id].speed / reductionRatio;
+            state[id].moment = feedback[id].moment;
+            state[id].temperature = feedback[id].temp;
+            state[id].angle = feedback[id].angle * 360 / 16384;
+            float realAngle = state[id].angle;
+            float thisAngle = feedback[id].angle;
             static int32_t lastRead = 0;
             if (thisAngle <= lastRead) {
                 if (lastRead - thisAngle > 8000)
@@ -252,8 +275,8 @@ void Motor_4010::MotorStateUpdate() {
                 else
                     realAngle += (thisAngle - lastRead) * 360.0f / 16384.0f / reductionRatio;
             }
-            state.angle = realAngle;
-            lastRead = feedback.angle;
+            state[id].angle = realAngle;
+            lastRead = feedback[id].angle;
             break;
         }
         case DIRECT:
@@ -267,20 +290,20 @@ void Motor_4010::MotorStateUpdate() {
  * @brief 计算电机实际控制电流
  * @return 控制电流值
  */
-int16_t Motor_4010::IntensityCalc() {
-    int16_t intensity;
+int16_t FOUR_Motor_4010::IntensityCalc(uint16_t id) {
+    int16_t intensity = 0;
+
     switch (ctrlType) {
         case DIRECT:
-            intensity = targetAngle * 16384 / 360.0f;
+            intensity = targetAngle[id] * 16384 / 360.0f;
             break;
 
         case SPEED_Single:
-            intensity = speedPID.PIDCalc(targetSpeed, state.speed);
+            intensity = speedPIDs[id].PIDCalc(targetSpeed[id], state[id].speed);
             break;
 
         case POSITION_Double:
-            float _targetSpeed = anglePID.PIDCalc(targetAngle, state.angle);
-            intensity = speedPID.PIDCalc(_targetSpeed, state.speed);
+
             break;
     }
     return intensity;
