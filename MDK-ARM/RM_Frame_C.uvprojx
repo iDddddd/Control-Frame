@@ -714,6 +714,11 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\AutoMove.cpp</FilePath>
             </File>
+            <File>
+              <FileName>CommuType.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\CommuType.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -8,6 +8,7 @@
 #include "Device.h"
 #include "can.h"
 #include "PID.h"
+#include "CommuType.h"
 #include <cstring>
 #include <map>
 
@@ -18,11 +19,6 @@
  * @example SPEED_Single 单环电机，控制速度
  * @example POSITION_Double 双环电机，控制角度
  */
-typedef enum {
-    DIRECT = 0,
-    SPEED_Single,
-    POSITION_Double
-} MOTOR_CTRL_TYPE_e;
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
@@ -38,10 +34,6 @@ typedef struct {
     float reductionRatio;//减速比
 } MOTOR_INIT_t;
 
-typedef struct {
-    uint16_t _id;//canID
-    MOTOR_CTRL_TYPE_e ctrlType;
-} COMMU_INIT_t;
 
 typedef struct {
 
@@ -80,54 +72,6 @@ private:
 
 };
 
-/*CAN类------------------------------------------------------------------*/
-class CAN {
-public:
-    uint16_t can_ID;
-    static uint8_t canmessage[8];
-
-    static void CANInit();
-
-    CAN();
-
-    explicit CAN(COMMU_INIT_t *_init);
-
-    ~CAN();
-
-    static void CANPackageSend();
-
-    static void Rx_Handle(CAN_HandleTypeDef *hcan);
-
-    virtual void CANMessageGenerate() = 0;
-
-protected:
-    MOTOR_STATE_t state{};
-    MOTOR_CTRL_TYPE_e ctrlType;
-    static std::map<uint16_t, uint8_t *> dict;
-
-    void ID_Bind_Rx(uint8_t *RxMessage);
-
-    void FOURID_Bind_Rx(uint16_t *canID, uint8_t (*RxMessage)[8]);
-};
-
-/*RS485类------------------------------------------------------------------*/
-class RS485 {
-public:
-    uint16_t rs485_ID;
-    static uint8_t rsmessage[4][11];
-
-    explicit RS485(uint16_t _id);
-
-    ~RS485();
-
-    static void RS485PackageSend();
-
-    virtual void RS485MessageGenerate() = 0;
-
-protected:
-    MOTOR_CTRL_TYPE_e ctrlType;
-
-};
 
 /*4315电机类------------------------------------------------------------------*/
 class Motor_4315 : public Motor, public RS485 {
