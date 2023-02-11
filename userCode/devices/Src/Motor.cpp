@@ -4,7 +4,6 @@
 
 #include "Motor.h"
 
-CAN *CAN::canPtrs[8] = {nullptr};
 uint8_t CAN::canmessage[8] = {0};
 uint8_t RS485::rsmessage[4][11] = {0};
 int16_t Motor_4315::motor4315_intensity[8];
@@ -39,12 +38,12 @@ Motor::~Motor() = default;
 void Motor::ErrorHandle() {}
 
 void Motor::MotorsHandle() {
+
     Motor_Object_t *current = head_;
     while (current) {
         current->motor_object->Handle();
         current = current->next;
     }
-
 
 }
 
@@ -81,9 +80,8 @@ void CAN::CANInit() {
 CAN::CAN(COMMU_INIT_t *_init, uint8_t *RxMessage) {
     can_ID = _init->_id;
     ctrlType = _init->ctrlType;
-    uint8_t canPos = _init->_id;
-    canPtrs[canPos % 8] = this;
     dict.insert(std::pair<uint16_t, uint8_t *>(can_ID, RxMessage));
+
 }
 
 /**
@@ -116,11 +114,9 @@ void CAN::CANPackageSend() {
 void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     uint8_t canBuf[8];
     CAN_RxHeaderTypeDef rx_header;
-    uint8_t canPos;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);
     if (hcan == &hcan1) {
-        canPos = rx_header.StdId - 0x141;
-        memcpy(dict[canPtrs[canPos]->can_ID], canBuf, sizeof(canBuf));
+        memcpy(dict[rx_header.StdId], canBuf, sizeof(canBuf));
     }
 
 }
@@ -173,9 +169,9 @@ void Motor_4010::Handle() {
     int16_t intensity = IntensityCalc();
 
     if (stopFlag == 1) {
-        motor4010_intensity[can_ID] = 0;
+        motor4010_intensity[can_ID - 0x141] = 0;
     } else {
-        motor4010_intensity[can_ID] = intensity;
+        motor4010_intensity[can_ID - 0x141] = intensity;
     }
 
     CANMessageGenerate();

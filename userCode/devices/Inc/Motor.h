@@ -77,12 +77,12 @@ protected:
     float reductionRatio;
 private:
     static Motor_Object_t *head_;
+
 };
 
 /*CAN类------------------------------------------------------------------*/
 class CAN {
 public:
-    static CAN *canPtrs[8];
     uint16_t can_ID;
     static uint8_t canmessage[8];
 

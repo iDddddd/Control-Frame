@@ -8,7 +8,7 @@ constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = -2.0f,
+        .kp = -1.5f,
         .ki = -0.0002f,
         .kd = 0,
         .componentKpMax = 2000,
@@ -42,19 +42,19 @@ MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
         .reductionRatio = 1.0f
 };
 COMMU_INIT_t chassisCommuInit1 = {
-        ._id = MOTOR_ID_1,
+        ._id = 0x141,
         .ctrlType = SPEED_Single
 };
 COMMU_INIT_t chassisCommuInit2 = {
-        ._id = MOTOR_ID_2,
+        ._id = 0x142,
         .ctrlType = SPEED_Single
 };
 COMMU_INIT_t chassisCommuInit3 = {
-        ._id = MOTOR_ID_3,
+        ._id = 0x143,
         .ctrlType = SPEED_Single
 };
 COMMU_INIT_t chassisCommuInit4 = {
-        ._id = MOTOR_ID_4,
+        ._id = 0x144,
         .ctrlType = SPEED_Single
 };
 
