@@ -23,7 +23,7 @@ PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
-        .outputMax = 2000 //3508电机输出电流上限，可以调小，勿调大
+        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 MOTOR_INIT_t chassisMotorInit1 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator1,
@@ -43,19 +43,23 @@ MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
 };
 COMMU_INIT_t chassisCommuInit1 = {
         ._id = 0x141,
-        .ctrlType = SPEED_Single
+        .ctrlType = SPEED_Single,
+        //.Serial = ONE
 };
 COMMU_INIT_t chassisCommuInit2 = {
         ._id = 0x142,
-        .ctrlType = SPEED_Single
+        .ctrlType = SPEED_Single,
+      //  .Serial = ONE
 };
 COMMU_INIT_t chassisCommuInit3 = {
         ._id = 0x143,
-        .ctrlType = SPEED_Single
+        .ctrlType = SPEED_Single,
+      //  .Serial = ONE
 };
 COMMU_INIT_t chassisCommuInit4 = {
         ._id = 0x144,
-        .ctrlType = SPEED_Single
+        .ctrlType = SPEED_Single,
+    //    .Serial = ONE
 };
 
 

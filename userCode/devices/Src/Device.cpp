@@ -5,6 +5,7 @@
 #include "RemoteControl.h"
 #include "Motor.h"
 #include "IMU.h"
+#include "OtherMotor.h"
 
 
 void aRGB_led_show(uint32_t aRGB) {
@@ -217,10 +218,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         CtrlHandle();
         ChassisHandle();
+        ARMHandle();
         Motor::MotorsHandle();
-        //ARMHandle();
         // ServoHandle();
-        FOUR_Motor_4010::CANPackageSend();
+        //   Motor_4010::CANPackageSend();
+        CAN::CANPackageSend();
+
         // Motor::ARMPackageSend();
         //ARMMotor::PackageSend();
         if (cnt > 20) {

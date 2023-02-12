@@ -15,4 +15,6 @@ void AngleCalc();
 
 void ArmStop();
 
+void ArmAngleCalc();
+
 #endif //RM_FRAME_C_ARMTASK_H

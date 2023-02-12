@@ -8,89 +8,58 @@
 #include "Device.h"
 #include "can.h"
 #include "CatchControl.h"
+#include "Motor.h"
+#include "CommuType.h"
 
-typedef enum {
-    ARM1 = 0,
-    ARM2,
-} MOTOR_TYPE_e;
-
-
-class ARMMotor : private Device {
+/*4010电机类------------------------------------------------------------------*/
+class Motor_4010 : public Motor, public CAN {
 public:
+    uint8_t RxMessage[8]{};
+    int16_t motor4010_intensity[8]{};
 
-    static uint8_t arm1_Initmessage[2];
-    static uint8_t arm2_Initmessage[8];
-
-    static uint8_t arm1message[8];
-    static uint8_t arm2message[8];
-
-
-    static float feedback_moment[3];
-
-    static void Init();
-
-    static void ARM1_Init();
-
-    static void ARM2_Init();
-
-    //机械臂4310发送
-    static void ARMCAN1PackageSend();
-
-    //机械臂4010发送
-    static void ARMCAN2PackageSend();
-
-    static void PackageSend();
-
-    static void IT_Handle(CAN_HandleTypeDef *hcan);
-
-    bool stopFlag{false};
-
-    MOTOR_TYPE_e motorType;
-    float targetSpeed = 0;
-    float targetAngle = 0;
-
-    ARMMotor(MOTOR_TYPE_e *MotorType);
-
-    ~ARMMotor();
+    void CANMessageGenerate() override;
 
     void Handle() override;
 
-    void ErrorHandle() override;
+    void SetTargetAngle(float _targetAngle);
 
-    void Stop();
+    Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
 
-private:
-
-    void ARMStop();
-
-    void ARMCAN1MessageGenerate();
-
-    void ARMCAN2MessageGenerate();
-
-};
-
-
-class TRAYMotor : private Device {
-public:
-    static uint8_t traymessage[3][8];
-    static uint8_t trayflag;
-
-    //底盘旋转4010发送
-    static void TrayPackageSend();
-
-    TRAYMotor();
-
-    ~TRAYMotor();
-
-    void Handle() override;
-
-    void ErrorHandle() override;
+    ~Motor_4010();
 
 private:
+    uint8_t id;
+    C6x0Rx_t feedback{};
+    float targetAngle{};
+    MOTOR_STATE_t state{};
+
     void MotorStateUpdate();
 
-    void TRAYFlagGenerate();
+    int16_t IntensityCalc();
+};
+/*4310电机类------------------------------------------------------------------*/
+class Motor_4310 : public Motor, public CAN {
+public:
+    static uint8_t InitMessage[2];
+    int16_t motor4310_intensity[8];
+    static void Init();
+    void CANMessageGenerate() override;
+
+    void Handle() override;
+
+    void SetTargetAngle(float _targetAngle);
+    void SetTargetSpeed(float _targetSpeed);
+
+
+
+    Motor_4310(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+
+    ~Motor_4310();
+
+private:
+
+    float targetAngle;
+    float targetSpeed;
 
 };
-
 #endif //RM_FRAME_C_OTHERMOTOR_H

@@ -22,7 +22,7 @@
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
-    uint16_t angle;
+    int16_t angle;
     int16_t speed;
     int16_t moment;
     int8_t temp;
@@ -62,11 +62,14 @@ public:
 
     void ErrorHandle() override;
 
+    void Stop();
+
     static void MotorsHandle();
 
 protected:
     PID speedPID, anglePID;
     float reductionRatio;
+    bool stopFlag{true};
 private:
     static Motor_Object_t *head_;
 
@@ -76,8 +79,7 @@ private:
 /*4315电机类------------------------------------------------------------------*/
 class Motor_4315 : public Motor, public RS485 {
 public:
-    int16_t motor4315_intensity[8];
-    bool stopFlag{true};
+    int16_t motor4315_intensity[8]{};
     float targetAngle = 0;
 
     void RS485MessageGenerate() override;
@@ -86,9 +88,7 @@ public:
 
     void SetTargetAngle(float _targetAngle);
 
-    void Stop();
-
-    Motor_4315(uint16_t _id, MOTOR_INIT_t *_init);
+    Motor_4315(uint32_t _id, MOTOR_INIT_t *_init);
 
     ~Motor_4315();
 
@@ -97,19 +97,17 @@ private:
 
 };
 
-/*4010电机类------------------------------------------------------------------*/
+/*4*4010电机类------------------------------------------------------------------*/
 class FOUR_Motor_4010 : public Motor, public CAN {
 public:
     uint8_t RxMessage[4][8]{};
-    int16_t motor4010_intensity[4];
+    int16_t motor4010_intensity[4]{};
 
     void CANMessageGenerate() override;
 
     void Handle() override;
 
-    void SetTargetSpeed(float *_targetSpeed);
-
-    void Stop();
+    void SetTargetSpeed(const float *_targetSpeed);
 
     FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_init2,
                     COMMU_INIT_t *commu_init3, COMMU_INIT_t *commu_init4, MOTOR_INIT_t *motor_init1,
@@ -118,17 +116,15 @@ public:
     ~FOUR_Motor_4010();
 
 private:
-    uint16_t canIDs[4];
+    uint32_t canIDs[4]{};
     PID speedPIDs[4];
     C6x0Rx_t feedback[4]{};
-    bool stopFlag{true};
-    float targetSpeed[4];
-    float targetAngle[4];
+    float targetSpeed[4]{};
     MOTOR_STATE_t state[4]{};
 
-    void MotorStateUpdate(uint16_t id);
+    void MotorStateUpdate(uint32_t id);
 
-    int16_t IntensityCalc(uint16_t id);
+    int16_t IntensityCalc(uint32_t id);
 };
 /*结构体成员取值定义组------------------------------------------------------*/
 

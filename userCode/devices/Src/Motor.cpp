@@ -4,7 +4,6 @@
 
 #include "Motor.h"
 
-uint8_t CAN::canmessage[8] = {0};
 uint8_t RS485::rsmessage[4][11] = {0};
 Motor_Object_t *Motor::head_;
 
@@ -44,6 +43,11 @@ void Motor::MotorsHandle() {
 
 }
 
+void Motor::Stop() {
+    stopFlag = true;
+
+}
+
 
 /*4010电机类------------------------------------------------------------------*/
 /**
@@ -52,7 +56,7 @@ void Motor::MotorsHandle() {
 FOUR_Motor_4010::FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_init2,
                                  COMMU_INIT_t *commu_init3, COMMU_INIT_t *commu_init4, MOTOR_INIT_t *motor_init1,
                                  MOTOR_INIT_t *motor_init2)
-        : Motor(motor_init2, this) {
+        : Motor(motor_init1, this) {
     canIDs[0] = commu_init1->_id;
     canIDs[1] = commu_init2->_id;
     canIDs[2] = commu_init3->_id;
@@ -75,13 +79,13 @@ FOUR_Motor_4010::~FOUR_Motor_4010() = default;
  */
 void FOUR_Motor_4010::Handle() {
     int16_t intensity[4];
-    uint16_t id;
+    uint32_t id;
 
     for (auto canID: canIDs) {
         id = canID - 0x141;
         MotorStateUpdate(id);
         intensity[id] = IntensityCalc(id);
-        if (stopFlag == 1) {
+        if (stopFlag) {
             motor4010_intensity[id] = 0;
         } else {
             motor4010_intensity[id] = intensity[id];
@@ -94,23 +98,28 @@ void FOUR_Motor_4010::Handle() {
  * @brief 4010电机类的消息包获取任务
  */
 void FOUR_Motor_4010::CANMessageGenerate() {
+    if((canQueue.rear + 1)%canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
-    canmessage[0] = motor4010_intensity[0];
-    canmessage[1] = motor4010_intensity[0] >> 8u;
-    canmessage[2] = motor4010_intensity[1];
-    canmessage[3] = motor4010_intensity[1] >> 8u;
-    canmessage[4] = motor4010_intensity[2];
-    canmessage[5] = motor4010_intensity[2] >> 8u;
-    canmessage[6] = motor4010_intensity[3];
-    canmessage[7] = motor4010_intensity[3] >> 8u;
+        canQueue.Data[canQueue.rear].ID = can_ID;
+      //  canQueue.Data[canQueue.rear].Serial = canSerial;
+        canQueue.Data[canQueue.rear].message[0] = motor4010_intensity[0];
+        canQueue.Data[canQueue.rear].message[1] = motor4010_intensity[0] >> 8u;
+        canQueue.Data[canQueue.rear].message[2] = motor4010_intensity[1];
+        canQueue.Data[canQueue.rear].message[3] = motor4010_intensity[1] >> 8u;
+        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity[2];
+        canQueue.Data[canQueue.rear].message[5] = motor4010_intensity[2] >> 8u;
+        canQueue.Data[canQueue.rear].message[6] = motor4010_intensity[3];
+        canQueue.Data[canQueue.rear].message[7] = motor4010_intensity[3] >> 8u;
 
+        canQueue.rear =  (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+    }
 }
 
 /**
  * @brief 用于设置4010电机速度
  * @param _targetSpeed 目标速度
  */
-void FOUR_Motor_4010::SetTargetSpeed(float *_targetSpeed) {
+void FOUR_Motor_4010::SetTargetSpeed(const float *_targetSpeed) {
     stopFlag = false;
     targetSpeed[0] = _targetSpeed[0];
     targetSpeed[1] = _targetSpeed[1];
@@ -121,17 +130,10 @@ void FOUR_Motor_4010::SetTargetSpeed(float *_targetSpeed) {
 
 
 /**
- * @brief 用于使4010电机停止
- */
-void FOUR_Motor_4010::Stop() {
-    stopFlag = true;
-}
-
-/**
  * @brief 更新电机的相关状态
  * @callergraph this->Handle()
  */
-void FOUR_Motor_4010::MotorStateUpdate(uint16_t id) {
+void FOUR_Motor_4010::MotorStateUpdate(uint32_t id) {
     feedback[id].angle = RxMessage[id][6] | (RxMessage[id][7] << 8u);
     feedback[id].speed = RxMessage[id][4] | (RxMessage[id][5] << 8u);
     feedback[id].moment = RxMessage[id][2] | (RxMessage[id][3] << 8u);
@@ -175,12 +177,12 @@ void FOUR_Motor_4010::MotorStateUpdate(uint16_t id) {
  * @brief 计算电机实际控制电流
  * @return 控制电流值
  */
-int16_t FOUR_Motor_4010::IntensityCalc(uint16_t id) {
+int16_t FOUR_Motor_4010::IntensityCalc(uint32_t id) {
     int16_t intensity = 0;
 
     switch (ctrlType) {
         case DIRECT:
-            intensity = targetAngle[id] * 16384 / 360.0f;
+            intensity = targetSpeed[id] * 16384 / 360.0f;
             break;
 
         case SPEED_Single:
@@ -199,7 +201,7 @@ int16_t FOUR_Motor_4010::IntensityCalc(uint16_t id) {
 /**
  * @brief Motor_4315类的构造函数
  */
-Motor_4315::Motor_4315(uint16_t _id, MOTOR_INIT_t *_init) : Motor(_init, this), RS485(_id) {
+Motor_4315::Motor_4315(uint32_t _id, MOTOR_INIT_t *_init) : Motor(_init, this), RS485(_id) {
 
 }
 
@@ -256,13 +258,6 @@ void Motor_4315::SetTargetAngle(float _targetAngle) {
     targetAngle = _targetAngle * 16384 / 360.0f;
 }
 
-/**
- * @brief 用于使4315电机停止
- */
-void Motor_4315::Stop() {
-    stopFlag = true;
-}
-
 uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
     uint16_t crc = 0xffff;        // Initial value
     while (length--) {
@@ -277,8 +272,4 @@ uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
     return crc;
 }
 
-
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    CAN::Rx_Handle(hcan);
-}
 

@@ -4,7 +4,12 @@
 
 #include "CommuType.h"
 
-MyMap<uint16_t, uint8_t *> CAN::dict;
+MyMap<uint32_t, uint8_t *> CAN::dict;
+TX_QUEUE_t CAN::canQueue = {
+        .front = 0,
+        .rear = 0,
+        .MAX_MESSAGE_COUNT = 8
+};
 
 
 /*CAN类------------------------------------------------------------------*/
@@ -15,7 +20,9 @@ void CAN::CANInit() {
     HAL_CAN_Start(&hcan1);
     HAL_CAN_Start(&hcan2);
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
-    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
+
+    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
 
     CAN_FilterTypeDef canFilterTypeDef;
 
@@ -40,11 +47,13 @@ void CAN::CANInit() {
 CAN::CAN() {
     can_ID = 0x280;
     ctrlType = SPEED_Single;
+    //canSerial = ONE;
 }
 
 CAN::CAN(COMMU_INIT_t *_init) {
     can_ID = _init->_id;
     ctrlType = _init->ctrlType;
+  //  canSerial = _init->Serial;
 
 }
 
@@ -59,16 +68,26 @@ CAN::~CAN() = default;
  *              in Device.cpp
  */
 void CAN::CANPackageSend() {
-    CAN_TxHeaderTypeDef txHeaderTypeDef;
-    uint32_t box;
+    if (canQueue.front != canQueue.rear) {
+        CAN_TxHeaderTypeDef txHeaderTypeDef;
+        uint32_t box;
 
-    txHeaderTypeDef.StdId = 0x280;
-    txHeaderTypeDef.DLC = 0x08;
-    txHeaderTypeDef.IDE = CAN_ID_STD;
-    txHeaderTypeDef.RTR = CAN_RTR_DATA;
-    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-
-    HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canmessage, &box);
+        txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;
+        txHeaderTypeDef.DLC = 0x08;
+        txHeaderTypeDef.IDE = CAN_ID_STD;
+        txHeaderTypeDef.RTR = CAN_RTR_DATA;
+        txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+        HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
+        /*switch (canQueue.Data[canQueue.rear].Serial) {
+            case ONE:
+                HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
+                break;
+            case TWO:
+                HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
+                break;
+        }*/
+        canQueue.front = (canQueue.front + 1) % canQueue.MAX_MESSAGE_COUNT;
+    }
 }
 
 /**
@@ -79,9 +98,8 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     uint8_t canBuf[8];
     CAN_RxHeaderTypeDef rx_header;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);
-    if (hcan == &hcan1) {
-        memcpy(dict[rx_header.StdId], canBuf, sizeof(canBuf));
-    }
+
+    memcpy(dict[rx_header.StdId], canBuf, sizeof(canBuf));
 
 }
 
@@ -89,7 +107,7 @@ void CAN::ID_Bind_Rx(uint8_t *RxMessage) {
     dict.insert(can_ID, RxMessage);
 }
 
-void CAN::FOURID_Bind_Rx(uint16_t *canIDs, uint8_t (*RxMessage)[8]) {
+void CAN::FOURID_Bind_Rx(uint32_t *canIDs, uint8_t (*RxMessage)[8]) {
 
     dict.insert(canIDs[0], RxMessage[0]);
     dict.insert(canIDs[1], RxMessage[1]);
@@ -102,7 +120,7 @@ void CAN::FOURID_Bind_Rx(uint16_t *canIDs, uint8_t (*RxMessage)[8]) {
 /**
  * @brief RS485类的构造函数
  */
-RS485::RS485(uint16_t _id) {
+RS485::RS485(uint32_t _id) {
     rs485_ID = _id;
     ctrlType = DIRECT;
 }
@@ -123,4 +141,11 @@ void RS485::RS485PackageSend() {
     rsmotorIndex++;
 }
 
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+    CAN::Rx_Handle(hcan);
+}
+
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
+    CAN::CANPackageSend();
+}
 
