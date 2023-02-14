@@ -47,13 +47,13 @@ void CAN::CANInit() {
 CAN::CAN() {
     can_ID = 0x280;
     ctrlType = SPEED_Single;
-    //canSerial = ONE;
+    canType = can1;
 }
 
 CAN::CAN(COMMU_INIT_t *_init) {
     can_ID = _init->_id;
     ctrlType = _init->ctrlType;
-  //  canSerial = _init->Serial;
+    canType = _init->canType;
 
 }
 
@@ -77,15 +77,12 @@ void CAN::CANPackageSend() {
         txHeaderTypeDef.IDE = CAN_ID_STD;
         txHeaderTypeDef.RTR = CAN_RTR_DATA;
         txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-        HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-        /*switch (canQueue.Data[canQueue.rear].Serial) {
-            case ONE:
-                HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-                break;
-            case TWO:
-                HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-                break;
-        }*/
+        if (canQueue.Data[canQueue.front].canType == can1) {
+            HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
+        } else if (canQueue.Data[canQueue.front].canType == can2) {
+            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
+        }
+
         canQueue.front = (canQueue.front + 1) % canQueue.MAX_MESSAGE_COUNT;
     }
 }
@@ -103,7 +100,7 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
 
 }
 
-void CAN::ID_Bind_Rx(uint8_t *RxMessage) {
+void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
     dict.insert(can_ID, RxMessage);
 }
 

@@ -7,25 +7,25 @@
 
 #include "Device.h"
 #include "Map.h"
+
+
+#define can1 1
+#define can2 2
+
 /*结构体定义--------------------------------------------------------------*/
 typedef enum {
     DIRECT = 0,
     SPEED_Single,
     POSITION_Double
 } MOTOR_CTRL_TYPE_e;
-typedef enum{
-    ONE,
-    TWO
-} SERIAL_t;
-
 typedef struct {
     uint32_t _id;//canID
     MOTOR_CTRL_TYPE_e ctrlType;
- //   SERIAL_t Serial;
+    int canType;
 } COMMU_INIT_t;
 typedef struct {
     uint32_t ID;
- //   SERIAL_t Serial;
+    int canType;
     uint8_t message[8];
 }DATA_t;
 typedef struct {
@@ -58,10 +58,10 @@ public:
 protected:
 
     MOTOR_CTRL_TYPE_e ctrlType;
-   // SERIAL_t canSerial;
+    int canType;
     static MyMap<uint32_t, uint8_t *> dict;
 
-    void ID_Bind_Rx(uint8_t *RxMessage);
+    void ID_Bind_Rx(uint8_t *RxMessage) const;
 
     void FOURID_Bind_Rx(uint32_t *canID, uint8_t (*RxMessage)[8]);
 };

@@ -5,7 +5,7 @@
 #include "OtherMotor.h"
 
 /*静态成员变量声明------------------------------------------------------------------*/
-uint8_t Motor_4310::InitMessage[2] = {0x30, 0x6B};
+
 
 /*4010电机类------------------------------------------------------------------*/
 
@@ -26,7 +26,7 @@ void Motor_4010::CANMessageGenerate() {
     if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
-      //  canQueue.Data[canQueue.rear].Serial = canSerial;
+        canQueue.Data[canQueue.rear].canType = canType;
         canQueue.Data[canQueue.rear].message[0] = 0xA1;
         canQueue.Data[canQueue.rear].message[1] = 0;
         canQueue.Data[canQueue.rear].message[2] = 0;
@@ -126,14 +126,16 @@ Motor_4310::~Motor_4310() = default;
 
 void Motor_4310::Init() {
     CAN_TxHeaderTypeDef txHeaderTypeDef;
+    uint32_t box;
+    uint8_t InitMessage[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
 
-    txHeaderTypeDef.StdId = 0x01;
+    txHeaderTypeDef.StdId = 0x101;
     txHeaderTypeDef.DLC = 0x08;
     txHeaderTypeDef.IDE = CAN_ID_STD;
     txHeaderTypeDef.RTR = CAN_RTR_DATA;
     txHeaderTypeDef.TransmitGlobalTime = DISABLE;
 
-    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, InitMessage, 0);
+    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, InitMessage, &box);
 }
 
 void Motor_4310::SetTargetAngle(float _targetAngle) {
@@ -147,21 +149,50 @@ void Motor_4310::SetTargetSpeed(float _targetSpeed) {
 }
 
 void Motor_4310::CANMessageGenerate() {
+    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
+        canQueue.Data[canQueue.rear].ID = can_ID;
+        canQueue.Data[canQueue.rear].canType = canType;
+        canQueue.Data[canQueue.rear].message[0] = Motor4310_Angle;
+        canQueue.Data[canQueue.rear].message[1] = Motor4310_Angle >> 8u;
+        canQueue.Data[canQueue.rear].message[2] = Motor4310_Angle >> 16u;
+        canQueue.Data[canQueue.rear].message[3] = Motor4310_Angle >> 24u;
+        canQueue.Data[canQueue.rear].message[4] = 0x00;
+        canQueue.Data[canQueue.rear].message[5] = 0x00;
+        canQueue.Data[canQueue.rear].message[6] = 0x00;
+        canQueue.Data[canQueue.rear].message[7] = 0x3F;
+
+        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+    }
 }
 
 void Motor_4310::Handle() {
-    uint32_t id = 0;
-
+    uint32_t Angle = AngleCalc();
     if (stopFlag) {
-        motor4310_intensity[id] = 0;
+        Motor4310_Angle = 0;
     } else {
-        motor4310_intensity[id] = 1;//
+        Motor4310_Angle = Angle;
     }
-
     CANMessageGenerate();
+
 }
 
+int32_t Motor_4310::AngleCalc() {
+    float Angle;
+    Angle = targetAngle * 12.5f / 360;
+    return float_to_uint(Angle, -12.5, 12.5, 16);
+}
 
+float Motor_4310::uint_to_float(int x_int, float x_min, float x_max, int bits) {
+    /// converts unsigned int to float, given range and number of bits ///
+    float span = x_max - x_min;
+    float offset = x_min;
+    return ((float) x_int) * span / ((float) ((1 << bits) - 1)) + offset;
+}
 
-
+int Motor_4310::float_to_uint(float x, float x_min, float x_max, int bits) {
+/// Converts a float to an unsigned int, given range and number of bits///
+    float span = x_max - x_min;
+    float offset = x_min;
+    return (int) ((x - offset) * ((float) ((1 << bits) - 1)) / span);
+}

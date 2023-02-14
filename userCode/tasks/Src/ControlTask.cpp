@@ -7,11 +7,13 @@
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
+        ArmStop();
     } else {//其他正常模式
         switch (RemoteControl::rcInfo.sLeft) {
             case UP_POS://左侧一档
                 ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
                                    RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
+                ArmSetAngle(RemoteControl::rcInfo.left_col * 360);
                 Headmemory();
                 break;
             case MID_POS://左侧二档

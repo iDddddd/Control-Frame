@@ -40,8 +40,8 @@ private:
 /*4310电机类------------------------------------------------------------------*/
 class Motor_4310 : public Motor, public CAN {
 public:
-    static uint8_t InitMessage[2];
-    int16_t motor4310_intensity[8];
+    uint32_t Motor4310_Angle;
+    uint32_t sendSpeed;
     static void Init();
     void CANMessageGenerate() override;
 
@@ -50,16 +50,16 @@ public:
     void SetTargetAngle(float _targetAngle);
     void SetTargetSpeed(float _targetSpeed);
 
-
-
     Motor_4310(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
 
     ~Motor_4310();
 
 private:
-
-    float targetAngle;
-    float targetSpeed;
+    int32_t AngleCalc();
+    float uint_to_float(int x_int, float x_min, float x_max, int bits);
+    int float_to_uint(float x, float x_min, float x_max, int bits);
+    float targetAngle{};
+    float targetSpeed{};
 
 };
 #endif //RM_FRAME_C_OTHERMOTOR_H

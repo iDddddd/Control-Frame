@@ -101,7 +101,7 @@ void FOUR_Motor_4010::CANMessageGenerate() {
     if((canQueue.rear + 1)%canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
-      //  canQueue.Data[canQueue.rear].Serial = canSerial;
+        canQueue.Data[canQueue.rear].canType = canType;
         canQueue.Data[canQueue.rear].message[0] = motor4010_intensity[0];
         canQueue.Data[canQueue.rear].message[1] = motor4010_intensity[0] >> 8u;
         canQueue.Data[canQueue.rear].message[2] = motor4010_intensity[1];
@@ -223,10 +223,10 @@ void Motor_4315::RS485MessageGenerate() {
     rsmessage[motorIndex][4] = 0x04;//数据包长度
 
     uint32_t tmp = motor4315_intensity[motorIndex];
-    rsmessage[motorIndex][8] = tmp >> 24u;
-    rsmessage[motorIndex][7] = tmp >> 16u;
-    rsmessage[motorIndex][6] = tmp >> 8u;
     rsmessage[motorIndex][5] = tmp;
+    rsmessage[motorIndex][6] = tmp >> 8u;
+    rsmessage[motorIndex][7] = tmp >> 16u;
+    rsmessage[motorIndex][8] = tmp >> 24u;
 
     uint16_t crc = CRC16Calc(rsmessage[motorIndex], 9);
     rsmessage[motorIndex][9] = crc;

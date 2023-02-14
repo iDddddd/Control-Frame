@@ -209,6 +209,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (init_Flag == 0)return;
     if (htim == &htim10) {//1ms
         //HAL_GPIO_TogglePin(LED_R_GPIO_Port,LED_R_Pin);
+
+    }
+    if (htim == &htim6) {
         aRGB_led_change(period);
 
         bsp_ADC_vccMoni();
@@ -220,20 +223,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         ChassisHandle();
         ARMHandle();
         Motor::MotorsHandle();
-        // ServoHandle();
-        //   Motor_4010::CANPackageSend();
         CAN::CANPackageSend();
+        RS485::RS485PackageSend();
 
-        // Motor::ARMPackageSend();
-        //ARMMotor::PackageSend();
         if (cnt > 20) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
             cnt = 0;
         }
-    }
-    if (htim == &htim6) {
 
-        Motor_4315::RS485PackageSend();
 
     }
     if (htim == &htim7) {
@@ -329,7 +326,7 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_TIM_Base_Start_IT(&htim7);
     CAN::CANInit();
-    //  ARMMotor::Init();
+    Motor_4310::Init();
     IMU::imu.Init();
     ChassisStart();
 
