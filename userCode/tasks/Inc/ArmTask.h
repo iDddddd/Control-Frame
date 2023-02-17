@@ -15,7 +15,7 @@ void AngleCalc();
 
 void ArmStop();
 
-void ArmSetAngle(float angle);
+void ArmSetAngle(float angle,float angle2);
 
 void ArmAngleCalc();
 

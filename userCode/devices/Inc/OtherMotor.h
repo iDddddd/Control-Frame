@@ -11,6 +11,7 @@
 #include "Motor.h"
 #include "CommuType.h"
 
+
 /*4010电机类------------------------------------------------------------------*/
 class Motor_4010 : public Motor, public CAN {
 public:
@@ -32,22 +33,28 @@ private:
     C6x0Rx_t feedback{};
     float targetAngle{};
     MOTOR_STATE_t state{};
-
+    float realAngle{0};
+    float thisAngle;
+    float lastRead;
+    static int16_t Intensity;
     void MotorStateUpdate();
-
     int16_t IntensityCalc();
 };
+
 /*4310电机类------------------------------------------------------------------*/
 class Motor_4310 : public Motor, public CAN {
 public:
-    uint32_t Motor4310_Angle;
-    uint32_t sendSpeed;
+    uint32_t Motor4310_Angle{};
+    uint32_t sendSpeed{};
+
     static void Init();
+
     void CANMessageGenerate() override;
 
     void Handle() override;
 
     void SetTargetAngle(float _targetAngle);
+
     void SetTargetSpeed(float _targetSpeed);
 
     Motor_4310(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
@@ -56,10 +63,14 @@ public:
 
 private:
     int32_t AngleCalc();
+
     float uint_to_float(int x_int, float x_min, float x_max, int bits);
+
     int float_to_uint(float x, float x_min, float x_max, int bits);
+
     float targetAngle{};
     float targetSpeed{};
 
 };
+
 #endif //RM_FRAME_C_OTHERMOTOR_H

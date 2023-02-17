@@ -22,7 +22,7 @@
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
-    int16_t angle;
+    uint16_t angle;
     int16_t speed;
     int16_t moment;
     int8_t temp;
@@ -80,8 +80,7 @@ private:
 class Motor_4315 : public Motor, public RS485 {
 public:
     int16_t motor4315_intensity[8]{};
-    float targetAngle = 0;
-
+    float targetAngle{0};
     void RS485MessageGenerate() override;
 
     void Handle() override;
@@ -93,6 +92,8 @@ public:
     ~Motor_4315();
 
 private:
+    void MotorGoBack();
+    float lastAngle{0};
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
 
 };

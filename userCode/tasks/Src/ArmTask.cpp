@@ -7,17 +7,35 @@
 
 PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体，四个底盘电机共用
         .kp = 2.0f,
-        .ki = 0.002f,
-        .kd = 0.0001f,
+        .ki = 0.0f,
+        .kd = 0.03f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 0.5f,
-        .ki = 0.001f,
-        .kd = 0.00001f,
+        .kp = 0.0f,
+        .ki = 0.0f,
+        .kd = 0.0f,
+        .componentKpMax = 2000,
+        .componentKiMax = 0,
+        .componentKdMax = 0,
+        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
+};
+PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
+        .kp = 18.0f,
+        .ki = 0.0f,
+        .kd = 0.2f,
+        .componentKpMax = 2000,
+        .componentKiMax = 0,
+        .componentKdMax = 0,
+        .outputMax = 2000
+};
+PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
+        .kp = 0.0f,
+        .ki = 0.0f,
+        .kd = 0.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
@@ -47,27 +65,44 @@ COMMU_INIT_t arm1CommuInit = {
         .canType = can2
 
 };
-Motor_4010 TrayMotor(&trayCommuInit, &trayMotorInit);
-Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
+COMMU_INIT_t arm2CommuInit = {
+        ._id = 0x146,
+        .ctrlType = POSITION_Double,
+        .canType = can2
+
+};
+MOTOR_INIT_t arm2MotorInit = {
+        .speedPIDp = &pidRegulator5,
+        .anglePIDp = &pidRegulator6,
+        .reductionRatio = 1.0f
+
+};
+//Motor_4010 TrayMotor(&trayCommuInit, &trayMotorInit);
+//Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
+Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
+
 bool ArmStopFlag = true;
-float Angle;
+float Angle1,Angle2;
 
 void ArmStop() {
     ArmStopFlag = true;
-    TrayMotor.Stop();
-    ArmMotor1.Stop();
+   //  TrayMotor.Stop();
+   // ArmMotor1.Stop();
+    ArmMotor2.Stop();
 }
 
-void ArmAngleCalc(){
-    TrayMotor.SetTargetAngle(Angle);
-    ArmMotor1.SetTargetAngle(Angle);
+void ArmAngleCalc() {
+    // TrayMotor.SetTargetAngle(Angle);
+   // ArmMotor1.SetTargetAngle(Angle1);
+    ArmMotor2.SetTargetAngle(Angle1);
 }
-void ArmSetAngle(float angle){
+
+void ArmSetAngle(float angle1,float angle2) {
     ArmStopFlag = false;
-    Angle = angle;
+    Angle1 = angle1;
+    Angle2 = angle2;
 
 }
-
 
 void ARMHandle() {
     if (!ArmStopFlag) {

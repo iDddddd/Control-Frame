@@ -23,6 +23,7 @@ void CAN::CANInit() {
     HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
 
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
 
     CAN_FilterTypeDef canFilterTypeDef;
 

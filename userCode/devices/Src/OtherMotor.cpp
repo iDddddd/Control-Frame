@@ -6,7 +6,7 @@
 
 /*静态成员变量声明------------------------------------------------------------------*/
 
-
+int16_t Motor_4010::Intensity;
 /*4010电机类------------------------------------------------------------------*/
 
 Motor_4010::Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(commuInit), Motor(motorInit, this) {
@@ -46,6 +46,7 @@ void Motor_4010::Handle() {
 
     MotorStateUpdate();
     intensity[id] = IntensityCalc();
+    Intensity = intensity[id];
     if (stopFlag) {
         motor4010_intensity[id] = 0;
     } else {
@@ -58,30 +59,29 @@ void Motor_4010::Handle() {
 void Motor_4010::MotorStateUpdate() {
 
     feedback.angle = RxMessage[6] | (RxMessage[7] << 8u);
-    feedback.speed = RxMessage[4] | (RxMessage[5] << 8u);
-    feedback.moment = RxMessage[2] | (RxMessage[3] << 8u);
-    feedback.temp = RxMessage[1];
+    feedback.speed = (int16_t )(RxMessage[4] | (RxMessage[5] << 8u));
+    feedback.moment = (int16_t )(RxMessage[2] | (RxMessage[3] << 8u));
+    feedback.temp = (int8_t )RxMessage[1];
 
     switch (ctrlType) {
         case SPEED_Single: {
-            state.speed = feedback.speed / reductionRatio;
+            state.speed = (float) (feedback.speed) / reductionRatio;
         }
         case POSITION_Double: {
-            state.speed = feedback.speed / reductionRatio;
+            state.speed = (float) (feedback.speed) / reductionRatio;
             state.moment = feedback.moment;
             state.temperature = feedback.temp;
-            state.angle = feedback.angle * 360 / 16384;
-            float realAngle = state.angle;
-            float thisAngle = feedback.angle;
-            static int32_t lastRead = 0;
+            state.angle = (float) (feedback.angle) * 360.0f / 16384.0f;
+
+            thisAngle = feedback.angle;
             if (thisAngle <= lastRead) {
                 if (lastRead - thisAngle > 8000)
-                    realAngle += (thisAngle + 16384 - lastRead) * 360.0f / 16384.0f / reductionRatio;
+                    realAngle += (thisAngle + 16384.0f - lastRead) * 360.0f / 16384.0f / reductionRatio;
                 else
                     realAngle -= (lastRead - thisAngle) * 360.0f / 16384.0f / reductionRatio;
             } else {
                 if (thisAngle - lastRead > 8000)
-                    realAngle -= (lastRead + 16384 - thisAngle) * 360.0f / 16384.0f / reductionRatio;
+                    realAngle -= (lastRead + 16384.0f - thisAngle) * 360.0f / 16384.0f / reductionRatio;
                 else
                     realAngle += (thisAngle - lastRead) * 360.0f / 16384.0f / reductionRatio;
             }
@@ -100,7 +100,7 @@ int16_t Motor_4010::IntensityCalc() {
     int16_t intensity = 0;
     switch (ctrlType) {
         case DIRECT:
-            intensity = targetAngle;
+            intensity = (int16_t) targetAngle;
             break;
 
         case SPEED_Single:
@@ -109,7 +109,7 @@ int16_t Motor_4010::IntensityCalc() {
 
         case POSITION_Double:
             float _targetSpeed = anglePID.PIDCalc(targetAngle, state.angle);
-            intensity = speedPID.PIDCalc(_targetSpeed, state.speed);
+            intensity = (int16_t) speedPID.PIDCalc(_targetSpeed, state.speed);
             break;
     }
     return intensity;
@@ -153,10 +153,10 @@ void Motor_4310::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = Motor4310_Angle;
-        canQueue.Data[canQueue.rear].message[1] = Motor4310_Angle >> 8u;
-        canQueue.Data[canQueue.rear].message[2] = Motor4310_Angle >> 16u;
-        canQueue.Data[canQueue.rear].message[3] = Motor4310_Angle >> 24u;
+        canQueue.Data[canQueue.rear].message[3] = Motor4310_Angle;
+        canQueue.Data[canQueue.rear].message[2] = Motor4310_Angle >> 8u;
+        canQueue.Data[canQueue.rear].message[1] = Motor4310_Angle >> 16u;
+        canQueue.Data[canQueue.rear].message[0] = Motor4310_Angle >> 24u;
         canQueue.Data[canQueue.rear].message[4] = 0x00;
         canQueue.Data[canQueue.rear].message[5] = 0x00;
         canQueue.Data[canQueue.rear].message[6] = 0x00;
