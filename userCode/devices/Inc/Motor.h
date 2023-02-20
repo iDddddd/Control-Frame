@@ -79,8 +79,9 @@ private:
 /*4315电机类------------------------------------------------------------------*/
 class Motor_4315 : public Motor, public RS485 {
 public:
-    int16_t motor4315_intensity[8]{};
+    int32_t motor4315_angle[8]{};
     float targetAngle{0};
+    float zeroAngle{0};
     void RS485MessageGenerate() override;
 
     void Handle() override;
@@ -93,7 +94,9 @@ public:
 
 private:
     void MotorGoBack();
+    float realAngle{0};
     float lastAngle{0};
+    void AngleCalc();
     uint16_t CRC16Calc(uint8_t *data, uint16_t length);
 
 };

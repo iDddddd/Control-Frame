@@ -154,10 +154,10 @@ void Motor_4310::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[3] = Motor4310_Angle;
-        canQueue.Data[canQueue.rear].message[2] = Motor4310_Angle >> 8u;
-        canQueue.Data[canQueue.rear].message[1] = Motor4310_Angle >> 16u;
-        canQueue.Data[canQueue.rear].message[0] = Motor4310_Angle >> 24u;
+        canQueue.Data[canQueue.rear].message[0] = *Motor4310_Angle;
+        canQueue.Data[canQueue.rear].message[1] = *(Motor4310_Angle+1);
+        canQueue.Data[canQueue.rear].message[2] = *(Motor4310_Angle+2);
+        canQueue.Data[canQueue.rear].message[3] = *(Motor4310_Angle+3);
         canQueue.Data[canQueue.rear].message[4] = 0x00;
         canQueue.Data[canQueue.rear].message[5] = 0x00;
         canQueue.Data[canQueue.rear].message[6] = 0x00;
@@ -168,11 +168,11 @@ void Motor_4310::CANMessageGenerate() {
 }
 
 void Motor_4310::Handle() {
-    uint32_t Angle = AngleCalc();
+
     if (stopFlag) {
         Motor4310_Angle = 0;
     } else {
-        Motor4310_Angle = Angle;
+        Motor4310_Angle = (uint8_t *) &targetAngle;
     }
     CANMessageGenerate();
 
@@ -200,7 +200,7 @@ int Motor_4310::float_to_uint(float x, float x_min, float x_max, int bits) {
 
 /*Emm42电机类------------------------------------------------------------------*/
 Emm42Motor::Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : Motor(motorInit, this),
-                                                                                         CAN(commuInit) {
+                                                                           CAN(commuInit) {
     ID_Bind_Rx(RxMessage);
 }
 
@@ -250,14 +250,14 @@ void Emm42Motor::Handle() {
     if (stopFlag) {
         Emm42Motor_Pos = 0;
     } else {
-        Emm42Motor_Pos = Pos / 65536 * 3200 ;
+        Emm42Motor_Pos = Pos / 65536 * 3200;
     }
     CANMessageGenerate();
 }
 
 void Emm42Motor::PositionCalc() {
 
-        NowPos = (RxMessage[1] << 24u) | (RxMessage[2] << 16u) | (RxMessage[3] << 8u) | (RxMessage[4]);
+    NowPos = (RxMessage[1] << 24u) | (RxMessage[2] << 16u) | (RxMessage[3] << 8u) | (RxMessage[4]);
 
 }
 

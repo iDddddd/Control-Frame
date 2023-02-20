@@ -157,10 +157,10 @@ int sign(float x) {
 }
 
 float SetAngle(float Angle) {
-    if (Angle > 270.0) {
+    if (Angle > 180.0) {
         Angle -= 180.0;
     }
-    if (Angle <= 90.0) {
+    if (Angle <= 0) {
         Angle += 180.0;
     }
     return Angle;
@@ -188,30 +188,30 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 //    CMBLSpeed = -fbVelocity + rtVelocity;
 //    CMBRSpeed = fbVelocity + rtVelocity;
 
-    RFLAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f + 180;
-    RFRAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f + 180;
-    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f + 180;
-    RBRAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f + 180;
+    RFLAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
+    RFRAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f;
+    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
+    RBRAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f;
 
     //控制底盘电机角度
-    RFL.SetTargetAngle(SetAngle(RFLAngle));
-    RFR.SetTargetAngle(SetAngle(RFRAngle));
-    RBL.SetTargetAngle(SetAngle(RBLAngle));
-    RBR.SetTargetAngle(SetAngle(RBRAngle));
+    RFL.SetTargetAngle(RFLAngle);
+    RFR.SetTargetAngle(RFRAngle);
+    RBL.SetTargetAngle(RBLAngle);
+    RBR.SetTargetAngle(RBRAngle);
 
-    ClassisSpeed[0] = ((-sign(fbVelocity - rtVelocity * M / 2) *
+    ClassisSpeed[0] = ((/*-sign(fbVelocity - rtVelocity * M / 2) */
                         sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
                              (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左前轮
-    ClassisSpeed[1] = ((sign(fbVelocity + rtVelocity * M / 2) *
+    ClassisSpeed[1] = -((/*sign(fbVelocity + rtVelocity * M / 2) */
                         sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
                              (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右前轮
-    ClassisSpeed[2] = ((sign(fbVelocity + rtVelocity * M / 2) *
+    ClassisSpeed[2] = -((/*sign(fbVelocity + rtVelocity * M / 2) */
                         sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
                              (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右后轮
-    ClassisSpeed[3] = ((-sign(fbVelocity - rtVelocity * M / 2) *
+    ClassisSpeed[3] = ((/*-sign(fbVelocity - rtVelocity * M / 2) */
                         sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
                              (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左后轮

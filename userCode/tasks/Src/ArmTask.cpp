@@ -92,29 +92,29 @@ MOTOR_INIT_t arm3MotorInit = {
 //Motor_4010 TrayMotor(&trayCommuInit, &trayMotorInit);
 //Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
 //Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-Emm42Motor ArmMotorZ(&arm3CommuInit,&arm3MotorInit);
+//Emm42Motor ArmMotorZ(&arm3CommuInit,&arm3MotorInit);
 bool ArmStopFlag = true;
-float Position,Angle2;
+float Position,Angle;
 
 void ArmStop() {
     ArmStopFlag = true;
    // TrayMotor.Stop();
-   // ArmMotor1.Stop();
+    //ArmMotor1.Stop();
    // ArmMotor2.Stop();
    // ArmMotorZ.Stop();
 }
 
 void ArmAngleCalc() {
     // TrayMotor.SetTargetAngle(Angle);
-    // ArmMotor1.SetTargetAngle(Angle1);
-    // ArmMotor2.SetTargetAngle(Angle2);
+     //ArmMotor1.SetTargetAngle(Position);
+    // ArmMotor2.SetTargetAngle(Angle);
    // ArmMotorZ.SetTargetPosition(Position);
 }
 
-void ArmSetAngle(float angle1,float angle2) {
+void ArmSetAngle(float position, float angle) {
     ArmStopFlag = false;
-    Position = angle1;
-    Angle2 = angle2;
+    Position = position;
+    Angle = angle;
 
 }
 

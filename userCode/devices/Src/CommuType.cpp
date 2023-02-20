@@ -5,6 +5,7 @@
 #include "CommuType.h"
 
 MyMap<uint32_t, uint8_t *> CAN::dict;
+uint8_t RS485::rsmessage[4][11] = {0};
 TX_QUEUE_t CAN::canQueue = {
         .front = 0,
         .rear = 0,

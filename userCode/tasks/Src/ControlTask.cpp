@@ -13,7 +13,7 @@ void CtrlHandle() {
             case UP_POS://左侧一档
                 ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
                                    RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
-                ArmSetAngle(RemoteControl::rcInfo.left_col * 10,RemoteControl::rcInfo.left_rol * 90);
+                ArmSetAngle(RemoteControl::rcInfo.left_col,RemoteControl::rcInfo.left_rol * 90);
                 Headmemory();
                 break;
             case MID_POS://左侧二档

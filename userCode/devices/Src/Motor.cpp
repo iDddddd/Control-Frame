@@ -4,7 +4,7 @@
 
 #include "Motor.h"
 
-uint8_t RS485::rsmessage[4][11] = {0};
+
 Motor_Object_t *Motor::head_;
 
 /*Motor类----------------------------------------------------------------*/
@@ -98,7 +98,7 @@ void FOUR_Motor_4010::Handle() {
  * @brief 4010电机类的消息包获取任务
  */
 void FOUR_Motor_4010::CANMessageGenerate() {
-    if((canQueue.rear + 1)%canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
@@ -111,7 +111,7 @@ void FOUR_Motor_4010::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[6] = motor4010_intensity[3];
         canQueue.Data[canQueue.rear].message[7] = motor4010_intensity[3] >> 8u;
 
-        canQueue.rear =  (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
     }
 }
 
@@ -222,11 +222,10 @@ void Motor_4315::RS485MessageGenerate() {
     rsmessage[motorIndex][3] = 0x55;//相对位置闭环控制命令码
     rsmessage[motorIndex][4] = 0x04;//数据包长度
 
-    uint32_t tmp = motor4315_intensity[motorIndex];
-    rsmessage[motorIndex][5] = tmp;
-    rsmessage[motorIndex][6] = tmp >> 8u;
-    rsmessage[motorIndex][7] = tmp >> 16u;
-    rsmessage[motorIndex][8] = tmp >> 24u;
+    rsmessage[motorIndex][5] = motor4315_angle[motorIndex];
+    rsmessage[motorIndex][6] = motor4315_angle[motorIndex] >> 8u;
+    rsmessage[motorIndex][7] = motor4315_angle[motorIndex] >> 16u;
+    rsmessage[motorIndex][8] = motor4315_angle[motorIndex] >> 24u;
 
     uint16_t crc = CRC16Calc(rsmessage[motorIndex], 9);
     rsmessage[motorIndex][9] = crc;
@@ -238,12 +237,11 @@ void Motor_4315::RS485MessageGenerate() {
  */
 void Motor_4315::Handle() {
 
-    int16_t intensity = targetAngle;
-
+    AngleCalc();
     if (stopFlag == 1) {
-        motor4315_intensity[rs485_ID] = 0;
+        motor4315_angle[rs485_ID] = (zeroAngle * 16384.0f / 360.0f);
     } else {
-        motor4315_intensity[rs485_ID] = intensity;
+        motor4315_angle[rs485_ID] = (realAngle * 16384.0f / 360.0f);
     }
 
     RS485MessageGenerate();
@@ -255,7 +253,18 @@ void Motor_4315::Handle() {
  */
 void Motor_4315::SetTargetAngle(float _targetAngle) {
     stopFlag = false;
-    targetAngle = _targetAngle * 16384.0f / 360.0f;
+    targetAngle = _targetAngle;
+}
+
+void Motor_4315::AngleCalc() {
+    if (targetAngle - lastAngle > 180) {
+        zeroAngle -= 360;
+    }
+    if (lastAngle - targetAngle > 180) {
+        zeroAngle += 360;
+    }
+    lastAngle = targetAngle;
+    realAngle = targetAngle + zeroAngle;
 }
 
 uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
@@ -274,7 +283,7 @@ uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
 
 void Motor_4315::MotorGoBack() {
 
-    for (int i = 0;i < 4;i++) {
+    for (int i = 0; i < 4; i++) {
         rsmessage[i][0] = 0x3E;//协议头
         rsmessage[i][1] = 0x00;//包序号
         rsmessage[i][2] = 0x01 + i; //ID
@@ -288,4 +297,5 @@ void Motor_4315::MotorGoBack() {
     }
 
 }
+
 

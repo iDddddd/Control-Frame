@@ -46,7 +46,7 @@ private:
 /*4310电机类------------------------------------------------------------------*/
 class Motor_4310 : public Motor, public CAN {
 public:
-    uint32_t Motor4310_Angle{};
+    uint8_t* Motor4310_Angle;
     uint32_t sendSpeed{};
 
     static void Init();
