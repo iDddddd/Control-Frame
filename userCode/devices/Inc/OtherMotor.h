@@ -37,7 +37,9 @@ private:
     float thisAngle;
     float lastRead;
     static int16_t Intensity;
+
     void MotorStateUpdate();
+
     int16_t IntensityCalc();
 };
 
@@ -71,6 +73,30 @@ private:
     float targetAngle{};
     float targetSpeed{};
 
+};
+
+/*Emm42电机类------------------------------------------------------------------*/
+class Emm42Motor : public Motor, public CAN {
+public:
+    uint32_t Emm42Motor_Pos{};
+    uint8_t Emm42Motor_Dir{};
+    Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+    uint8_t RxMessage[8]{0};
+    int32_t NowPos{};
+    ~Emm42Motor();
+
+    void GeneratePositon();
+
+    void CANMessageGenerate() override;
+
+    void Handle() override;
+
+    void SetTargetPosition(float _targetposition);
+
+private:
+
+    float targetPosition{}; //单位mm
+    void PositionCalc();
 };
 
 #endif //RM_FRAME_C_OTHERMOTOR_H

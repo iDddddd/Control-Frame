@@ -209,7 +209,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (init_Flag == 0)return;
     if (htim == &htim10) {//1ms
         //HAL_GPIO_TogglePin(LED_R_GPIO_Port,LED_R_Pin);
-        RS485::RS485PackageSend();
+
     }
     if (htim == &htim6) {
         aRGB_led_change(period);
@@ -224,7 +224,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         ARMHandle();
         Motor::MotorsHandle();
         CAN::CANPackageSend();
-
+        RS485::RS485PackageSend();
 
         if (cnt > 20) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
