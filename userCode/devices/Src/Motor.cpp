@@ -63,7 +63,7 @@ FOUR_Motor_4010::FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_
     canIDs[3] = commu_init4->_id;
     if (motor_init1->speedPIDp) speedPIDs[0].PIDInfo = *motor_init1->speedPIDp;
     if (motor_init1->speedPIDp) speedPIDs[1].PIDInfo = *motor_init1->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[2].PIDInfo = *motor_init2->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[2].PIDInfo = *motor_init1->speedPIDp;
     if (motor_init1->speedPIDp) speedPIDs[3].PIDInfo = *motor_init2->speedPIDp;
     FOURID_Bind_Rx(canIDs, RxMessage);
 
