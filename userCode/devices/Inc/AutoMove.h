@@ -8,27 +8,36 @@
 #include "IMU.h"
 #include "Device.h"
 
-class Move : public Device {
-    static float t;
-    static float v;
-    static float x;
-    float d1 = 0;
-    float d2 = 0;
-    float d_max;
-    static float a;
-    static float v_max;
-
+class Move {
 public:
-
+    float d1;
+    float d2;
+    float d_max;
+    float a = 2;
+    float v;
+    float v_max = 1;
     float v_rel;
 
-    Move(float d);
-
+    Move();
     ~Move();
 
-    void Handle() override;
+    void Calc(float target);
 
-    void ErrorHandle() override;
+    void Handle();
+};
+class AutoMove {
+public:
+    static float t;
+    Move x;
+    Move y;
+    Move o;
+
+    AutoMove(float x_distance, float y_distance, float o_angle);
+
+    ~AutoMove() = default;
+
+    void Handle();
+
 
 };
 

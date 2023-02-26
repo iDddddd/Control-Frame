@@ -8,7 +8,8 @@
 
 #include "Device.h"
 
-#define BUFF_SIZE 100
+#define BUFF_SIZE 28
+#define CONTROL_LENGTH 14u
 
 typedef struct {
     uint16_t speed;
@@ -44,7 +45,7 @@ public:
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern void DMA2_Stream1_IRQHandler(void);
+extern void USART6_IRQHandler(void);
 #ifdef __cplusplus
 }
 #endif

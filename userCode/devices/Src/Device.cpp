@@ -321,6 +321,7 @@ int main() {
 
     //TODO adc校准？
     RemoteControl::init();
+    CatchControl::Init();
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);
     HAL_TIM_Base_Start_IT(&htim6);

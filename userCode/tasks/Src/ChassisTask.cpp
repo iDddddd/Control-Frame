@@ -71,7 +71,7 @@ Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
 Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 
-Move move(2.0);
+//Move move(2.0);
 bool ChassisStopFlag = true;
 float FBVelocity, LRVelocity, RTVelocity;
 float ZeroYaw;
@@ -124,9 +124,9 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
 
 void AutoSetVelocity() {
     ChassisStopFlag = false;
-    move.Handle();
+  //  move.Handle();
     if (IMU::imu.position.displace[1] < 2) {
-        FBVelocity = move.v_rel;
+   //     FBVelocity = move.v_rel;
         LRVelocity = 0;
         RTVelocity = 0;
     } else {

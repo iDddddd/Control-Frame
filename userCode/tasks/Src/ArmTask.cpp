@@ -24,8 +24,8 @@ PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 18.0f,
-        .ki = 0.0f,
+        .kp = 20.0f,
+        .ki = 0.2f,
         .kd = 0.2f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -33,7 +33,7 @@ PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 0.0f,
+        .kp = 3.0f,
         .ki = 0.0f,
         .kd = 0.0f,
         .componentKpMax = 2000,

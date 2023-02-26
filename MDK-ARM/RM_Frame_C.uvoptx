@@ -162,34 +162,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>269</LineNumber>
+          <LineNumber>56</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134300330</Address>
+          <Address>134300236</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\devices\Src\Motor.cpp</Filename>
+          <Filename>..\userCode\devices\Src\CatchControl.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/Motor.cpp\269</Expression>
+          <Expression>\\RM_Frame_C\../userCode/devices/Src/CatchControl.cpp\56</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>200</LineNumber>
+          <LineNumber>52</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134291456</Address>
+          <Address>134300188</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\tasks\Src\ChassisTask.cpp</Filename>
+          <Filename>..\userCode\devices\Src\CatchControl.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/tasks/Src/ChassisTask.cpp\200</Expression>
+          <Expression>\\RM_Frame_C\../userCode/devices/Src/CatchControl.cpp\52</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -387,6 +387,36 @@
           <count>38</count>
           <WinNumber>1</WinNumber>
           <ItemText>RBRAngle</ItemText>
+        </Ww>
+        <Ww>
+          <count>39</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>buf</ItemText>
+        </Ww>
+        <Ww>
+          <count>40</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>rx_buff</ItemText>
+        </Ww>
+        <Ww>
+          <count>41</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>sbus_rx_buf</ItemText>
+        </Ww>
+        <Ww>
+          <count>42</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cc_ctrl</ItemText>
+        </Ww>
+        <Ww>
+          <count>43</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cc_ctrl.ARM2</ItemText>
+        </Ww>
+        <Ww>
+          <count>44</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cc_ctrl.ARM2.angle</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
