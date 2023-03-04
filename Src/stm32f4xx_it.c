@@ -87,7 +87,6 @@ extern TIM_HandleTypeDef htim10;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart6_rx;
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart6;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -424,56 +423,38 @@ void TIM7_IRQHandler(void)
 
   /* USER CODE END TIM7_IRQn 1 */
 }
-/*
 
-*/
 /**
   * @brief This function handles DMA2 stream0 global interrupt.
   *//*
-
 void DMA2_Stream0_IRQHandler(void)
 {
-  */
-/* USER CODE BEGIN DMA2_Stream0_IRQn 0 *//*
+  *//* USER CODE BEGIN DMA2_Stream0_IRQn 0 *//*
 
-
-  */
-/* USER CODE END DMA2_Stream0_IRQn 0 *//*
-
+  *//* USER CODE END DMA2_Stream0_IRQn 0 *//*
   HAL_DMA_IRQHandler(&hdma_spi1_rx);
-  */
-/* USER CODE BEGIN DMA2_Stream0_IRQn 1 *//*
+  *//* USER CODE BEGIN DMA2_Stream0_IRQn 1 *//*
 
+  *//* USER CODE END DMA2_Stream0_IRQn 1 *//*
+}*/
 
-  */
-/* USER CODE END DMA2_Stream0_IRQn 1 *//*
-
-}
-
-*/
 /**
   * @brief This function handles DMA2 stream1 global interrupt.
-  *//*
-
+  */
 void DMA2_Stream1_IRQHandler(void)
 {
-  */
-/* USER CODE BEGIN DMA2_Stream1_IRQn 0 *//*
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
 
 
-  */
-/* USER CODE END DMA2_Stream1_IRQn 0 *//*
-
+  
+  /* USER CODE END DMA2_Stream1_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart6_rx);
-  */
-/* USER CODE BEGIN DMA2_Stream1_IRQn 1 *//*
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
 
-  */
-/* USER CODE END DMA2_Stream1_IRQn 1 *//*
 
+  /* USER CODE END DMA2_Stream1_IRQn 1 */
 }
-*/
 
 /**
   * @brief This function handles DMA2 stream3 global interrupt.
@@ -503,7 +484,6 @@ void CAN2_TX_IRQHandler(void)
   /* USER CODE END CAN2_TX_IRQn 1 */
 }
 
-
 /**
   * @brief This function handles USB On The Go FS global interrupt.
   */
@@ -517,8 +497,6 @@ void OTG_FS_IRQHandler(void)
 
   /* USER CODE END OTG_FS_IRQn 1 */
 }
-
-
 
 /* USER CODE BEGIN 1 */
 

@@ -71,7 +71,7 @@ Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
 Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 
-//Move move(2.0);
+AutoMove autoMove(2, 0, 0);
 bool ChassisStopFlag = true;
 float FBVelocity, LRVelocity, RTVelocity;
 float ZeroYaw;
@@ -124,11 +124,11 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
 
 void AutoSetVelocity() {
     ChassisStopFlag = false;
-  //  move.Handle();
-    if (IMU::imu.position.displace[1] < 2) {
-   //     FBVelocity = move.v_rel;
-        LRVelocity = 0;
-        RTVelocity = 0;
+    autoMove.Handle();
+    if (IMU::imu.position.displace[1] < 2 || IMU::imu.position.displace[0] < 2) {
+        FBVelocity = autoMove.x.v_rel;
+        LRVelocity = autoMove.y.v_rel;
+        RTVelocity = autoMove.o.v_rel;
     } else {
         FBVelocity = 0;
         LRVelocity = 0;
@@ -200,20 +200,20 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBR.SetTargetAngle(RBRAngle);
 
     ClassisSpeed[0] = ((/*-sign(fbVelocity - rtVelocity * M / 2) */
-                        sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                             (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
+                               sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+                                    (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左前轮
     ClassisSpeed[1] = -((/*sign(fbVelocity + rtVelocity * M / 2) */
-                        sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                             (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
-                       (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右前轮
+                                sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
+                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右前轮
     ClassisSpeed[2] = -((/*sign(fbVelocity + rtVelocity * M / 2) */
-                        sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                             (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
-                       (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右后轮
+                                sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
+                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右后轮
     ClassisSpeed[3] = ((/*-sign(fbVelocity - rtVelocity * M / 2) */
-                        sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                             (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
+                               sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                                    (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左后轮
 
     //控制底盘电机转速

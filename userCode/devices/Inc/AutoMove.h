@@ -10,20 +10,23 @@
 
 class Move {
 public:
-    float d1;
-    float d2;
-    float d_max;
+    float d1{};
+    float d2{};
+    float d_max{};
     float a = 2;
-    float v;
+    float v{};
     float v_max = 1;
-    float v_rel;
+    float v_rel{};
 
     Move();
     ~Move();
 
     void Calc(float target);
 
-    void Handle();
+    void Handle_X();
+    void Handle_Y();
+    void Handle_O();
+
 };
 class AutoMove {
 public:

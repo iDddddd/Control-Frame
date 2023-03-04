@@ -10,11 +10,15 @@ void CtrlHandle() {
         ArmStop();
     } else {//其他正常模式
         switch (RemoteControl::rcInfo.sLeft) {
-            case UP_POS://左侧一档
-                ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                   RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
-                ArmSetAngle(RemoteControl::rcInfo.left_col,RemoteControl::rcInfo.left_col * 90);
-                Headmemory();
+            case UP_POS://左侧一档{
+                if (RemoteControl::rcInfo.sRight == UP_POS) {
+                    ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
+                                       RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
+                    ArmSetAngle(RemoteControl::rcInfo.left_col, RemoteControl::rcInfo.left_col * 90);
+                    Headmemory();
+                }else if (RemoteControl::rcInfo.sRight == MID_POS){
+                    ArmSetAngle(CatchControl::cc_ctrl.ARM1.angle, CatchControl::cc_ctrl.ARM2.angle);
+                }
                 break;
             case MID_POS://左侧二档
                 if (RemoteControl::rcInfo.sRight == UP_POS) {

@@ -24,16 +24,16 @@ PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 20.0f,
-        .ki = 0.2f,
-        .kd = 0.2f,
+        .kp = 30.0f,
+        .ki = 0.002f,
+        .kd = 0.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 3.0f,
+        .kp = 2.0f,
         .ki = 0.0f,
         .kd = 0.0f,
         .componentKpMax = 2000,
@@ -94,27 +94,51 @@ MOTOR_INIT_t arm3MotorInit = {
 //Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
 //Emm42Motor ArmMotorZ(&arm3CommuInit,&arm3MotorInit);
 bool ArmStopFlag = true;
-float Position,Angle;
+float Position, Angle;
+static float arm1Angle, arm2Angle;
+static float arm1_angle;
 
 void ArmStop() {
     ArmStopFlag = true;
-   // TrayMotor.Stop();
-    //ArmMotor1.Stop();
-   // ArmMotor2.Stop();
-   // ArmMotorZ.Stop();
+    // TrayMotor.Stop();
+   // ArmMotor1.Stop();
+    //  ArmMotor2.Stop();
+    // ArmMotorZ.Stop();
 }
 
 void ArmAngleCalc() {
     // TrayMotor.SetTargetAngle(Angle);
-     //ArmMotor1.SetTargetAngle(Position);
-    // ArmMotor2.SetTargetAngle(Angle);
-   // ArmMotorZ.SetTargetPosition(Position);
+ //    ArmMotor1.SetTargetAngle(arm1Angle);
+  //   ArmMotor2.SetTargetAngle(arm2Angle);
+  //  ArmMotorZ.SetTargetPosition(Position);
 }
+/*void ArmAngleCalc() {
+    arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;
+    float arm2_angle = arm2Angle / 16384.0f * 360.0f;
+    arm1_angle -= PI;
+    if (arm2_angle > 180) {
+        arm2_angle -= 360;
+    }
+    if (arm1_angle > 1.2) {
+        arm1_angle = 1.2f;
+    } else if (arm1_angle < -1.2f) {
+        arm1_angle = -1.2f;
+    }
+    if (arm2_angle > 90) {
+        arm2_angle = 90;
+    } else if (arm2_angle < -90) {
+        arm2_angle = -90;
+    }
+    ArmMotor1.SetTargetAngle(arm1_angle);
+    ArmMotor2.SetTargetAngle(arm2_angle);
 
-void ArmSetAngle(float position, float angle) {
+}*/
+
+void ArmSetAngle(float Arm1Angle, float Arm2Angle) {
     ArmStopFlag = false;
-    Position = position;
-    Angle = angle;
+
+    arm1Angle = Arm1Angle;
+    arm2Angle = Arm2Angle;
 
 }
 

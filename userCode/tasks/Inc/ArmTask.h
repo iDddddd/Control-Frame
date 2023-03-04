@@ -11,11 +11,12 @@
 #include "OtherMotor.h"
 #include "Servo.h"
 
+#define PI 3.1415926f
 void AngleCalc();
 
 void ArmStop();
 
-void ArmSetAngle(float position, float angle);
+void ArmSetAngle(float Arm1Angle, float Arm2Angle);
 
 void ArmAngleCalc();
 

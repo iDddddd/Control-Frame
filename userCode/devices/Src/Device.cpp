@@ -209,9 +209,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (init_Flag == 0)return;
     if (htim == &htim10) {//1ms
         //HAL_GPIO_TogglePin(LED_R_GPIO_Port,LED_R_Pin);
-
-    }
-    if (htim == &htim6) {
         aRGB_led_change(period);
 
         bsp_ADC_vccMoni();
@@ -224,13 +221,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         ARMHandle();
         Motor::MotorsHandle();
         CAN::CANPackageSend();
-        RS485::RS485PackageSend();
+
 
         if (cnt > 20) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
             cnt = 0;
         }
 
+    }
+    if (htim == &htim6) {
+        RS485::RS485PackageSend();
 
     }
     if (htim == &htim7) {
@@ -315,9 +315,9 @@ int main() {
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
 
-    //  HAL_TIM_Base_Start_IT(&htim1);
-    // HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-    //HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
+    HAL_TIM_Base_Start_IT(&htim1);//舵机
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
 
     //TODO adc校准？
     RemoteControl::init();
@@ -327,7 +327,7 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_TIM_Base_Start_IT(&htim7);
     CAN::CANInit();
-    Motor_4310::Init();
+    //  Motor_4310::Init();
     IMU::imu.Init();
     ChassisStart();
 

@@ -18,7 +18,7 @@ typedef struct {
 typedef struct {
     ARM_col_t ARM1;
     ARM_col_t ARM2;
-    ARM_col_t ARM3;
+    uint8_t ARM_Z_Flag;
     uint16_t x;
     uint16_t y;
     uint8_t TrayFlag;
@@ -37,7 +37,7 @@ public:
 
     static void IT_Handle();
 
-    static void GET_Data(const volatile uint8_t *buf);
+  //  static void GET_Data(const volatile uint8_t *buf);
 
 };
 

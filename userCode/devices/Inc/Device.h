@@ -19,10 +19,10 @@
 #include "gpio.h"
 
 
-#include <stdarg.h>
-#include <string.h>
-#include <math.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstring>
+#include <cmath>
+#include <cstdio>
 #include "usbd_cdc_if.h"
 
 #define INRANGE(NUM, MIN, MAX) \
