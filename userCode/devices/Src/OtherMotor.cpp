@@ -155,9 +155,9 @@ void Motor_4310::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
         canQueue.Data[canQueue.rear].message[0] = *Motor4310_Angle;
-        canQueue.Data[canQueue.rear].message[1] = *(Motor4310_Angle+1);
-        canQueue.Data[canQueue.rear].message[2] = *(Motor4310_Angle+2);
-        canQueue.Data[canQueue.rear].message[3] = *(Motor4310_Angle+3);
+        canQueue.Data[canQueue.rear].message[1] = *(Motor4310_Angle + 1);
+        canQueue.Data[canQueue.rear].message[2] = *(Motor4310_Angle + 2);
+        canQueue.Data[canQueue.rear].message[3] = *(Motor4310_Angle + 3);
         canQueue.Data[canQueue.rear].message[4] = 0x00;
         canQueue.Data[canQueue.rear].message[5] = 0x00;
         canQueue.Data[canQueue.rear].message[6] = 0x00;
@@ -178,92 +178,66 @@ void Motor_4310::Handle() {
 
 }
 
-int32_t Motor_4310::AngleCalc() {
-    float Angle;
-    Angle = targetAngle * 12.5f / 360;
-    return float_to_uint(Angle, -12.5, 12.5, 16);
-}
-
-float Motor_4310::uint_to_float(int x_int, float x_min, float x_max, int bits) {
-    /// converts unsigned int to float, given range and number of bits ///
-    float span = x_max - x_min;
-    float offset = x_min;
-    return ((float) x_int) * span / ((float) ((1 << bits) - 1)) + offset;
-}
-
-int Motor_4310::float_to_uint(float x, float x_min, float x_max, int bits) {
-/// Converts a float to an unsigned int, given range and number of bits///
-    float span = x_max - x_min;
-    float offset = x_min;
-    return (int) ((x - offset) * ((float) ((1 << bits) - 1)) / span);
-}
-
 /*Emm42电机类------------------------------------------------------------------*/
 Emm42Motor::Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : Motor(motorInit, this),
                                                                            CAN(commuInit) {
-    ID_Bind_Rx(RxMessage);
 }
 
-void Emm42Motor::GeneratePositon() {
-    CAN_TxHeaderTypeDef txHeaderTypeDef;
-    uint32_t box;
-    uint8_t Message[2] = {0x36, 0x6B};
-
-    txHeaderTypeDef.StdId = 0x01;
-    txHeaderTypeDef.DLC = 0x02;
-    txHeaderTypeDef.IDE = CAN_ID_STD;
-    txHeaderTypeDef.RTR = CAN_RTR_DATA;
-    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-
-    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, Message, &box);
-}
 
 void Emm42Motor::CANMessageGenerate() {
     if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xFD;
-        canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
-        canQueue.Data[canQueue.rear].message[2] = 0xFF;
-        canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
-        canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
-        canQueue.Data[canQueue.rear].message[7] = 0x6B;
+               canQueue.Data[canQueue.rear].ID = can_ID;
+               canQueue.Data[canQueue.rear].canType = canType;
+               canQueue.Data[canQueue.rear].message[0] = 0xFD;
+               canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
+               canQueue.Data[canQueue.rear].message[2] = 0xFF;
+               canQueue.Data[canQueue.rear].message[3] = 0x00;
+               canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
+               canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
+               canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
+               canQueue.Data[canQueue.rear].message[7] = 0x6B;
 
         canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
     }
 }
 
 void Emm42Motor::Handle() {
-    GeneratePositon();
-    PositionCalc();
-    int32_t targetPos = targetPosition / 8.4f * 65536.0f;
+
+    /*int32_t targetPos = targetPosition / 8.4f * 65536.0f;
     int32_t Pos = targetPos - NowPos;
-    if (Pos <= 0) {
-        Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF
-        Pos *= -1;
-    } else {
-        Emm42Motor_Dir = 0x12;
-    }
+      if (Pos <= 0) {
+          Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF
+          Pos *= -1;
+      } else {
+          Emm42Motor_Dir = 0x12;
+      }
+      if (stopFlag) {
+          Emm42Motor_Pos = 0;
+      } else {
+          Emm42Motor_Pos = Pos / 65536 * 3200;
+      }*/
     if (stopFlag) {
         Emm42Motor_Pos = 0;
+        CANMessageGenerate();
     } else {
-        Emm42Motor_Pos = Pos / 65536 * 3200;
+        if (NowPos == UP && TarPos == DOWN) {
+            Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF,最大为4FF
+            Emm42Motor_Pos = 3200;
+            CANMessageGenerate();
+            NowPos = DOWN;
+        } else if (NowPos == DOWN && TarPos == UP) {
+            Emm42Motor_Dir = 0x12;//1表示往上
+            Emm42Motor_Pos = 3200;
+            CANMessageGenerate();
+            NowPos = UP;
+        }
     }
-    CANMessageGenerate();
 }
 
-void Emm42Motor::PositionCalc() {
-
-    NowPos = (RxMessage[1] << 24u) | (RxMessage[2] << 16u) | (RxMessage[3] << 8u) | (RxMessage[4]);
-
-}
-
-void Emm42Motor::SetTargetPosition(float _targetposition) {
+void Emm42Motor::SetTargetPosition(MOTORZ_POS_t pos) {
     stopFlag = false;
-    targetPosition = _targetposition;
+    TarPos = pos;
 }
 
 

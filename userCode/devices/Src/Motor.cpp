@@ -281,21 +281,4 @@ uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {
     return crc;
 }
 
-void Motor_4315::MotorGoBack() {
-
-    for (int i = 0; i < 4; i++) {
-        rsmessage[i][0] = 0x3E;//协议头
-        rsmessage[i][1] = 0x00;//包序号
-        rsmessage[i][2] = 0x01 + i; //ID
-        rsmessage[i][3] = 0x52;//相对位置闭环控制命令码
-        rsmessage[i][4] = 0x00;//数据包长度
-
-        uint16_t crc = CRC16Calc(rsmessage[i], 5);
-        rsmessage[i][5] = crc;
-        rsmessage[i][6] = crc >> 8u;
-        HAL_UART_Transmit_IT(&huart1, rsmessage[i], 7);
-    }
-
-}
-
 

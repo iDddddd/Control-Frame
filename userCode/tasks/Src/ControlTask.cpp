@@ -17,7 +17,7 @@ void CtrlHandle() {
                     ArmSetAngle(RemoteControl::rcInfo.left_col, RemoteControl::rcInfo.left_col * 90);
                     Headmemory();
                 }else if (RemoteControl::rcInfo.sRight == MID_POS){
-                    ArmSetAngle(CatchControl::cc_ctrl.ARM1.angle, CatchControl::cc_ctrl.ARM2.angle);
+                    CatchControl::AutoTask();
                 }
                 break;
             case MID_POS://左侧二档

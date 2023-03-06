@@ -4,13 +4,19 @@
 
 #include "AutoMove.h"
 
-Move::Move() {
+float Move::expectPos[3]{};
+uint8_t Move::FinishFlag = 0;
 
-}
+Move::Move(){
+    static uint8_t num = 0;
+    Index = num;
+    num++;
+};
 
 Move::~Move() = default;
 
 void Move::Calc(float target) {
+    stopFlag = false;
     d_max = target;
     d1 = v_max * v_max / (2 * a);
     d2 = target - 2 * d1;
@@ -20,113 +26,72 @@ void Move::Calc(float target) {
     }
 }
 
-void Move::Handle_X() {
-    static float x = 0;
-    if (x < d1) {
-        v += a * 0.001f;
-        x += (2.0f * v - a * 0.001f) / 2 * 0.001f;
-    } else if (x > (d1 + d2)) {
-        v -= a * 0.001f;
-        x += (2.0f * v + a * 0.001f) / 2 * 0.001f;
-    } else if (x > d1 && x < (d1 + d2)) {
-        x += v * 0.001f;
-    } else if (x >= d_max) {
-        v = 0;
-    }
 
-    if (IMU::imu.position.displace[1] < x) {
-        v_rel = v + 0.001f * a;
-    } else if (IMU::imu.position.displace[1] > x) {
-        v_rel = v - 0.001f * a;
-    } else if (v < 0) {
-        v_rel = 0;
-    } else {
-        v_rel = v;
-    }
-
-    if (v_rel > v_max) {
-        v_rel = v_max;
-    } else if (v_rel < 0) {
-        v_rel = 0;
-        a = 0;
-    }
-
-
+void Move::Stop() {
+    stopFlag = true;
 }
 
-void Move::Handle_Y() {
-    static float y = 0;
-    if (y < d1) {
-        v += a * 0.001f;
-        y += (2 * v - a * 0.001f) / 2 * 0.001f;
-    } else if (y > (d1 + d2)) {
-        v -= a * 0.001f;
-        y += (2 * v + a * 0.001f) / 2 * 0.001f;
-    } else if (y > d1 && y < (d1 + d2)) {
-        y += v * 0.001f;
-    } else if (y >= d_max) {
-        v = 0;
-    }
-
-    if (IMU::imu.position.displace[0] < y) {
-        v_rel = v + 0.001f * a;
-    } else if (IMU::imu.position.displace[0] > y) {
-        v_rel = v - 0.001f * a;
-    } else if (v < 0) {
+void Move::Handle(float &reference) {
+    if (stopFlag) {
         v_rel = 0;
+        reference = 0;
     } else {
-        v_rel = v;
-    }
+        if (expectPos[Index] < d1) {
+            v += a * 0.001f;
+            expectPos[Index] += (2 * v - a * 0.001f) / 2 * 0.001f;
+        } else if (expectPos[Index] > (d1 + d2)) {
+            v -= a * 0.001f;
+            expectPos[Index] += (2 * v + a * 0.001f) / 2 * 0.001f;
+        } else if (expectPos[Index] > d1 && expectPos[Index] < (d1 + d2)) {
+            expectPos[Index] += v * 0.001f;
+        } else if (expectPos[Index] >= d_max) {
+            v = 0;
+        }
 
-    if (v_rel > v_max) {
-        v_rel = v_max;
-    } else if (v_rel < 0) {
-        v_rel = 0;
-        a = 0;
-    }
+        if (reference < expectPos[Index]) {
+            v_rel = v + 0.001f * a;
+        } else if (reference > expectPos[Index]) {
+            v_rel = v - 0.001f * a;
+        } else if (v < 0) {
+            v_rel = 0;
+        } else {
+            v_rel = v;
+        }
 
+        if (v_rel <= 0) {
+            stopFlag = true;
+            FinishFlag +=1;
+        }
+    }
 }
 
-void Move::Handle_O() {
-    static float o = 0;
-    if (o < d1) {
-        v += a * 0.001f;
-        o += (2 * v - a * 0.001f) / 2 * 0.001f;
-    } else if (o > (d1 + d2)) {
-        v -= a * 0.001f;
-        o += (2 * v + a * 0.001f) / 2 * 0.001f;
-    } else if (o > d1 && o < (d1 + d2)) {
-        o += v * 0.001f;
-    } else if (o >= d_max) {
-        v = 0;
-    }
+AutoMove::AutoMove() = default;
 
-    if (IMU::imu.attitude.yaw < o) {
-        v_rel = v + 0.001f * a;
-    } else if (IMU::imu.attitude.yaw > o) {
-        v_rel = v - 0.001f * a;
-    } else if (v < 0) {
-        v_rel = 0;
+void AutoMove::Handle() {
+    if (StopFlag) {
+        StopMove();
     } else {
-        v_rel = v;
+        x.Handle(IMU::imu.position.displace[1]);
+        y.Handle(IMU::imu.position.displace[0]);
+        y.Handle(IMU::imu.attitude.yaw);
     }
-    if (v_rel > v_max) {
-        v_rel = v_max;
-    } else if (v_rel < 0) {
-        v_rel = 0;
-        a = 0;
-    }
-
+  /*  if(Move::FinishFlag == 3){
+        uint8_t flag = 0x01;
+        HAL_UART_Transmit_IT(&huart6,&flag,1);
+        StopFlag = true;
+    }//完成后发送*/
 }
 
-AutoMove::AutoMove(float x_distance, float y_distance, float o_angle) {
+void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
+    StopFlag = false;
     x.Calc(x_distance);
     y.Calc(y_distance);
     o.Calc(o_angle);
 }
 
-void AutoMove::Handle() {
-    x.Handle_X();
-    y.Handle_Y();
-    o.Handle_O();
+void AutoMove::StopMove() {
+    StopFlag = true;
+    x.Stop();
+    y.Stop();
+    o.Stop();
 }

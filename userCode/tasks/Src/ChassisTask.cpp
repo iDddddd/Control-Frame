@@ -71,7 +71,7 @@ Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
 Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 
-AutoMove autoMove(2, 0, 0);
+AutoMove autoMove;
 bool ChassisStopFlag = true;
 float FBVelocity, LRVelocity, RTVelocity;
 float ZeroYaw;
@@ -88,7 +88,6 @@ void ChassisHandle() {
     if (!ChassisStopFlag) {
         WheelsSpeedCalc(FBVelocity, LRVelocity, RTVelocity);
     }
-
 }
 
 /**
@@ -103,7 +102,10 @@ void ChassisSetVelocity(float _fbV, float _lrV, float _rtV) {
     LRVelocity = _lrV;
     RTVelocity = _rtV;
 }
-
+/**
+ * @brief 无头模式速度设定
+ *
+ */
 void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV) {
     ChassisStopFlag = false;
     FBVelocity = _fbV * cos(IMU::imu.attitude.yaw) - _lrV * sin(IMU::imu.attitude.yaw);
@@ -121,7 +123,9 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
     LRVelocity = _fbV * sin((IMU::imu.attitude.yaw - ZeroYaw)) + _lrV * cos((IMU::imu.attitude.yaw - ZeroYaw));
     RTVelocity = _rtV;
 }
-
+/**
+ * @brief 自动移动设定速度
+ */
 void AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
@@ -137,6 +141,22 @@ void AutoSetVelocity() {
 
 }
 
+void AutoChassisSet(uint16_t x,uint16_t y){
+    autoMove.StartMove(x,y,0);
+}
+/**
+ * @brief 自动模式下执行急停模式的底盘任务处理
+ */
+void AutoChassisStop(){
+    ChassisStopFlag = true;
+
+    Classis_Motor.Stop();
+    RFL.Stop();
+    RFR.Stop();
+    RBL.Stop();
+    RBR.Stop();
+}
+
 /**
  * @brief 执行急停模式的底盘任务处理
  */
@@ -149,6 +169,7 @@ void ChassisStop() {
     RBL.Stop();
     RBR.Stop();
 }
+
 
 int sign(float x) {
     if (x < 0) return -1;

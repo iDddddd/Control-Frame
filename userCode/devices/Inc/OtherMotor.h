@@ -11,7 +11,10 @@
 #include "Motor.h"
 #include "CommuType.h"
 
-
+typedef enum {
+    DOWN = 0,
+    UP
+}MOTORZ_POS_t;
 /*4010电机类------------------------------------------------------------------*/
 class Motor_4010 : public Motor, public CAN {
 public:
@@ -64,12 +67,6 @@ public:
     ~Motor_4310();
 
 private:
-    int32_t AngleCalc();
-
-    float uint_to_float(int x_int, float x_min, float x_max, int bits);
-
-    int float_to_uint(float x, float x_min, float x_max, int bits);
-
     float targetAngle{};
     float targetSpeed{};
 
@@ -78,25 +75,22 @@ private:
 /*Emm42电机类------------------------------------------------------------------*/
 class Emm42Motor : public Motor, public CAN {
 public:
-    uint32_t Emm42Motor_Pos{};
-    uint8_t Emm42Motor_Dir{};
     Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-    uint8_t RxMessage[8]{0};
-    int32_t NowPos{};
+    MOTORZ_POS_t NowPos = DOWN;
+    MOTORZ_POS_t TarPos = DOWN;
+    uint8_t Emm42Motor_Dir{};
+    uint32_t Emm42Motor_Pos{};
     ~Emm42Motor();
-
-    void GeneratePositon();
 
     void CANMessageGenerate() override;
 
     void Handle() override;
 
-    void SetTargetPosition(float _targetposition);
+    void SetTargetPosition(MOTORZ_POS_t pos);
 
 private:
-
     float targetPosition{}; //单位mm
-    void PositionCalc();
+
 };
 
 #endif //RM_FRAME_C_OTHERMOTOR_H

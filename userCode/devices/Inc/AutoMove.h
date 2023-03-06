@@ -10,22 +10,28 @@
 
 class Move {
 public:
+    static float expectPos[3];
+    uint8_t Index;
     float d1{};
     float d2{};
     float d_max{};
     float a = 2;
     float v{};
-    float v_max = 1;
+    float v_max = 2;
     float v_rel{};
+
+    static uint8_t FinishFlag;
 
     Move();
     ~Move();
-
+    bool stopFlag{true};
     void Calc(float target);
-
-    void Handle_X();
+    void Handle(float  &reference);
+/*    void Handle_X();
     void Handle_Y();
-    void Handle_O();
+    void Handle_O();*/
+
+    void Stop();
 
 };
 class AutoMove {
@@ -34,9 +40,10 @@ public:
     Move x;
     Move y;
     Move o;
-
-    AutoMove(float x_distance, float y_distance, float o_angle);
-
+    bool StopFlag{true};
+    AutoMove();
+    void StartMove(float x_distance, float y_distance, float o_angle);
+    void StopMove();
     ~AutoMove() = default;
 
     void Handle();

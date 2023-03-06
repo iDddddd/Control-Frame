@@ -92,26 +92,26 @@ MOTOR_INIT_t arm3MotorInit = {
 //Motor_4010 TrayMotor(&trayCommuInit, &trayMotorInit);
 //Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
 //Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-//Emm42Motor ArmMotorZ(&arm3CommuInit,&arm3MotorInit);
+Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
 static float arm1Angle, arm2Angle;
-static float arm1_angle;
 
 void ArmStop() {
     ArmStopFlag = true;
     // TrayMotor.Stop();
-   // ArmMotor1.Stop();
+    // ArmMotor1.Stop();
     //  ArmMotor2.Stop();
     // ArmMotorZ.Stop();
 }
 
 void ArmAngleCalc() {
     // TrayMotor.SetTargetAngle(Angle);
- //    ArmMotor1.SetTargetAngle(arm1Angle);
-  //   ArmMotor2.SetTargetAngle(arm2Angle);
-  //  ArmMotorZ.SetTargetPosition(Position);
+    //    ArmMotor1.SetTargetAngle(arm1Angle);
+    //   ArmMotor2.SetTargetAngle(arm2Angle);
+    //  ArmMotorZ.SetTargetPosition(Position);
 }
+
 /*void ArmAngleCalc() {
     arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;
     float arm2_angle = arm2Angle / 16384.0f * 360.0f;
@@ -140,6 +140,28 @@ void ArmSetAngle(float Arm1Angle, float Arm2Angle) {
     arm1Angle = Arm1Angle;
     arm2Angle = Arm2Angle;
 
+}
+
+void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
+    float arm1_angle = angle1 / 16384.0f * 2 * 3.1415f;
+    float arm2_angle = angle2 / 16384.0f * 360.0f;
+    arm1_angle -= PI;
+    if (arm2_angle > 180) {
+        arm2_angle -= 360;
+    }
+    if (arm1_angle > 1.2) {
+        arm1_angle = 1.2f;
+    } else if (arm1_angle < -1.2f) {
+        arm1_angle = -1.2f;
+    }
+    if (arm2_angle > 90) {
+        arm2_angle = 90;
+    } else if (arm2_angle < -90) {
+        arm2_angle = -90;
+    }
+    //   ArmMotor1.SetTargetAngle(arm1_angle);
+    //  ArmMotor2.SetTargetAngle(arm2_angle);
+    //ArmMotorZ.SetTargetPosition(static_cast<MOTORZ_POS_t>(pos));
 }
 
 void ARMHandle() {

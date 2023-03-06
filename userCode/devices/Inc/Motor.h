@@ -93,7 +93,6 @@ public:
     ~Motor_4315();
 
 private:
-    void MotorGoBack();
     float realAngle{0};
     float lastAngle{0};
     void AngleCalc();

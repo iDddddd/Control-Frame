@@ -218,7 +218,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         CtrlHandle();
         ChassisHandle();
-        ARMHandle();
+        //ARMHandle();
         Motor::MotorsHandle();
         CAN::CANPackageSend();
 

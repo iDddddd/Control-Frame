@@ -7,6 +7,7 @@
 CC_ctrl_t CatchControl::cc_ctrl{};
 uint16_t CatchControl::data_length;
 uint8_t CatchControl::rx_buff[2][BUFF_SIZE];
+TASK_FLAG_t CatchControl::TaskFlag;
 
 void CatchControl::Init() {
     //使能 DMA 串口接收
@@ -63,39 +64,7 @@ void CatchControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
 
-            int i = 0;
-            while (i < 14) {
-                if (rx_buff[0][i + 0] == 0x7A) {
-                    if (rx_buff[0][i + 1] == 0x01) {
-                        switch (rx_buff[0][i + 2]) {
-                            case 0x01:{
-                                cc_ctrl.ChassisStopFlag = rx_buff[0][i + 7];
-                                break;
-                            }
-                            case 0x02:{
-                                cc_ctrl.x = (rx_buff[0][i + 7] << 8u) | rx_buff[0][i + 8];
-                                cc_ctrl.y = (rx_buff[0][i + 9] << 8u) | rx_buff[0][i + 10];
-                                break;
-                            }
-                            case 0x03:{
-                                cc_ctrl.ARM1.angle = (rx_buff[0][i + 8] << 8u) | rx_buff[0][i + 7];
-                                cc_ctrl.ARM2.angle = (rx_buff[0][i + 10] << 8u) | rx_buff[0][i + 9];
-                                cc_ctrl.ARM_Z_Flag = rx_buff[0][i + 12];
-                                break;
-                            }
-                            case 0x04:{
-                                cc_ctrl.ArmServoFlag = rx_buff[0][i + 7];
-                                break;
-                            }
-                            case 0x05:{
-                                cc_ctrl.TrayFlag = rx_buff[0][i + 8];
-                            }
-                            
-                        }
-                    }
-                }
-                i++;
-            }
+            GetData(0);
 
         } else {
             /* Current memory buffer used is Memory 1 */
@@ -114,45 +83,75 @@ void CatchControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
 
-            int i = 0;
-            while (i < 14) {
-                if (rx_buff[0][i + 0] == 0x7A) {
-                    if (rx_buff[0][i + 1] == 0x01) {
-                        switch (rx_buff[0][i + 2]) {
-                            case 0x01:{
-                                cc_ctrl.ChassisStopFlag = rx_buff[0][i + 7];
-                                break;
-                            }
-                            case 0x02:{
-                                cc_ctrl.x = (rx_buff[0][i + 8] << 8u) | rx_buff[0][i + 7];
-                                cc_ctrl.y = (rx_buff[0][i + 10] << 8u) | rx_buff[0][i + 9];
-                                break;
-                            }
-                            case 0x03:{
-                                cc_ctrl.ARM1.angle = (rx_buff[0][i + 8] << 8u) | rx_buff[0][i + 7];
-                                cc_ctrl.ARM2.angle = (rx_buff[0][i + 10] << 8u) | rx_buff[0][i + 9];
-                                cc_ctrl.ARM_Z_Flag = rx_buff[0][i + 12];
-                                break;
-                            }
-                            case 0x04:{
-                                cc_ctrl.ArmServoFlag = rx_buff[0][i + 7];
-                                break;
-                            }
-                            case 0x05:{
-                                cc_ctrl.TrayFlag = rx_buff[0][i + 8];
-                                break;
-                            }
-
-                        }
-                    }
-                }
-                i++;
-            }
+            GetData(1);
 
         }
-
     }
 }
+
+void CatchControl::GetData(uint8_t bufIndex) {
+    int i = 0;
+    while (i < 14) {
+        if (rx_buff[bufIndex][i + 0] == 0x7A) {
+            if (rx_buff[bufIndex][i + 1] == 0x01) {
+                switch (rx_buff[bufIndex][i + 2]) {
+                    case 0x01:{
+                        TaskFlag = STOP;
+                        cc_ctrl.ChassisStopFlag = rx_buff[0][i + 7];
+                        break;
+                    }
+                    case 0x02:{
+                        TaskFlag = MOVE;
+                        cc_ctrl.x = (rx_buff[0][i + 7] << 8u) | rx_buff[0][i + 8];
+                        cc_ctrl.y = (rx_buff[0][i + 9] << 8u) | rx_buff[0][i + 10];
+
+                        break;
+                    }
+                    case 0x03:{
+                        TaskFlag = ARM;
+                        cc_ctrl.ARM1.angle = (rx_buff[0][i + 8] << 8u) | rx_buff[0][i + 7];
+                        cc_ctrl.ARM2.angle = (rx_buff[0][i + 10] << 8u) | rx_buff[0][i + 9];
+                        cc_ctrl.ARM_Z_Flag = rx_buff[0][i + 12];
+                        break;
+                    }
+                    case 0x04:{
+                        TaskFlag = CLAW;
+                        cc_ctrl.ArmServoFlag = rx_buff[0][i + 7];
+                        break;
+                    }
+                    case 0x05:{
+                        TaskFlag = TRAY;
+                        cc_ctrl.TrayFlag = rx_buff[0][i + 7];
+                        break;
+                    }
+                }
+            }
+        }
+        i++;
+    }
+
+}
+
+void CatchControl::AutoTask() {
+    switch (TaskFlag) {
+        case STOP:
+            AutoChassisStop();
+            break;
+        case MOVE:
+            AutoChassisSet(cc_ctrl.x,cc_ctrl.y);
+            break;
+        case ARM:
+            AutoArmSet(cc_ctrl.ARM1.angle,cc_ctrl.ARM2.angle,cc_ctrl.ARM_Z_Flag);
+            break;
+        case TRAY:
+            AutoTraySet(cc_ctrl.TrayFlag);
+            break;
+        case CLAW:
+            AutoClawSet(cc_ctrl.ArmServoFlag);
+            break;
+    }
+}
+
 
 void USART6_IRQHandler() {
 
