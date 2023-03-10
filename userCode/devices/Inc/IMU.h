@@ -116,7 +116,7 @@ struct IMU_buffer_t {
 class IMU : private Device {
 
 
-    void ErrorHandle();
+    void ErrorHandle() override;
 
     //读取数据
     IMU_buffer_t buf;
@@ -129,7 +129,7 @@ class IMU : private Device {
             .imu_start_dma_flag = 0
     };
 
-    void imu_cmd_spi_dma(void);
+    void imu_cmd_spi_dma();
 
     void filter(float *current, IMU_Filter_t Filter);
 
@@ -164,7 +164,7 @@ class IMU : private Device {
     void get_displace(float displace[3], float _velocity[3], float velocity[3]);
 
 public:
-    void Handle();
+    void Handle() override;
 
     void ITHandle(uint16_t GPIO_Pin);
 

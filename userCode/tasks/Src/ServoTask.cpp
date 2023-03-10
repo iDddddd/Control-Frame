@@ -21,7 +21,7 @@ SERVO_INIT_T TrayServo = {
 
 Servo armServo(&ArmServo);
 Servo trayServo(&TrayServo);
-void AutoTraySet(uint8_t trayflag){
+/*void AutoTraySet(uint8_t trayflag){
     if(trayflag == 1){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,
                               930);
@@ -31,7 +31,7 @@ void AutoTraySet(uint8_t trayflag){
     }
     uint8_t flag = 0x01;
     HAL_UART_Transmit_IT(&huart6,&flag,1);
-}
+}*/
 void AutoClawSet(uint8_t clawflag){
     if(clawflag == 1){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,

@@ -42,15 +42,15 @@ PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 MOTOR_INIT_t trayMotorInit = {
-        .speedPIDp = &pidRegulator3,
-        .anglePIDp = &pidRegulator4,
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
         .reductionRatio = 1.0f
 
 };
 
 COMMU_INIT_t trayCommuInit = {
         ._id = 0x145,
-        .ctrlType = POSITION_Double,
+        .ctrlType = DIRECT,
         .canType = can2
 
 };
@@ -89,10 +89,10 @@ MOTOR_INIT_t arm3MotorInit = {
         .reductionRatio = 1.0f
 
 };
-//Motor_4010 TrayMotor(&trayCommuInit, &trayMotorInit);
+//Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
 //Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
 //Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
+//Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
 static float arm1Angle, arm2Angle;
@@ -111,7 +111,9 @@ void ArmAngleCalc() {
     //   ArmMotor2.SetTargetAngle(arm2Angle);
     //  ArmMotorZ.SetTargetPosition(Position);
 }
-
+void AutoTraySet(uint8_t trayflag){
+   // TrayMotor.SetTargetPos(static_cast<MOTOR_POS_t>(trayflag));
+}
 /*void ArmAngleCalc() {
     arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;
     float arm2_angle = arm2Angle / 16384.0f * 360.0f;

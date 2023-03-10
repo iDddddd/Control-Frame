@@ -15,6 +15,11 @@ typedef enum {
     DOWN = 0,
     UP
 }MOTORZ_POS_t;
+typedef enum{
+    RED = 0,
+    BLUE,
+    GREEN
+}MOTOR_POS_t;
 /*4010电机类------------------------------------------------------------------*/
 class Motor_4010 : public Motor, public CAN {
 public:
@@ -44,6 +49,28 @@ private:
     void MotorStateUpdate();
 
     int16_t IntensityCalc();
+};
+
+/*4310托盘电机类------------------------------------------------------------------*/
+class Motor_4010_TRAY : public Motor, public CAN {
+public:
+    uint8_t TxDir;//0为顺时针，1为逆时针
+    uint16_t TxAngle;
+    uint16_t TxSpeed;
+
+    void CANMessageGenerate() override;
+
+    void Handle() override;
+
+    void SetTargetPos(MOTOR_POS_t _targetAngle);
+
+    Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+
+    ~Motor_4010_TRAY();
+
+private:
+    MOTOR_POS_t targetPos{};
+
 };
 
 /*4310电机类------------------------------------------------------------------*/

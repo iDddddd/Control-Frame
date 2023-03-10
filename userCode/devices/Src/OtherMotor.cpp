@@ -243,4 +243,50 @@ void Emm42Motor::SetTargetPosition(MOTORZ_POS_t pos) {
 
 Emm42Motor::~Emm42Motor() = default;
 
+/*4310托盘电机类------------------------------------------------------------------*/
+Motor_4010_TRAY::Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit): CAN(commuInit), Motor(motorInit, this) {
 
+}
+
+void Motor_4010_TRAY::SetTargetPos(MOTOR_POS_t _targetAngle) {
+    targetPos = _targetAngle;
+}
+
+void Motor_4010_TRAY::Handle() {
+    if (stopFlag) {
+        TxSpeed = 0;
+    } else {
+        TxSpeed = 300;
+        switch (targetPos) {
+            case RED:
+                TxAngle = 2000;
+                break;
+            case BLUE:
+                TxAngle = 14000;
+                break;
+            case GREEN:
+                TxAngle = 26000;
+                break;
+        }
+    }
+}
+
+void Motor_4010_TRAY::CANMessageGenerate() {
+    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+
+        canQueue.Data[canQueue.rear].ID = can_ID;
+        canQueue.Data[canQueue.rear].canType = canType;
+        canQueue.Data[canQueue.rear].message[0] = 0xA6;
+        canQueue.Data[canQueue.rear].message[1] = 0x00;
+        canQueue.Data[canQueue.rear].message[2] = TxSpeed;
+        canQueue.Data[canQueue.rear].message[3] = TxSpeed >> 8u;
+        canQueue.Data[canQueue.rear].message[4] = TxAngle;
+        canQueue.Data[canQueue.rear].message[5] = TxAngle >> 8u;
+        canQueue.Data[canQueue.rear].message[6] = 0;
+        canQueue.Data[canQueue.rear].message[7] = 0;
+
+        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+    }
+}
+
+Motor_4010_TRAY::~Motor_4010_TRAY() = default;
