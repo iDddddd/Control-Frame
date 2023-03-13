@@ -114,7 +114,7 @@ public:
 
     FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_init2,
                     COMMU_INIT_t *commu_init3, COMMU_INIT_t *commu_init4, MOTOR_INIT_t *motor_init1,
-                    MOTOR_INIT_t *motor_init2);
+                    MOTOR_INIT_t *motor_init2,MOTOR_INIT_t *motor_init3,MOTOR_INIT_t *motor_init4);
 
     ~FOUR_Motor_4010();
 

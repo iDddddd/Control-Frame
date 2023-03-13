@@ -7,10 +7,12 @@
 float Move::expectPos[3]{};
 uint8_t Move::FinishFlag = 0;
 
-Move::Move(){
-    static uint8_t num = 0;
-    Index = num;
-    num++;
+Move::Move() {
+    a = 0.5;
+    v_max = 1;
+    pid.kp = 1;
+    pid.ki = 0;
+    pid.kd = 5;
 };
 
 Move::~Move() = default;
@@ -24,6 +26,8 @@ void Move::Calc(float target) {
         d1 = target / 2;
         d2 = 0;
     }
+
+
 }
 
 
@@ -36,7 +40,9 @@ void Move::Handle(float &reference) {
         v_rel = 0;
         reference = 0;
     } else {
-        if (expectPos[Index] < d1) {
+        if (expectPos[Index] >= d_max) {
+            v = 0;
+        }else if (expectPos[Index] < d1) {
             v += a * 0.001f;
             expectPos[Index] += (2 * v - a * 0.001f) / 2 * 0.001f;
         } else if (expectPos[Index] > (d1 + d2)) {
@@ -44,11 +50,9 @@ void Move::Handle(float &reference) {
             expectPos[Index] += (2 * v + a * 0.001f) / 2 * 0.001f;
         } else if (expectPos[Index] > d1 && expectPos[Index] < (d1 + d2)) {
             expectPos[Index] += v * 0.001f;
-        } else if (expectPos[Index] >= d_max) {
-            v = 0;
         }
 
-        if (reference < expectPos[Index]) {
+        /*if (reference < expectPos[Index]) {
             v_rel = v + 0.001f * a;
         } else if (reference > expectPos[Index]) {
             v_rel = v - 0.001f * a;
@@ -56,16 +60,19 @@ void Move::Handle(float &reference) {
             v_rel = 0;
         } else {
             v_rel = v;
-        }
-
+        }*/
+        v_rel = v + pid.PIDCalc(expectPos[Index],reference,1);
         if (v_rel <= 0) {
             stopFlag = true;
             FinishFlag +=1;
         }
     }
 }
-
-AutoMove::AutoMove() = default;
+AutoMove::AutoMove() {
+    x.Index = 0;
+    y.Index = 1;
+    o.Index = 2;
+}
 
 void AutoMove::Handle() {
     if (StopFlag) {
@@ -75,11 +82,11 @@ void AutoMove::Handle() {
         y.Handle(IMU::imu.position.displace[0]);
         y.Handle(IMU::imu.attitude.yaw);
     }
-  /*  if(Move::FinishFlag == 3){
-        uint8_t flag = 0x01;
-        HAL_UART_Transmit_IT(&huart6,&flag,1);
-        StopFlag = true;
-    }//完成后发送*/
+    /*  if(Move::FinishFlag == 3){
+          uint8_t flag = 0x01;
+          HAL_UART_Transmit_IT(&huart6,&flag,1);
+          StopFlag = true;
+      }//完成后发送*/
 }
 
 void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
@@ -87,6 +94,9 @@ void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
     x.Calc(x_distance);
     y.Calc(y_distance);
     o.Calc(o_angle);
+    IMU::imu.position.displace[0] = 0;
+    IMU::imu.position.displace[1] = 0;
+    Move::FinishFlag = 0;
 }
 
 void AutoMove::StopMove() {

@@ -15,11 +15,11 @@ public:
     float d1{};
     float d2{};
     float d_max{};
-    float a = 2;
+    float a;
     float v{};
-    float v_max = 2;
+    float v_max;
     float v_rel{};
-
+    EASY_PID pid;
     static uint8_t FinishFlag;
 
     Move();

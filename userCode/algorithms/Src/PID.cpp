@@ -3,24 +3,26 @@
 //
 
 #include "PID.h"
+
 void PID::Reset() {
-     PIDInfo.ref = 0;
-     PIDInfo.fdb = 0;
-     PIDInfo.err[0] = 0;
-     PIDInfo.err[1] = 0;
-     PIDInfo.err[2] = 0;
-     PIDInfo.err[3] = 0;
-     PIDInfo.errSum = 0;
+    PIDInfo.ref = 0;
+    PIDInfo.fdb = 0;
+    PIDInfo.err[0] = 0;
+    PIDInfo.err[1] = 0;
+    PIDInfo.err[2] = 0;
+    PIDInfo.err[3] = 0;
+    PIDInfo.errSum = 0;
 
-     PIDInfo.componentKp = 0;
-     PIDInfo.componentKi = 0;
-     PIDInfo.componentKd = 0;
+    PIDInfo.componentKp = 0;
+    PIDInfo.componentKi = 0;
+    PIDInfo.componentKd = 0;
 
-     PIDInfo.output = 0;
+    PIDInfo.output = 0;
 
 }
+
 void PID::Reset(PID_Regulator_t *pidRegulator) {
-    if(pidRegulator != nullptr)PIDInfo = *pidRegulator;
+    if (pidRegulator != nullptr)PIDInfo = *pidRegulator;
 }
 
 /**
@@ -29,7 +31,7 @@ void PID::Reset(PID_Regulator_t *pidRegulator) {
  * @param feedback 反馈量
  * @return 控制量
  */
-float PID::PIDCalc(float target,float feedback) {
+float PID::PIDCalc(float target, float feedback) {
     PIDInfo.fdb = feedback;
     PIDInfo.ref = target;
     PIDInfo.err[3] = PIDInfo.ref - PIDInfo.fdb;
@@ -66,3 +68,11 @@ float PID::PIDCalc(float target, float feedback, float max) {
     return PIDInfo.output;
 }
 
+float EASY_PID::PIDCalc(float target, float nowdata, float max) {
+    float error = target - nowdata;
+    integral = integral + error;
+    out = kp * error + ki * integral + kd * (error - lasterror);
+    lasterror = error;
+    INRANGE(out,-1*max,max);
+    return out;
+}

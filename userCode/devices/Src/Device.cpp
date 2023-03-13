@@ -218,7 +218,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         CtrlHandle();
         ChassisHandle();
-        //ARMHandle();
+        ARMHandle();
         Motor::MotorsHandle();
         CAN::CANPackageSend();
 
@@ -327,7 +327,7 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_TIM_Base_Start_IT(&htim7);
     CAN::CANInit();
-    //  Motor_4310::Init();
+    Motor_4310::Init();
     IMU::imu.Init();
     ChassisStart();
 

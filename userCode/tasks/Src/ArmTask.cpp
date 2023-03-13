@@ -24,18 +24,18 @@ PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 30.0f,
-        .ki = 0.002f,
-        .kd = 0.0f,
+        .kp = 4.03f,
+        .ki = 0.005f,
+        .kd = 0.01f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 2.0f,
-        .ki = 0.0f,
-        .kd = 0.0f,
+        .kp = 6.03f,
+        .ki = 0.01f,
+        .kd = 5.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
@@ -90,32 +90,31 @@ MOTOR_INIT_t arm3MotorInit = {
 
 };
 //Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
-//Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
-//Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
+Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
+Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
 //Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
 static float arm1Angle, arm2Angle;
-
 void ArmStop() {
     ArmStopFlag = true;
     // TrayMotor.Stop();
-    // ArmMotor1.Stop();
-    //  ArmMotor2.Stop();
+     ArmMotor1.Stop();
+      ArmMotor2.Stop();
     // ArmMotorZ.Stop();
 }
 
 void ArmAngleCalc() {
-    // TrayMotor.SetTargetAngle(Angle);
-    //    ArmMotor1.SetTargetAngle(arm1Angle);
-    //   ArmMotor2.SetTargetAngle(arm2Angle);
+  //   TrayMotor.SetTargetAngle(Angle);
+        ArmMotor1.SetTargetAngle(arm1Angle);
+       ArmMotor2.SetTargetAngle(arm2Angle);
     //  ArmMotorZ.SetTargetPosition(Position);
 }
 void AutoTraySet(uint8_t trayflag){
    // TrayMotor.SetTargetPos(static_cast<MOTOR_POS_t>(trayflag));
 }
 /*void ArmAngleCalc() {
-    arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;
+    float arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;
     float arm2_angle = arm2Angle / 16384.0f * 360.0f;
     arm1_angle -= PI;
     if (arm2_angle > 180) {
@@ -132,7 +131,7 @@ void AutoTraySet(uint8_t trayflag){
         arm2_angle = -90;
     }
     ArmMotor1.SetTargetAngle(arm1_angle);
-    ArmMotor2.SetTargetAngle(arm2_angle);
+   // ArmMotor2.SetTargetAngle(arm2_angle);
 
 }*/
 
@@ -145,12 +144,13 @@ void ArmSetAngle(float Arm1Angle, float Arm2Angle) {
 }
 
 void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
-    float arm1_angle = angle1 / 16384.0f * 2 * 3.1415f;
+    float arm1_angle = angle1 / 16384.0f * 2 * 3.1415926f;
     float arm2_angle = angle2 / 16384.0f * 360.0f;
     arm1_angle -= PI;
-    if (arm2_angle > 180) {
+    /*if (arm2_angle > 180) {
         arm2_angle -= 360;
-    }
+    }*/
+    arm2_angle -= 180;
     if (arm1_angle > 1.2) {
         arm1_angle = 1.2f;
     } else if (arm1_angle < -1.2f) {
@@ -161,8 +161,8 @@ void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
     } else if (arm2_angle < -90) {
         arm2_angle = -90;
     }
-    //   ArmMotor1.SetTargetAngle(arm1_angle);
-    //  ArmMotor2.SetTargetAngle(arm2_angle);
+       ArmMotor1.SetTargetAngle(arm1_angle);
+      ArmMotor2.SetTargetAngle(arm2_angle);
     //ArmMotorZ.SetTargetPosition(static_cast<MOTORZ_POS_t>(pos));
 }
 

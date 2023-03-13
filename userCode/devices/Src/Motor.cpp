@@ -55,16 +55,16 @@ void Motor::Stop() {
  */
 FOUR_Motor_4010::FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_init2,
                                  COMMU_INIT_t *commu_init3, COMMU_INIT_t *commu_init4, MOTOR_INIT_t *motor_init1,
-                                 MOTOR_INIT_t *motor_init2)
+                                 MOTOR_INIT_t *motor_init2,MOTOR_INIT_t *motor_init3,MOTOR_INIT_t *motor_init4)
         : Motor(motor_init1, this) {
     canIDs[0] = commu_init1->_id;
     canIDs[1] = commu_init2->_id;
     canIDs[2] = commu_init3->_id;
     canIDs[3] = commu_init4->_id;
     if (motor_init1->speedPIDp) speedPIDs[0].PIDInfo = *motor_init1->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[1].PIDInfo = *motor_init1->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[2].PIDInfo = *motor_init1->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[3].PIDInfo = *motor_init2->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[1].PIDInfo = *motor_init2->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[2].PIDInfo = *motor_init3->speedPIDp;
+    if (motor_init1->speedPIDp) speedPIDs[3].PIDInfo = *motor_init4->speedPIDp;
     FOURID_Bind_Rx(canIDs, RxMessage);
 
 }

@@ -8,7 +8,7 @@ constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = -0.19f,
+        .kp = -0.215f,
         .ki = -0.0004f,
         .kd = 0,
         .componentKpMax = 2000,
@@ -17,8 +17,17 @@ PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 0.19f,
+        .kp = 0.215f,
         .ki = 0.0004f,
+        .kd = 0,
+        .componentKpMax = 2000,
+        .componentKiMax = 0,
+        .componentKdMax = 0,
+        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
+};
+PID_Regulator_t pidRegulator8 = {//此为储存pid参数的结构体，四个底盘电机共用
+        .kp = -0.215f,
+        .ki = -0.0004f,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -35,7 +44,11 @@ MOTOR_INIT_t chassisMotorInit2 = {//四个底盘电机共用的初始化结构�
         .anglePIDp = nullptr,
         .reductionRatio = 1.0f
 };
-
+MOTOR_INIT_t chassisMotorInit3 = {//四个底盘电机共用的初始化结构体
+        .speedPIDp = &pidRegulator8,
+        .anglePIDp = nullptr,
+        .reductionRatio = 1.0f
+};
 MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
@@ -64,7 +77,7 @@ COMMU_INIT_t chassisCommuInit4 = {
 
 
 FOUR_Motor_4010 Classis_Motor(&chassisCommuInit1, &chassisCommuInit2, &chassisCommuInit3, &chassisCommuInit4,
-                              &chassisMotorInit1, &chassisMotorInit2);
+                              &chassisMotorInit1, &chassisMotorInit1, &chassisMotorInit3, &chassisMotorInit2);
 
 Motor_4315 RFL(MOTOR_ID_1, &swerveMotorInit);
 Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
@@ -102,6 +115,7 @@ void ChassisSetVelocity(float _fbV, float _lrV, float _rtV) {
     LRVelocity = _lrV;
     RTVelocity = _rtV;
 }
+
 /**
  * @brief 无头模式速度设定
  *
@@ -123,31 +137,27 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
     LRVelocity = _fbV * sin((IMU::imu.attitude.yaw - ZeroYaw)) + _lrV * cos((IMU::imu.attitude.yaw - ZeroYaw));
     RTVelocity = _rtV;
 }
+
 /**
  * @brief 自动移动设定速度
  */
 void AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
-    if (IMU::imu.position.displace[1] < 2 || IMU::imu.position.displace[0] < 2) {
-        FBVelocity = autoMove.x.v_rel;
-        LRVelocity = autoMove.y.v_rel;
-        RTVelocity = autoMove.o.v_rel;
-    } else {
-        FBVelocity = 0;
-        LRVelocity = 0;
-        RTVelocity = 0;
-    }
+    FBVelocity = autoMove.x.v_rel;
+    LRVelocity = 0;
+    RTVelocity = 0;
 
 }
 
-void AutoChassisSet(uint16_t x,uint16_t y){
-    autoMove.StartMove(x,y,0);
+void AutoChassisSet(uint16_t x, uint16_t y) {
+    autoMove.StartMove(x, 0, 0);
 }
+
 /**
  * @brief 自动模式下执行急停模式的底盘任务处理
  */
-void AutoChassisStop(){
+void AutoChassisStop() {
     ChassisStopFlag = true;
 
     Classis_Motor.Stop();
@@ -211,8 +221,8 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 
     RFLAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
     RFRAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f;
-    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
     RBRAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f;
+    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
 
     //控制底盘电机角度
     RFL.SetTargetAngle(RFLAngle);
@@ -220,21 +230,17 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBL.SetTargetAngle(RBLAngle);
     RBR.SetTargetAngle(RBRAngle);
 
-    ClassisSpeed[0] = ((/*-sign(fbVelocity - rtVelocity * M / 2) */
-                               sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                                    (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
+    ClassisSpeed[0] = (sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+                             (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左前轮
-    ClassisSpeed[1] = -((/*sign(fbVelocity + rtVelocity * M / 2) */
-                                sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
+    ClassisSpeed[1] = -(sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
+                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
                         (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右前轮
-    ClassisSpeed[2] = -((/*sign(fbVelocity + rtVelocity * M / 2) */
-                                sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2))) /
+    ClassisSpeed[2] = -(sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
                         (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右后轮
-    ClassisSpeed[3] = ((/*-sign(fbVelocity - rtVelocity * M / 2) */
-                               sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                                    (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2))) /
+    ClassisSpeed[3] = (sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
+                                    (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左后轮
 
     //控制底盘电机转速
