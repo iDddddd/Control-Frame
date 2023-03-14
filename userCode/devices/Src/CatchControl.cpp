@@ -7,6 +7,7 @@
 CC_ctrl_t CatchControl::cc_ctrl{};
 uint16_t CatchControl::data_length;
 uint8_t CatchControl::rx_buff[2][BUFF_SIZE];
+uint8_t tx_buff[2] = {0x01,0x02};
 TASK_FLAG_t CatchControl::TaskFlag;
 
 void CatchControl::Init() {
@@ -97,31 +98,31 @@ void CatchControl::GetData(uint8_t bufIndex) {
                 switch (rx_buff[bufIndex][i + 2]) {
                     case 0x01:{
                         TaskFlag = STOP;
-                        cc_ctrl.ChassisStopFlag = rx_buff[0][i + 7];
+                        cc_ctrl.ChassisStopFlag = rx_buff[bufIndex][i + 7];
                         break;
                     }
                     case 0x02:{
                         TaskFlag = MOVE;
-                        cc_ctrl.x = (rx_buff[0][i + 7] << 8u) | rx_buff[0][i + 8];
-                        cc_ctrl.y = (rx_buff[0][i + 9] << 8u) | rx_buff[0][i + 10];
+                        cc_ctrl.x = (rx_buff[bufIndex][i + 7] << 8u) | rx_buff[bufIndex][i + 8];
+                        cc_ctrl.y = (rx_buff[bufIndex][i + 9] << 8u) | rx_buff[bufIndex][i + 10];
 
                         break;
                     }
                     case 0x03:{
                         TaskFlag = ARM;
-                        cc_ctrl.ARM1.angle = (rx_buff[0][i + 8] << 8u) | rx_buff[0][i + 7];
-                        cc_ctrl.ARM2.angle = (rx_buff[0][i + 10] << 8u) | rx_buff[0][i + 9];
-                        cc_ctrl.ARM_Z_Flag = rx_buff[0][i + 12];
+                        cc_ctrl.ARM1.angle = (rx_buff[bufIndex][i + 8] << 8u) | rx_buff[bufIndex][i + 7];
+                        cc_ctrl.ARM2.angle = (rx_buff[bufIndex][i + 10] << 8u) | rx_buff[bufIndex][i + 9];
+                        cc_ctrl.ARM_Z_Flag = rx_buff[bufIndex][i + 12];
                         break;
                     }
                     case 0x04:{
                         TaskFlag = CLAW;
-                        cc_ctrl.ArmServoFlag = rx_buff[0][i + 7];
+                        cc_ctrl.ArmServoFlag = rx_buff[bufIndex][i + 7];
                         break;
                     }
                     case 0x05:{
                         TaskFlag = TRAY;
-                        cc_ctrl.TrayFlag = rx_buff[0][i + 7];
+                        cc_ctrl.TrayFlag = rx_buff[bufIndex][i + 7];
                         break;
                     }
                 }

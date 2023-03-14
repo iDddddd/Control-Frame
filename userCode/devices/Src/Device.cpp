@@ -294,7 +294,6 @@ int main() {
     MX_TIM6_Init();
     MX_TIM7_Init();
     MX_TIM10_Init();
-    MX_TIM8_Init();
     MX_ADC1_Init();
     MX_ADC3_Init();
     MX_USART1_UART_Init();

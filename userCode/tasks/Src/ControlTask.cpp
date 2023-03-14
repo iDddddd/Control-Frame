@@ -3,7 +3,6 @@
 //
 #include "ControlTask.h"
 
-
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
@@ -31,7 +30,7 @@ void CtrlHandle() {
                 break;
             case DOWN_POS:
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-                    AutoSetVelocity();
+                   // AutoSetVelocity();
                 }
                 break;
             default:
