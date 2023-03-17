@@ -117,7 +117,7 @@ void CatchControl::GetData(uint8_t bufIndex) {
                     }
                     case 0x04:{
                         TaskFlag = CLAW;
-                        cc_ctrl.ArmServoFlag = rx_buff[bufIndex][i + 7];
+                        cc_ctrl.ArmServoFlag = rx_buff[bufIndex][i + 12];
                         break;
                     }
                     case 0x05:{

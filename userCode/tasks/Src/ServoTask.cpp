@@ -37,11 +37,11 @@ void AutoClawSet(uint8_t clawflag){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
                               1300);
     }else{
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
                               900);
     }
     uint8_t flag = 0x01;
-    HAL_UART_Transmit_IT(&huart6,&flag,1);
+    HAL_UART_Transmit(&huart6,&flag,1,3);
 }
 
 

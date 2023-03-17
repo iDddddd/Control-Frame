@@ -6,6 +6,7 @@
 #include "Motor.h"
 #include "IMU.h"
 #include "OtherMotor.h"
+#include "Buzzer.h"
 
 
 void aRGB_led_show(uint32_t aRGB) {
@@ -78,42 +79,6 @@ void aRGB_led_change(uint32_t period) {
     lastPhase = lastPhase + interval;
 }
 
-uint8_t buzzerWorkingFlag;
-
-
-float bsp_BuzzerOn(float _freq, float _targetVolPct) {
-
-#define BUZZER_CLOCK_FREQUENCY 84000000
-#define BUZZER_CLOCK htim4
-#define BUZZER_CLOCK_CHANNEL TIM_CHANNEL_3
-#define REFERENCE_MAX_VOL_CCR 5000
-
-    uint16_t arr, cpr;
-    arr = (uint16_t) ((BUZZER_CLOCK_FREQUENCY / (float) (BUZZER_CLOCK.Instance->PSC + 1)) / _freq);
-    //cpr = (uint16_t)(duty*(float)arr);
-    cpr = (uint16_t) (_targetVolPct * REFERENCE_MAX_VOL_CCR * 0.5);
-    if (cpr > arr / 2) {
-        cpr = arr / 2;
-    }
-
-
-    if (!buzzerWorkingFlag) {
-        buzzerWorkingFlag = 1;
-        HAL_TIM_Base_Start(&BUZZER_CLOCK);
-        HAL_TIM_PWM_Start(&BUZZER_CLOCK, BUZZER_CLOCK_CHANNEL);
-    }
-    BUZZER_CLOCK.Instance->ARR = arr;
-            __HAL_TIM_SetCompare(&BUZZER_CLOCK, BUZZER_CLOCK_CHANNEL, cpr);
-
-    return (float) cpr / (float) arr * 2;
-}
-
-void bsp_BuzzerOff() {
-    if (buzzerWorkingFlag) {
-        buzzerWorkingFlag = 0;
-        HAL_TIM_PWM_Stop(&BUZZER_CLOCK, BUZZER_CLOCK_CHANNEL);
-    }
-}
 
 volatile float vccMoni = 0;
 volatile float vccBat = 0;
@@ -216,7 +181,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         static uint32_t cnt = 0;
         cnt++;
 
-        CtrlHandle();
+
         ChassisHandle();
         ARMHandle();
         Motor::MotorsHandle();
@@ -231,10 +196,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
     if (htim == &htim6) {
         RS485::RS485PackageSend();
-
+       // my_buzzer_play();
     }
     if (htim == &htim7) {
         IMU::imu.Handle();
+        CtrlHandle();
     }
 }
 
@@ -329,8 +295,10 @@ int main() {
     Motor_4310::Init();
     IMU::imu.Init();
     ChassisStart();
+  //  bsp_BuzzerOn(1000);
 
     init_Flag = 1;
+    AutoChassisSet(2,2);
     /* USER CODE END 2 */
 
     /* Infinite loop */

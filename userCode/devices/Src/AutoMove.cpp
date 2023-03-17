@@ -8,11 +8,11 @@ float Move::expectPos[3]{};
 uint8_t Move::FinishFlag = 0;
 
 Move::Move() {
-    a = 0.5;
-    v_max = 1;
+    a = 1.5;
+    v_max = 2;
     pid.kp = 1;
     pid.ki = 0;
-    pid.kd = 5;
+    pid.kd = 0;
 };
 
 Move::~Move() = default;
@@ -25,6 +25,7 @@ void Move::Calc(float target) {
     if (d2 < 0) {
         d1 = target / 2;
         d2 = 0;
+        v_max = sqrt(2 * a * d1);
     }
 
 
@@ -42,7 +43,7 @@ void Move::Handle(float &reference) {
     } else {
         if (expectPos[Index] >= d_max) {
             v = 0;
-        }else if (expectPos[Index] < d1) {
+        } else if (expectPos[Index] < d1) {
             v += a * 0.001f;
             expectPos[Index] += (2 * v - a * 0.001f) / 2 * 0.001f;
         } else if (expectPos[Index] > (d1 + d2)) {
@@ -52,22 +53,23 @@ void Move::Handle(float &reference) {
             expectPos[Index] += v * 0.001f;
         }
 
-        /*if (reference < expectPos[Index]) {
-            v_rel = v + 0.001f * a;
+        if (reference < expectPos[Index]) {
+            v_rel = v + 0.05f * a;
         } else if (reference > expectPos[Index]) {
-            v_rel = v - 0.001f * a;
+            v_rel = v - 0.05f * a;
         } else if (v < 0) {
             v_rel = 0;
         } else {
             v_rel = v;
-        }*/
-        v_rel = v + pid.PIDCalc(expectPos[Index],reference,1);
+        }
+      //  v_rel = v + pid.PIDCalc(expectPos[Index], reference, 1);
         if (v_rel <= 0) {
             stopFlag = true;
-            FinishFlag +=1;
+            FinishFlag += 1;
         }
     }
 }
+
 AutoMove::AutoMove() {
     x.Index = 0;
     y.Index = 1;
@@ -80,7 +82,7 @@ void AutoMove::Handle() {
     } else {
         x.Handle(IMU::imu.position.displace[1]);
         y.Handle(IMU::imu.position.displace[0]);
-        y.Handle(IMU::imu.attitude.yaw);
+        o.Handle(IMU::imu.attitude.yaw);
     }
     /*  if(Move::FinishFlag == 3){
           uint8_t flag = 0x01;

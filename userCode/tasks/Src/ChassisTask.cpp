@@ -145,13 +145,13 @@ void AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
     FBVelocity = autoMove.x.v_rel;
-    LRVelocity = 0;
+    LRVelocity = autoMove.y.v_rel;
     RTVelocity = 0;
 
 }
 
 void AutoChassisSet(uint16_t x, uint16_t y) {
-    autoMove.StartMove(x, 0, 0);
+    autoMove.StartMove(x, y, 0);
 }
 
 /**
@@ -180,22 +180,6 @@ void ChassisStop() {
     RBR.Stop();
 }
 
-
-int sign(float x) {
-    if (x < 0) return -1;
-    if (x > 0) return 1;
-    return 0;
-}
-
-float SetAngle(float Angle) {
-    if (Angle > 180.0) {
-        Angle -= 180.0;
-    }
-    if (Angle <= 0) {
-        Angle += 180.0;
-    }
-    return Angle;
-}
 
 /**
  * @brief 速度与角度计算任务

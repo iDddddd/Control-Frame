@@ -153,13 +153,21 @@ void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
     arm2_angle -= 180;
     if (arm1_angle > 1.2) {
         arm1_angle = 1.2f;
+        bsp_BuzzerOn(500);
     } else if (arm1_angle < -1.2f) {
         arm1_angle = -1.2f;
+        bsp_BuzzerOn(500);
+    } else{
+        bsp_BuzzerOff();
     }
     if (arm2_angle > 90) {
         arm2_angle = 90;
+        bsp_BuzzerOn(1000);
     } else if (arm2_angle < -90) {
         arm2_angle = -90;
+        bsp_BuzzerOn(1000);
+    } else{
+        bsp_BuzzerOff();
     }
        ArmMotor1.SetTargetAngle(arm1_angle);
       ArmMotor2.SetTargetAngle(arm2_angle);

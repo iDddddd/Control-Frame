@@ -30,7 +30,7 @@ void CtrlHandle() {
                 break;
             case DOWN_POS:
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-                   // AutoSetVelocity();
+                AutoSetVelocity();
                 }
                 break;
             default:
