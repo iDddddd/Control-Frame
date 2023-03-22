@@ -2,8 +2,8 @@
 // Created by mac on 2022/12/14.
 //
 
-#ifndef RM_FRAME_C_OTHERMOTOR_H
-#define RM_FRAME_C_OTHERMOTOR_H
+#ifndef RM_FRAME_C_ARMMOTOR_H
+#define RM_FRAME_C_ARMMOTOR_H
 
 #include "Device.h"
 #include "can.h"
@@ -120,4 +120,4 @@ private:
 
 };
 
-#endif //RM_FRAME_C_OTHERMOTOR_H
+#endif //RM_FRAME_C_ARMMOTOR_H

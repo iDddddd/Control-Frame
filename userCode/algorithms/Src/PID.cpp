@@ -9,8 +9,6 @@ void PID::Reset() {
     PIDInfo.fdb = 0;
     PIDInfo.err[0] = 0;
     PIDInfo.err[1] = 0;
-    PIDInfo.err[2] = 0;
-    PIDInfo.err[3] = 0;
     PIDInfo.errSum = 0;
 
     PIDInfo.componentKp = 0;
@@ -34,18 +32,18 @@ void PID::Reset(PID_Regulator_t *pidRegulator) {
 float PID::PIDCalc(float target, float feedback) {
     PIDInfo.fdb = feedback;
     PIDInfo.ref = target;
-    PIDInfo.err[3] = PIDInfo.ref - PIDInfo.fdb;
-    PIDInfo.componentKp = PIDInfo.err[3] * PIDInfo.kp;
-    PIDInfo.errSum += PIDInfo.err[3];
+    PIDInfo.err[1] = PIDInfo.ref - PIDInfo.fdb;
+    PIDInfo.componentKp = PIDInfo.err[1] * PIDInfo.kp;
+    PIDInfo.errSum += PIDInfo.err[1];
     INRANGE(PIDInfo.errSum, -1 * PIDInfo.componentKiMax / PIDInfo.ki, PIDInfo.componentKiMax / PIDInfo.ki);
     PIDInfo.componentKi = PIDInfo.errSum * PIDInfo.ki;
-    PIDInfo.componentKd = (PIDInfo.err[3] - PIDInfo.err[2]) * PIDInfo.kd;
+    PIDInfo.componentKd = (PIDInfo.err[1] - PIDInfo.err[0]) * PIDInfo.kd;
     INRANGE(PIDInfo.componentKp, -1 * PIDInfo.componentKpMax, PIDInfo.componentKpMax);
     INRANGE(PIDInfo.componentKi, -1 * PIDInfo.componentKiMax, PIDInfo.componentKiMax);
     INRANGE(PIDInfo.componentKd, -1 * PIDInfo.componentKdMax, PIDInfo.componentKdMax);
     PIDInfo.output = PIDInfo.componentKp + PIDInfo.componentKi + PIDInfo.componentKd;
     INRANGE(PIDInfo.output, -1 * PIDInfo.outputMax, PIDInfo.outputMax);
-    PIDInfo.err[2] = PIDInfo.err[3];
+    PIDInfo.err[0] = PIDInfo.err[1];
     return PIDInfo.output;
 }
 
@@ -53,18 +51,18 @@ float PID::PIDCalc(float target, float feedback, float max) {
     PIDInfo.fdb = feedback;
     PIDInfo.ref = target;
     PIDInfo.outputMax = max;
-    PIDInfo.err[3] = PIDInfo.ref - PIDInfo.fdb;
-    PIDInfo.componentKp = PIDInfo.err[3] * PIDInfo.kp;
-    PIDInfo.errSum += PIDInfo.err[3];
+    PIDInfo.err[1] = PIDInfo.ref - PIDInfo.fdb;
+    PIDInfo.componentKp = PIDInfo.err[1] * PIDInfo.kp;
+    PIDInfo.errSum += PIDInfo.err[1];
     INRANGE(PIDInfo.errSum, -1 * PIDInfo.componentKiMax / PIDInfo.ki, PIDInfo.componentKiMax / PIDInfo.ki);
     PIDInfo.componentKi = PIDInfo.errSum * PIDInfo.ki;
-    PIDInfo.componentKd = (PIDInfo.err[3] - PIDInfo.err[2]) * PIDInfo.kd;
+    PIDInfo.componentKd = (PIDInfo.err[1] - PIDInfo.err[0]) * PIDInfo.kd;
     INRANGE(PIDInfo.componentKp, -1 * PIDInfo.componentKpMax, PIDInfo.componentKpMax);
     INRANGE(PIDInfo.componentKi, -1 * PIDInfo.componentKiMax, PIDInfo.componentKiMax);
     INRANGE(PIDInfo.componentKd, -1 * PIDInfo.componentKdMax, PIDInfo.componentKdMax);
     PIDInfo.output = PIDInfo.componentKp + PIDInfo.componentKi + PIDInfo.componentKd;
     INRANGE(PIDInfo.output, -1 * PIDInfo.outputMax, PIDInfo.outputMax);
-    PIDInfo.err[2] = PIDInfo.err[3];
+    PIDInfo.err[0] = PIDInfo.err[1];
     return PIDInfo.output;
 }
 
@@ -73,6 +71,6 @@ float EASY_PID::PIDCalc(float target, float nowdata, float max) {
     integral = integral + error;
     out = kp * error + ki * integral + kd * (error - lasterror);
     lasterror = error;
-    INRANGE(out,-1*max,max);
+    INRANGE(out, -1 * max, max);
     return out;
 }

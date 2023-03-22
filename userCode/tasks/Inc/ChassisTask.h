@@ -9,8 +9,7 @@
 #include "Motor.h"
 #include "AutoMove.h"
 
-#define RPM2RADpS(num)(num * (3.1415926f/30.0f))
-#define RADpS2RPM(num)(num / (3.1415926f/30.0f))
+
 #define WHEEL_DIAMETER             0.048f//4010直径 m
 #define REDUCTION_RATIO 19.0f
 #define TRACK_WIDTH            0.40f //轮距

@@ -11,8 +11,6 @@
 #include "CommuType.h"
 #include <cstring>
 
-
-
 /*枚举类型定义------------------------------------------------------------*/
 /**
  * @enum 控制电机的方式
@@ -21,6 +19,12 @@
  */
 
 /*结构体定义--------------------------------------------------------------*/
+typedef enum {
+    DIRECT = 0,
+    SPEED_Single,
+    POSITION_Double
+} MOTOR_CTRL_TYPE_e;
+
 typedef struct {
     uint16_t angle;
     int16_t speed;
@@ -31,6 +35,7 @@ typedef struct {
 typedef struct {
     PID_Regulator_t *speedPIDp;//速度环pid参数结构体指针
     PID_Regulator_t *anglePIDp;//角度环pid参数结构体指针
+    MOTOR_CTRL_TYPE_e ctrlType;
     float reductionRatio;//减速比
 } MOTOR_INIT_t;
 
@@ -70,6 +75,7 @@ protected:
     PID speedPID, anglePID;
     float reductionRatio;
     bool stopFlag{true};
+    MOTOR_CTRL_TYPE_e ctrlType;
 private:
     static Motor_Object_t *head_;
 

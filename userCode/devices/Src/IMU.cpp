@@ -326,20 +326,20 @@ void IMU::data_adjust(float accel[3], float _accel[3]) {
 void IMU::velocityVerify() {
     static int xcount = 0;
     static int ycount = 0;
-    if (abs(proData.accel[0]) < 0.2) {
+    if (abs(proData.accel[0]) < 0.05) {
         xcount++;
     } else {
         xcount = 0;
     }
-    if (xcount >= 50) {
+    if (xcount >= 10) {
         position.velocity[0] = 0;
     }
-    if (abs(proData.accel[1]) < 0.2) {
+    if (abs(proData.accel[1]) < 0.05) {
         ycount++;
     } else {
         ycount = 0;
     }
-    if (ycount >= 50) {
+    if (ycount >= 10) {
         position.velocity[1] = 0;
     }
 

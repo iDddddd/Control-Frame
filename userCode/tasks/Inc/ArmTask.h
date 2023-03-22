@@ -8,11 +8,10 @@
 
 #include "Device.h"
 #include "Motor.h"
-#include "OtherMotor.h"
+#include "ARMMotor.h"
 #include "Servo.h"
 #include "Buzzer.h"
 
-#define PI 3.1415926f
 void AngleCalc();
 
 void ArmStop();

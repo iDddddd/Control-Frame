@@ -13,14 +13,9 @@
 #define can2 2
 
 /*结构体定义--------------------------------------------------------------*/
-typedef enum {
-    DIRECT = 0,
-    SPEED_Single,
-    POSITION_Double
-} MOTOR_CTRL_TYPE_e;
+
 typedef struct {
     uint32_t _id;//canID
-    MOTOR_CTRL_TYPE_e ctrlType;
     int canType;
 } COMMU_INIT_t;
 typedef struct {
@@ -56,8 +51,6 @@ public:
     virtual void CANMessageGenerate() = 0;
 
 protected:
-
-    MOTOR_CTRL_TYPE_e ctrlType;
     int canType;
     static MyMap<uint32_t, uint8_t *> dict;
 
@@ -81,7 +74,6 @@ public:
     virtual void RS485MessageGenerate() = 0;
 
 protected:
-    MOTOR_CTRL_TYPE_e ctrlType;
 
 };
 

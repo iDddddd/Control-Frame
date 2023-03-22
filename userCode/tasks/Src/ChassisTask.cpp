@@ -26,8 +26,8 @@ PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator8 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = -0.215f,
-        .ki = -0.0004f,
+        .kp = 0.215f,
+        .ki = 0.0004f,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -37,41 +37,41 @@ PID_Regulator_t pidRegulator8 = {//此为储存pid参数的结构体，四个底
 MOTOR_INIT_t chassisMotorInit1 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator1,
         .anglePIDp = nullptr,
+        .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
 };
 MOTOR_INIT_t chassisMotorInit2 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator2,
         .anglePIDp = nullptr,
+        .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
 };
 MOTOR_INIT_t chassisMotorInit3 = {//四个底盘电机共用的初始化结构体
         .speedPIDp = &pidRegulator8,
         .anglePIDp = nullptr,
+        .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
 };
 MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
+        .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 };
 COMMU_INIT_t chassisCommuInit1 = {
         ._id = 0x141,
-        .ctrlType = SPEED_Single,
         .canType = can1
 };
 COMMU_INIT_t chassisCommuInit2 = {
         ._id = 0x142,
-        .ctrlType = SPEED_Single,
         .canType = can1
 };
 COMMU_INIT_t chassisCommuInit3 = {
         ._id = 0x143,
-        .ctrlType = SPEED_Single,
         .canType = can1
 };
 COMMU_INIT_t chassisCommuInit4 = {
         ._id = 0x144,
-        .ctrlType = SPEED_Single,
         .canType = can1
 };
 
@@ -84,7 +84,7 @@ Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
 Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 
-AutoMove autoMove;
+AutoMove autoMove(1);
 bool ChassisStopFlag = true;
 float FBVelocity, LRVelocity, RTVelocity;
 float ZeroYaw;
@@ -144,14 +144,14 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
 void AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
-    FBVelocity = autoMove.x.v_rel;
-    LRVelocity = autoMove.y.v_rel;
-    RTVelocity = 0;
+    FBVelocity = autoMove.vx;
+    LRVelocity = autoMove.vy;
+    RTVelocity = autoMove.vo;
 
 }
 
-void AutoChassisSet(uint16_t x, uint16_t y) {
-    autoMove.StartMove(x, y, 0);
+void AutoChassisSet(uint16_t x, uint16_t y, uint16_t o) {
+    autoMove.StartMove(x, y, o);
 }
 
 /**
@@ -161,10 +161,14 @@ void AutoChassisStop() {
     ChassisStopFlag = true;
 
     Classis_Motor.Stop();
-    RFL.Stop();
+    /*RFL.Stop();
     RFR.Stop();
     RBL.Stop();
-    RBR.Stop();
+    RBR.Stop();*/
+    RFL.SetTargetAngle(45);
+    RFR.SetTargetAngle(135);
+    RBL.SetTargetAngle(135);
+    RBR.SetTargetAngle(45);
 }
 
 /**
@@ -180,7 +184,6 @@ void ChassisStop() {
     RBR.Stop();
 }
 
-
 /**
  * @brief 速度与角度计算任务
  * @param fbVelocity
@@ -190,7 +193,7 @@ void ChassisStop() {
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float ClassisSpeed[4];
     float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
-    rtVelocity = -RPM2RADpS(rtVelocity);
+    rtVelocity *= 2.0f * PI;
 
     //计算四个轮子线速度，单位：m/s
     /**
@@ -203,10 +206,10 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 //    CMBLSpeed = -fbVelocity + rtVelocity;
 //    CMBRSpeed = fbVelocity + rtVelocity;
 
-    RFLAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
-    RFRAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f;
-    RBRAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / 3.1415926f;
-    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / 3.1415926f;
+    RFLAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / PI;
+    RFRAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / PI;
+    RBRAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / PI;
+    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / PI;
 
     //控制底盘电机角度
     RFL.SetTargetAngle(RFLAngle);
@@ -215,16 +218,16 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBR.SetTargetAngle(RBRAngle);
 
     ClassisSpeed[0] = (sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                             (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
+                            (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左前轮
     ClassisSpeed[1] = -(sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
+                             (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
                         (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右前轮
     ClassisSpeed[2] = -(sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                                     (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
+                             (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
                         (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右后轮
     ClassisSpeed[3] = (sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                                    (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
+                            (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左后轮
 
     //控制底盘电机转速

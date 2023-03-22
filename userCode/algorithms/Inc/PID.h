@@ -10,7 +10,7 @@
 typedef struct PID_Regulator_t {
     float ref;
     float fdb;
-    float err[4];
+    float err[2];
     float errSum;
     float kp;
     float ki;

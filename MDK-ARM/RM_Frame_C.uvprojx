@@ -705,11 +705,6 @@
               <FilePath>..\userCode\devices\Src\CatchControl.cpp</FilePath>
             </File>
             <File>
-              <FileName>OtherMotor.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\userCode\devices\Src\OtherMotor.cpp</FilePath>
-            </File>
-            <File>
               <FileName>AutoMove.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\AutoMove.cpp</FilePath>
@@ -723,6 +718,11 @@
               <FileName>Buzzer.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\Buzzer.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ARMMotor.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\ARMMotor.cpp</FilePath>
             </File>
           </Files>
         </Group>

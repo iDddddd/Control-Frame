@@ -7,10 +7,12 @@
 
 #include "IMU.h"
 #include "Device.h"
+#include "CatchControl.h"
 
 class Move {
 public:
     static float expectPos[3];
+    float x_rel;
     uint8_t Index;
     float d1{};
     float d2{};
@@ -22,26 +24,29 @@ public:
     EASY_PID pid;
     static uint8_t FinishFlag;
 
-    Move();
+    Move(uint8_t _n);
     ~Move();
-    bool stopFlag{true};
+    bool stopFlag{false};
     void Calc(float target);
-    void Handle(float  &reference);
-/*    void Handle_X();
-    void Handle_Y();
-    void Handle_O();*/
+    float Handle(float  &reference);
+    float Handle_X(float  reference);
+    float Handle_Y(float  reference);
+    float Handle_O(const float  reference);
 
     void Stop();
 
 };
+
 class AutoMove {
 public:
-    static float t;
-    Move x;
-    Move y;
-    Move o;
-    bool StopFlag{true};
-    AutoMove();
+   // static float t;
+
+    uint8_t num;
+    float vx;
+    float vy;
+    float vo;
+    bool StopFlag{false};
+    AutoMove(uint8_t _num);
     void StartMove(float x_distance, float y_distance, float o_angle);
     void StopMove();
     ~AutoMove() = default;

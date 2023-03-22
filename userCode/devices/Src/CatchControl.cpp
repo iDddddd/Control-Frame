@@ -139,7 +139,7 @@ void CatchControl::AutoTask() {
             AutoChassisStop();
             break;
         case MOVE:
-            AutoChassisSet(cc_ctrl.x,cc_ctrl.y);
+            AutoChassisSet(cc_ctrl.x,cc_ctrl.y,0);
             break;
         case ARM:
             AutoArmSet(cc_ctrl.ARM1.angle,cc_ctrl.ARM2.angle,cc_ctrl.ARM_Z_Flag);

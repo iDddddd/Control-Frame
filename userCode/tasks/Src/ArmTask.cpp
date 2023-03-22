@@ -44,48 +44,48 @@ PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底
 MOTOR_INIT_t trayMotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
+        .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 
 };
 
 COMMU_INIT_t trayCommuInit = {
         ._id = 0x145,
-        .ctrlType = DIRECT,
         .canType = can2
 
 };
 MOTOR_INIT_t arm1MotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
+        .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 };
 COMMU_INIT_t arm1CommuInit = {
         ._id = 0x101,
-        .ctrlType = DIRECT,
         .canType = can2
 
 };
 COMMU_INIT_t arm2CommuInit = {
         ._id = 0x146,
-        .ctrlType = POSITION_Double,
         .canType = can2
 
 };
 MOTOR_INIT_t arm2MotorInit = {
         .speedPIDp = &pidRegulator5,
         .anglePIDp = &pidRegulator6,
+        .ctrlType = POSITION_Double,
         .reductionRatio = 1.0f
 
 };
 COMMU_INIT_t arm3CommuInit = {
         ._id = 0x01,
-        .ctrlType = DIRECT,
         .canType = can2
 
 };
 MOTOR_INIT_t arm3MotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
+        .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 
 };
@@ -96,6 +96,7 @@ Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
 static float arm1Angle, arm2Angle;
+static float arm1data,arm2data;
 void ArmStop() {
     ArmStopFlag = true;
     // TrayMotor.Stop();
@@ -144,6 +145,8 @@ void ArmSetAngle(float Arm1Angle, float Arm2Angle) {
 }
 
 void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
+		arm1data = angle1;
+	arm2data = angle2;
     float arm1_angle = angle1 / 16384.0f * 2 * 3.1415926f;
     float arm2_angle = angle2 / 16384.0f * 360.0f;
     arm1_angle -= PI;
@@ -160,15 +163,17 @@ void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
     } else{
         bsp_BuzzerOff();
     }
-    if (arm2_angle > 90) {
-        arm2_angle = 90;
+    if (arm2_angle > 150) {
+        arm2_angle = 150;
         bsp_BuzzerOn(1000);
-    } else if (arm2_angle < -90) {
-        arm2_angle = -90;
+    } else if (arm2_angle < -150) {
+        arm2_angle = -150;
         bsp_BuzzerOn(1000);
     } else{
         bsp_BuzzerOff();
     }
+    arm1Angle = arm1_angle;
+    arm2Angle = arm2_angle;
        ArmMotor1.SetTargetAngle(arm1_angle);
       ArmMotor2.SetTargetAngle(arm2_angle);
     //ArmMotorZ.SetTargetPosition(static_cast<MOTORZ_POS_t>(pos));

@@ -5,7 +5,7 @@
 #include "RemoteControl.h"
 #include "Motor.h"
 #include "IMU.h"
-#include "OtherMotor.h"
+#include "ARMMotor.h"
 #include "Buzzer.h"
 
 
@@ -196,7 +196,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
     if (htim == &htim6) {
         RS485::RS485PackageSend();
-       // my_buzzer_play();
+
     }
     if (htim == &htim7) {
         IMU::imu.Handle();
@@ -283,7 +283,8 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim1);//舵机
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
+                          1500);
     //TODO adc校准？
     RemoteControl::init();
     CatchControl::Init();
@@ -296,9 +297,9 @@ int main() {
     IMU::imu.Init();
     ChassisStart();
   //  bsp_BuzzerOn(1000);
-
     init_Flag = 1;
-    AutoChassisSet(2,2);
+
+    AutoChassisSet(0,0,PI/2);
     /* USER CODE END 2 */
 
     /* Infinite loop */

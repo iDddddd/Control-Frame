@@ -48,15 +48,12 @@ void CAN::CANInit() {
  */
 CAN::CAN() {
     can_ID = 0x280;
-    ctrlType = SPEED_Single;
     canType = can1;
 }
 
 CAN::CAN(COMMU_INIT_t *_init) {
     can_ID = _init->_id;
-    ctrlType = _init->ctrlType;
     canType = _init->canType;
-
 }
 
 /**
@@ -121,7 +118,6 @@ void CAN::FOURID_Bind_Rx(uint32_t *canIDs, uint8_t (*RxMessage)[8]) {
  */
 RS485::RS485(uint32_t _id) {
     rs485_ID = _id;
-    ctrlType = DIRECT;
 }
 
 /**

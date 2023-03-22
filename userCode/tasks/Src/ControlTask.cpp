@@ -12,7 +12,7 @@ void CtrlHandle() {
             case UP_POS://左侧一档{
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                       RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
+                                       RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
                     ArmSetAngle(RemoteControl::rcInfo.left_col, RemoteControl::rcInfo.left_col * 90);
                     Headmemory();
                 }else if (RemoteControl::rcInfo.sRight == MID_POS){
@@ -22,10 +22,10 @@ void CtrlHandle() {
             case MID_POS://左侧二档
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
+                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
                 } else if (RemoteControl::rcInfo.sRight == MID_POS) {
                     HeadkeepSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 60);
+                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
                 }
                 break;
             case DOWN_POS:
