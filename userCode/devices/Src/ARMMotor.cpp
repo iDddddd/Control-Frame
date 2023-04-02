@@ -161,7 +161,7 @@ void Motor_4310::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[4] = 0x00;
         canQueue.Data[canQueue.rear].message[5] = 0x00;
         canQueue.Data[canQueue.rear].message[6] = 0x00;
-        canQueue.Data[canQueue.rear].message[7] = 0x3F;
+        canQueue.Data[canQueue.rear].message[7] = 0x40;
 
         canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
     }
@@ -204,19 +204,6 @@ void Emm42Motor::CANMessageGenerate() {
 
 void Emm42Motor::Handle() {
 
-    /*int32_t targetPos = targetPosition / 8.4f * 65536.0f;
-    int32_t Pos = targetPos - NowPos;
-      if (Pos <= 0) {
-          Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF
-          Pos *= -1;
-      } else {
-          Emm42Motor_Dir = 0x12;
-      }
-      if (stopFlag) {
-          Emm42Motor_Pos = 0;
-      } else {
-          Emm42Motor_Pos = Pos / 65536 * 3200;
-      }*/
     if (stopFlag) {
         Emm42Motor_Pos = 0;
         CANMessageGenerate();
@@ -226,16 +213,36 @@ void Emm42Motor::Handle() {
             Emm42Motor_Pos = 3200;
             CANMessageGenerate();
             NowPos = DOWN;
-        } else if (NowPos == DOWN && TarPos == UP) {
+        }else if(NowPos == UP && TarPos == MID) {
+            Emm42Motor_Dir = 0x02;//0表示往下
+            Emm42Motor_Pos = 1600;
+            CANMessageGenerate();
+            NowPos = MID;
+        }else if (NowPos == DOWN && TarPos == UP) {
             Emm42Motor_Dir = 0x12;//1表示往上
             Emm42Motor_Pos = 3200;
             CANMessageGenerate();
             NowPos = UP;
+        }else if(NowPos == DOWN && TarPos == MID){
+            Emm42Motor_Dir = 0x12;//1表示往上
+            Emm42Motor_Pos = 1600;
+            CANMessageGenerate();
+            NowPos = MID;
+        }else if(NowPos == MID && TarPos == UP){
+            Emm42Motor_Dir = 0x12;//1表示往上
+            Emm42Motor_Pos = 1600;
+            CANMessageGenerate();
+            NowPos = UP;
+        } else if(NowPos == MID && TarPos == DOWN){
+            Emm42Motor_Dir = 0x02;//1表示往上
+            Emm42Motor_Pos = 1600;
+            CANMessageGenerate();
+            NowPos = DOWN;
         }
     }
 }
 
-void Emm42Motor::SetTargetPosition(MOTORZ_POS_t pos) {
+void Emm42Motor::SetTargetPosition(uint8_t pos) {
     stopFlag = false;
     TarPos = pos;
 }

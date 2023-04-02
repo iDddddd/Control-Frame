@@ -5,37 +5,19 @@
 #include "ArmTask.h"
 
 
-PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 2.0f,
-        .ki = 0.0f,
-        .kd = 0.03f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000
-};
-PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 0.0f,
-        .ki = 0.0f,
-        .kd = 0.0f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
 PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 4.53f,
-        .ki = 0.005f,
-        .kd = 0.01f,
+         .kp = 3.53f,
+        .ki = 0.05f,
+        .kd = 0.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 6.03f,
-        .ki = 0.01f,
-        .kd = 0.0f,
+       .kp = 4.03f,
+        .ki = 0.1f,
+        .kd = 0.1f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
@@ -92,7 +74,7 @@ MOTOR_INIT_t arm3MotorInit = {
 //Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
 Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
 Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-//Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
+Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
 static float arm1Angle, arm2Angle;
@@ -102,7 +84,7 @@ void ArmStop() {
     // TrayMotor.Stop();
      ArmMotor1.Stop();
       ArmMotor2.Stop();
-    // ArmMotorZ.Stop();
+     ArmMotorZ.Stop();
 }
 
 void ArmAngleCalc() {
@@ -145,7 +127,7 @@ void ArmSetAngle(float Arm1Angle, float Arm2Angle) {
 }
 
 void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
-		arm1data = angle1;
+    arm1data = angle1;
 	arm2data = angle2;
     float arm1_angle = angle1 / 16384.0f * 2 * 3.1415926f;
     float arm2_angle = angle2 / 16384.0f * 360.0f;
@@ -174,9 +156,9 @@ void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
     }
     arm1Angle = arm1_angle;
     arm2Angle = arm2_angle;
-       ArmMotor1.SetTargetAngle(arm1_angle);
-      ArmMotor2.SetTargetAngle(arm2_angle);
-    //ArmMotorZ.SetTargetPosition(static_cast<MOTORZ_POS_t>(pos));
+    ArmMotor1.SetTargetAngle(arm1_angle);
+    ArmMotor2.SetTargetAngle(arm2_angle);
+    ArmMotorZ.SetTargetPosition(pos);
 }
 
 void ARMHandle() {

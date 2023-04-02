@@ -35,7 +35,6 @@ typedef struct {
 class CatchControl : public Device {
 public:
     static CC_ctrl_t cc_ctrl;
-    static uint16_t data_length;
     static uint8_t rx_buff[2][BUFF_SIZE];
     static TASK_FLAG_t TaskFlag;
 
@@ -52,8 +51,8 @@ public:
 extern void AutoChassisStop();//Realized in ChassisTask
 extern void AutoChassisSet(uint16_t x,uint16_t y,uint16_t o);//Realized in ChassisTask
 extern void AutoArmSet(uint16_t angle1,uint16_t angle2,uint8_t pos);//Realized in ArmTask
-void AutoTraySet(uint8_t trayflag);//Realized in ArmTask
-void AutoClawSet(uint8_t clawflag);//Realized in ServoTask
+extern void AutoTraySet(uint8_t trayflag);//Realized in ArmTask
+extern void AutoClawSet(uint8_t clawflag);//Realized in ServoTask
 
 #ifdef __cplusplus
 extern "C" {

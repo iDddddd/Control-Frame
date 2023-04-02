@@ -35,10 +35,10 @@ Servo trayServo(&TrayServo);
 void AutoClawSet(uint8_t clawflag){
     if(clawflag == 1){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                              1550);
+                              1500);
     }else{
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                              1300);
+                              1200);
     }
     uint8_t flag = 0x01;
     HAL_UART_Transmit(&huart6,&flag,1,3);

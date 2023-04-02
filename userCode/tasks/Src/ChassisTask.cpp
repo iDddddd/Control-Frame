@@ -193,23 +193,22 @@ void ChassisStop() {
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float ClassisSpeed[4];
     float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
-    rtVelocity *= 2.0f * PI;
+    rtVelocity *= -2.0f * PI;
+    float vx, vy, w;
+    vx = lrVelocity;
+    vy = fbVelocity;
+    w = rtVelocity * -2.0f * PI;
+    float A, B, C, D;
+    A = vx - w * L / 2;
+    B = vx + w * L / 2;
+    C = vy - w * M / 2;
+    D = vy + w * M / 2;
 
-    //计算四个轮子线速度，单位：m/s
-    /**
-     * @brief 此处四句代码需要结合底盘的三个速度，计算处四个轮子的位置对应的线速度。
-     * @param fbVelocity,lrVelocity,rtVelocity
-     * @return CMFLSpeed CMFRSpeed CMBLSpeed CMBRSpeed
-     */
-//    CMFLSpeed = fbVelocity - rtVelocity;
-//    CMFRSpeed = -fbVelocity - rtVelocity;
-//    CMBLSpeed = -fbVelocity + rtVelocity;
-//    CMBRSpeed = fbVelocity + rtVelocity;
-
-    RFLAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / PI;
-    RFRAngle = -atan2((lrVelocity - rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / PI;
-    RBRAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity + rtVelocity * M / 2)) * 180 / PI;
-    RBLAngle = -atan2((lrVelocity + rtVelocity * L / 2), (fbVelocity - rtVelocity * M / 2)) * 180 / PI;
+    //计算四个轮子角度，单位：度
+    RFLAngle = -atan2(B, D) * 180 / PI;
+    RFRAngle = -atan2(B, C) * 180 / PI;
+    RBRAngle = -atan2(A, C) * 180 / PI;
+    RBLAngle = -atan2(A, D) * 180 / PI;
 
     //控制底盘电机角度
     RFL.SetTargetAngle(RFLAngle);
@@ -217,18 +216,11 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBL.SetTargetAngle(RBLAngle);
     RBR.SetTargetAngle(RBRAngle);
 
-    ClassisSpeed[0] = (sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                            (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
-                       (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左前轮
-    ClassisSpeed[1] = -(sqrt((lrVelocity - rtVelocity * L / 2) * (lrVelocity - rtVelocity * L / 2) +
-                             (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
-                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右前轮
-    ClassisSpeed[2] = -(sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                             (fbVelocity + rtVelocity * M / 2) * (fbVelocity + rtVelocity * M / 2)) /
-                        (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//右后轮
-    ClassisSpeed[3] = (sqrt((lrVelocity + rtVelocity * L / 2) * (lrVelocity + rtVelocity * L / 2) +
-                            (fbVelocity - rtVelocity * M / 2) * (fbVelocity - rtVelocity * M / 2)) /
-                       (WHEEL_DIAMETER / 2.0f)) * 180 / 3.1415926f;//左后轮
+    //计算四个轮子线速度，单位：m/s
+    ClassisSpeed[0] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
+    ClassisSpeed[1] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 360;//右前轮
+    ClassisSpeed[2] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
+    ClassisSpeed[3] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
 
     //控制底盘电机转速
     Classis_Motor.SetTargetSpeed(ClassisSpeed);

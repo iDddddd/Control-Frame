@@ -67,14 +67,20 @@ float Move::Handle(float &reference) {
                 v_rel = v;
             }
             */
-        v_rel = v + (expectPos[Index] - reference) * 2;
+     //   v_rel = v + (expectPos[Index] - reference) * 2;
         if(v_rel > v_max){
             v_rel = v_max;
         }
-        if (reference >= d_max) {
+         if (expectPos[Index] >= d_max) {
+           Stop();
+           FinishFlag += 1;
+        /*   uint8_t flag[2] = {0x01,0x01};
+           HAL_UART_Transmit(&huart6,flag,2,10);*/
+       }
+       /* if (reference >= d_max) {
             Stop();
             FinishFlag += 1;
-        }
+        }*/
 
     }
     return v_rel;
@@ -199,17 +205,17 @@ AutoMove::AutoMove(uint8_t _num) {
 
 void AutoMove::Handle() {
     if (!StopFlag) {
-      // vx = x.Handle(IMU::imu.position.displace[1]);
-       // vy = y.Handle(IMU::imu.position.displace[0]);
+       vx = x.Handle(IMU::imu.position.displace[1]);
+        vy = y.Handle(IMU::imu.position.displace[0]);
         vo = o.Handle_O(IMU::imu.attitude.yaw);
     } else {
         AutoChassisStop();
     }
-    /*  if(Move::FinishFlag == 3){
+      if(Move::FinishFlag == 1){
           uint8_t flag = 0x01;
           HAL_UART_Transmit_IT(&huart6,&flag,1);
           StopFlag = true;
-      }//完成后发送*/
+      }//完成后发送
 }
 
 void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {

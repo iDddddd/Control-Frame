@@ -17,6 +17,7 @@ Motor::Motor(MOTOR_INIT_t *_init, Motor *motor) {
 
     if (_init->speedPIDp) speedPID.PIDInfo = *_init->speedPIDp;
     if (_init->anglePIDp) anglePID.PIDInfo = *_init->anglePIDp;
+    ctrlType = _init->ctrlType;
     reductionRatio = _init->reductionRatio;
 
     auto *new_object = new Motor_Object_t();
@@ -62,9 +63,9 @@ FOUR_Motor_4010::FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_
     canIDs[2] = commu_init3->_id;
     canIDs[3] = commu_init4->_id;
     if (motor_init1->speedPIDp) speedPIDs[0].PIDInfo = *motor_init1->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[1].PIDInfo = *motor_init2->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[2].PIDInfo = *motor_init3->speedPIDp;
-    if (motor_init1->speedPIDp) speedPIDs[3].PIDInfo = *motor_init4->speedPIDp;
+    if (motor_init2->speedPIDp) speedPIDs[1].PIDInfo = *motor_init2->speedPIDp;
+    if (motor_init3->speedPIDp) speedPIDs[2].PIDInfo = *motor_init3->speedPIDp;
+    if (motor_init4->speedPIDp) speedPIDs[3].PIDInfo = *motor_init4->speedPIDp;
     FOURID_Bind_Rx(canIDs, RxMessage);
 
 }
@@ -190,7 +191,6 @@ int16_t FOUR_Motor_4010::IntensityCalc(uint32_t id) {
             break;
 
         case POSITION_Double:
-
             break;
     }
     return intensity;

@@ -5,9 +5,7 @@
 #include "CatchControl.h"
 
 CC_ctrl_t CatchControl::cc_ctrl{};
-uint16_t CatchControl::data_length;
 uint8_t CatchControl::rx_buff[2][BUFF_SIZE];
-uint8_t tx_buff[2] = {0x01,0x02};
 TASK_FLAG_t CatchControl::TaskFlag;
 
 void CatchControl::Init() {
@@ -44,7 +42,7 @@ void CatchControl::IT_Handle() {
     {
         __HAL_UART_CLEAR_PEFLAG(&huart6);
     } else if (USART6->SR & UART_FLAG_IDLE) {
-
+        static uint16_t rx_len = 0;
         __HAL_UART_CLEAR_PEFLAG(&huart6);
 
         if ((hdma_usart6_rx.Instance->CR & DMA_SxCR_CT) == RESET) {
@@ -54,7 +52,7 @@ void CatchControl::IT_Handle() {
             __HAL_DMA_DISABLE(&hdma_usart6_rx);
 
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            data_length = BUFF_SIZE - hdma_usart6_rx.Instance->NDTR;
+            rx_len = BUFF_SIZE - hdma_usart6_rx.Instance->NDTR;
 
             //重新设定数据长度
             hdma_usart6_rx.Instance->NDTR = BUFF_SIZE;
@@ -64,16 +62,16 @@ void CatchControl::IT_Handle() {
 
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
-
-            GetData(0);
-
+            if (rx_len == CONTROL_LENGTH) {
+                GetData(0);
+            }
         } else {
             /* Current memory buffer used is Memory 1 */
             //失效DMA
             __HAL_DMA_DISABLE(&hdma_usart6_rx);
 
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            data_length = BUFF_SIZE - hdma_usart6_rx.Instance->NDTR;
+            rx_len = BUFF_SIZE - hdma_usart6_rx.Instance->NDTR;
 
             //重新设定数据长度
             hdma_usart6_rx.Instance->NDTR = BUFF_SIZE;
@@ -84,8 +82,9 @@ void CatchControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
 
-            GetData(1);
-
+            if (rx_len == CONTROL_LENGTH) {
+                GetData(1);
+            }
         }
     }
 }

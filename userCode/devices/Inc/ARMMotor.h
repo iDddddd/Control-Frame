@@ -11,10 +11,11 @@
 #include "Motor.h"
 #include "CommuType.h"
 
-typedef enum {
-    DOWN = 0,
-    UP
-}MOTORZ_POS_t;
+#define DOWN  0
+#define MID  1
+#define UP  2
+
+
 typedef enum{
     RED = 0,
     BLUE,
@@ -103,8 +104,8 @@ private:
 class Emm42Motor : public Motor, public CAN {
 public:
     Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-    MOTORZ_POS_t NowPos = DOWN;
-    MOTORZ_POS_t TarPos = DOWN;
+    uint8_t NowPos = DOWN;
+    uint8_t TarPos = DOWN;
     uint8_t Emm42Motor_Dir{};
     uint32_t Emm42Motor_Pos{};
     ~Emm42Motor();
@@ -113,7 +114,7 @@ public:
 
     void Handle() override;
 
-    void SetTargetPosition(MOTORZ_POS_t pos);
+    void SetTargetPosition(uint8_t pos);
 
 private:
     float targetPosition{}; //单位mm
