@@ -104,7 +104,6 @@ void CatchControl::GetData(uint8_t bufIndex) {
                         TaskFlag = MOVE;
                         cc_ctrl.x = (rx_buff[bufIndex][i + 7] << 8u) | rx_buff[bufIndex][i + 8];
                         cc_ctrl.y = (rx_buff[bufIndex][i + 9] << 8u) | rx_buff[bufIndex][i + 10];
-
                         break;
                     }
                     case 0x03:{
@@ -121,7 +120,7 @@ void CatchControl::GetData(uint8_t bufIndex) {
                     }
                     case 0x05:{
                         TaskFlag = TRAY;
-                        cc_ctrl.TrayFlag = rx_buff[bufIndex][i + 7];
+                        cc_ctrl.TrayFlag = rx_buff[bufIndex][i + 12];
                         break;
                     }
                 }
@@ -143,15 +142,19 @@ void CatchControl::AutoTask() {
         case ARM:
             AutoArmSet(cc_ctrl.ARM1.angle,cc_ctrl.ARM2.angle,cc_ctrl.ARM_Z_Flag);
             break;
-        case TRAY:
-            AutoTraySet(cc_ctrl.TrayFlag);
-            break;
         case CLAW:
             AutoClawSet(cc_ctrl.ArmServoFlag);
+            break;
+        case TRAY:
+            AutoTraySet(cc_ctrl.TrayFlag);
             break;
     }
 }
 
+void CompleteTask(){
+    uint8_t tx_message[1] = {0x01};
+    HAL_UART_Transmit(&huart6,tx_message,1,3);
+}
 
 void USART6_IRQHandler() {
 

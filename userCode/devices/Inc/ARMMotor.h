@@ -16,11 +16,10 @@
 #define UP  2
 
 
-typedef enum{
-    RED = 0,
-    BLUE,
-    GREEN
-}MOTOR_POS_t;
+#define RED  0
+#define BLUE 1
+#define GREEN 2
+
 /*4010电机类------------------------------------------------------------------*/
 class Motor_4010 : public Motor, public CAN {
 public:
@@ -55,29 +54,30 @@ private:
 /*4310托盘电机类------------------------------------------------------------------*/
 class Motor_4010_TRAY : public Motor, public CAN {
 public:
-    uint8_t TxDir;//0为顺时针，1为逆时针
-    uint16_t TxAngle;
-    uint16_t TxSpeed;
+    uint8_t TxDir{};//0为顺时针，1为逆时针
+    uint16_t TxAngle{};
+    uint16_t TxSpeed{};
 
     void CANMessageGenerate() override;
 
     void Handle() override;
 
-    void SetTargetPos(MOTOR_POS_t _targetAngle);
+    void SetTargetPos(uint8_t _targetAngle);
 
     Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
 
     ~Motor_4010_TRAY();
 
 private:
-    MOTOR_POS_t targetPos{};
+    uint8_t targetPos{};
+    uint8_t nowPos{};
 
 };
 
 /*4310电机类------------------------------------------------------------------*/
 class Motor_4310 : public Motor, public CAN {
 public:
-    uint8_t* Motor4310_Angle;
+    uint8_t *Motor4310_Angle;
     uint32_t sendSpeed{};
 
     static void Init();
@@ -95,7 +95,7 @@ public:
     ~Motor_4310();
 
 private:
-    float targetAngle{};
+    float targetAngle{0};
     float targetSpeed{};
 
 };
@@ -104,10 +104,12 @@ private:
 class Emm42Motor : public Motor, public CAN {
 public:
     Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+
     uint8_t NowPos = DOWN;
     uint8_t TarPos = DOWN;
     uint8_t Emm42Motor_Dir{};
     uint32_t Emm42Motor_Pos{};
+
     ~Emm42Motor();
 
     void CANMessageGenerate() override;

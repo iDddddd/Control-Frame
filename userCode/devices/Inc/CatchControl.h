@@ -8,8 +8,8 @@
 
 #include "Device.h"
 
-#define BUFF_SIZE 28
-#define CONTROL_LENGTH 14u
+#define BUFF_SIZE 28u
+#define CONTROL_LENGTH 0x10
 typedef enum {
     STOP = 0,
     MOVE,
@@ -46,7 +46,7 @@ public:
   //  static void GET_Data(const volatile uint8_t *buf);
 
 };
-
+void CompleteTask();
 /*外部函数声明-------------------------------------------------------------*/
 extern void AutoChassisStop();//Realized in ChassisTask
 extern void AutoChassisSet(uint16_t x,uint16_t y,uint16_t o);//Realized in ChassisTask

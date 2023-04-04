@@ -71,7 +71,7 @@ MOTOR_INIT_t arm3MotorInit = {
         .reductionRatio = 1.0f
 
 };
-//Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
+Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
 Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
 Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
 Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
@@ -94,7 +94,7 @@ void ArmAngleCalc() {
     //  ArmMotorZ.SetTargetPosition(Position);
 }
 void AutoTraySet(uint8_t trayflag){
-   // TrayMotor.SetTargetPos(static_cast<MOTOR_POS_t>(trayflag));
+    TrayMotor.SetTargetPos(trayflag);
 }
 /*void ArmAngleCalc() {
     float arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;

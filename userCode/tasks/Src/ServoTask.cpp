@@ -32,24 +32,20 @@ Servo trayServo(&TrayServo);
     uint8_t flag = 0x01;
     HAL_UART_Transmit_IT(&huart6,&flag,1);
 }*/
+bool clawFlag = false;
 void AutoClawSet(uint8_t clawflag){
-    if(clawflag == 1){
+    if(clawflag == 1 && !clawFlag){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
                               1500);
-    }else{
+        clawFlag = true;
+        CompleteTask();
+    }else if(clawflag == 0 && clawFlag){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
                               1200);
+        clawFlag = false;
+        CompleteTask();
     }
-    uint8_t flag = 0x01;
-    HAL_UART_Transmit(&huart6,&flag,1,3);
-}
 
-
-void ServoHandle() {
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                          1300);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,
-                          930);
 }
 
 

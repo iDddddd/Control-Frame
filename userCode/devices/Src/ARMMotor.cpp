@@ -187,16 +187,16 @@ Emm42Motor::Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : Motor
 void Emm42Motor::CANMessageGenerate() {
     if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
 
-               canQueue.Data[canQueue.rear].ID = can_ID;
-               canQueue.Data[canQueue.rear].canType = canType;
-               canQueue.Data[canQueue.rear].message[0] = 0xFD;
-               canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
-               canQueue.Data[canQueue.rear].message[2] = 0xFF;
-               canQueue.Data[canQueue.rear].message[3] = 0x00;
-               canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
-               canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
-               canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
-               canQueue.Data[canQueue.rear].message[7] = 0x6B;
+        canQueue.Data[canQueue.rear].ID = can_ID;
+        canQueue.Data[canQueue.rear].canType = canType;
+        canQueue.Data[canQueue.rear].message[0] = 0xFD;
+        canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
+        canQueue.Data[canQueue.rear].message[2] = 0xFF;
+        canQueue.Data[canQueue.rear].message[3] = 0x00;
+        canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
+        canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
+        canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
+        canQueue.Data[canQueue.rear].message[7] = 0x6B;
 
         canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
     }
@@ -213,27 +213,27 @@ void Emm42Motor::Handle() {
             Emm42Motor_Pos = 3200;
             CANMessageGenerate();
             NowPos = DOWN;
-        }else if(NowPos == UP && TarPos == MID) {
+        } else if (NowPos == UP && TarPos == MID) {
             Emm42Motor_Dir = 0x02;//0表示往下
             Emm42Motor_Pos = 1600;
             CANMessageGenerate();
             NowPos = MID;
-        }else if (NowPos == DOWN && TarPos == UP) {
+        } else if (NowPos == DOWN && TarPos == UP) {
             Emm42Motor_Dir = 0x12;//1表示往上
             Emm42Motor_Pos = 3200;
             CANMessageGenerate();
             NowPos = UP;
-        }else if(NowPos == DOWN && TarPos == MID){
+        } else if (NowPos == DOWN && TarPos == MID) {
             Emm42Motor_Dir = 0x12;//1表示往上
             Emm42Motor_Pos = 1600;
             CANMessageGenerate();
             NowPos = MID;
-        }else if(NowPos == MID && TarPos == UP){
+        } else if (NowPos == MID && TarPos == UP) {
             Emm42Motor_Dir = 0x12;//1表示往上
             Emm42Motor_Pos = 1600;
             CANMessageGenerate();
             NowPos = UP;
-        } else if(NowPos == MID && TarPos == DOWN){
+        } else if (NowPos == MID && TarPos == DOWN) {
             Emm42Motor_Dir = 0x02;//1表示往上
             Emm42Motor_Pos = 1600;
             CANMessageGenerate();
@@ -251,11 +251,13 @@ void Emm42Motor::SetTargetPosition(uint8_t pos) {
 Emm42Motor::~Emm42Motor() = default;
 
 /*4310托盘电机类------------------------------------------------------------------*/
-Motor_4010_TRAY::Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit): CAN(commuInit), Motor(motorInit, this) {
+Motor_4010_TRAY::Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(commuInit),
+                                                                                     Motor(motorInit, this) {
 
 }
 
-void Motor_4010_TRAY::SetTargetPos(MOTOR_POS_t _targetAngle) {
+void Motor_4010_TRAY::SetTargetPos(uint8_t _targetAngle) {
+    stopFlag = false;
     targetPos = _targetAngle;
 }
 
@@ -264,17 +266,32 @@ void Motor_4010_TRAY::Handle() {
         TxSpeed = 0;
     } else {
         TxSpeed = 300;
-        switch (targetPos) {
-            case RED:
-                TxAngle = 2000;
-                break;
-            case BLUE:
-                TxAngle = 14000;
-                break;
-            case GREEN:
-                TxAngle = 26000;
-                break;
+        if (targetPos == RED) {
+            TxAngle = 2000;
+            if (nowPos == GREEN) {
+                TxDir = 0;
+            } else if (nowPos == BLUE) {
+                TxDir = 1;
+            }
+            nowPos = RED;
+        } else if (targetPos == BLUE) {
+            TxAngle = 14000;
+            if (nowPos == RED) {
+                TxDir = 0;
+            } else if (nowPos == GREEN) {
+                TxDir = 1;
+            }
+            nowPos = BLUE;
+        } else if (targetPos == GREEN) {
+            TxAngle = 26000;
+            if (nowPos == RED) {
+                TxDir = 1;
+            } else if (nowPos == BLUE) {
+                TxDir = 0;
+            }
+            nowPos = GREEN;
         }
+        CANMessageGenerate();
     }
 }
 
@@ -284,7 +301,7 @@ void Motor_4010_TRAY::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
         canQueue.Data[canQueue.rear].message[0] = 0xA6;
-        canQueue.Data[canQueue.rear].message[1] = 0x00;
+        canQueue.Data[canQueue.rear].message[1] = TxDir;
         canQueue.Data[canQueue.rear].message[2] = TxSpeed;
         canQueue.Data[canQueue.rear].message[3] = TxSpeed >> 8u;
         canQueue.Data[canQueue.rear].message[4] = TxAngle;

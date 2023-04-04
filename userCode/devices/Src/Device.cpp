@@ -284,7 +284,7 @@ int main() {
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                          1500);
+                          1220);//初始化爪子
     //TODO adc校准？
     RemoteControl::init();
     CatchControl::Init();
