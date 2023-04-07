@@ -11,7 +11,7 @@
 #include "RemoteControl.h"
 #include "ServoTask.h"
 #include "ArmTask.h"
-
+#include "AutoTask.h"
 
 /*枚举类型定义------------------------------------------------------------*/
 

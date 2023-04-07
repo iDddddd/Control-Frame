@@ -287,7 +287,7 @@ int main() {
                           1220);//初始化爪子
     //TODO adc校准？
     RemoteControl::init();
-    CatchControl::Init();
+    ManiControl::Init();
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);
     HAL_TIM_Base_Start_IT(&htim6);
@@ -299,7 +299,7 @@ int main() {
   //  bsp_BuzzerOn(1000);
     init_Flag = 1;
 
-    AutoChassisSet(0,0,PI/2);
+  //  AutoChassisSet(0,0,PI/2);
     /* USER CODE END 2 */
 
     /* Infinite loop */

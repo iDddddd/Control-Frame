@@ -95,6 +95,7 @@ void ArmAngleCalc() {
 }
 void AutoTraySet(uint8_t trayflag){
     TrayMotor.SetTargetPos(trayflag);
+    CompleteTask();
 }
 /*void ArmAngleCalc() {
     float arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;

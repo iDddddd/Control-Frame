@@ -161,14 +161,15 @@ void AutoChassisStop() {
     ChassisStopFlag = true;
 
     Classis_Motor.Stop();
+    autoMove.StopMove();
     /*RFL.Stop();
     RFR.Stop();
     RBL.Stop();
     RBR.Stop();*/
-    RFL.SetTargetAngle(45);
-    RFR.SetTargetAngle(135);
-    RBL.SetTargetAngle(135);
-    RBR.SetTargetAngle(45);
+    RFL.SetTargetAngle(0);
+    RFR.SetTargetAngle(90);
+    RBL.SetTargetAngle(90);
+    RBR.SetTargetAngle(0);
 }
 
 /**

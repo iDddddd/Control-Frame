@@ -7,7 +7,7 @@
 
 #include "IMU.h"
 #include "Device.h"
-#include "CatchControl.h"
+#include "ManiControl.h"
 
 class Move {
 public:
@@ -28,7 +28,6 @@ public:
     ~Move();
     bool stopFlag{false};
     void Calc(float target);
-    float Handle(float  &reference);
     float Handle_X(float  reference);
     float Handle_Y(float  reference);
     float Handle_O(const float  reference);
@@ -39,13 +38,12 @@ public:
 
 class AutoMove {
 public:
-   // static float t;
 
     uint8_t num;
-    float vx;
-    float vy;
-    float vo;
-    bool StopFlag{false};
+    float vx{};
+    float vy{};
+    float vo{};
+    bool StopFlag{true};
     AutoMove(uint8_t _num);
     void StartMove(float x_distance, float y_distance, float o_angle);
     void StopMove();

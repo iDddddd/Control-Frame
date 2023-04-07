@@ -7,7 +7,7 @@
 
 #include "Device.h"
 #include "can.h"
-#include "CatchControl.h"
+#include "ManiControl.h"
 #include "Motor.h"
 #include "CommuType.h"
 

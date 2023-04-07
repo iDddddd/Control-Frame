@@ -669,6 +669,11 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\tasks\Src\ServoTask.cpp</FilePath>
             </File>
+            <File>
+              <FileName>AutoTask.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\tasks\Src\AutoTask.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -700,11 +705,6 @@
               <FilePath>..\userCode\devices\Src\IMU.cpp</FilePath>
             </File>
             <File>
-              <FileName>CatchControl.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\userCode\devices\Src\CatchControl.cpp</FilePath>
-            </File>
-            <File>
               <FileName>AutoMove.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\AutoMove.cpp</FilePath>
@@ -723,6 +723,16 @@
               <FileName>ARMMotor.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\ARMMotor.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ManiControl.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\ManiControl.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>StateMachine.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\StateMachine.cpp</FilePath>
             </File>
           </Files>
         </Group>

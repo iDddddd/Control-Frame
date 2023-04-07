@@ -2,13 +2,13 @@
 // Created by mac on 2022/12/14.
 //
 
-#include "CatchControl.h"
+#include "ManiControl.h"
 
-CC_ctrl_t CatchControl::cc_ctrl{};
-uint8_t CatchControl::rx_buff[2][BUFF_SIZE];
-TASK_FLAG_t CatchControl::TaskFlag;
+MC_ctrl_t ManiControl::mc_ctrl{};
+uint8_t ManiControl::rx_buff[2][BUFF_SIZE];
+TASK_FLAG_t ManiControl::TaskFlag;
 
-void CatchControl::Init() {
+void ManiControl::Init() {
     //使能 DMA 串口接收
     SET_BIT(huart6.Instance->CR3, USART_CR3_DMAR);
     //使能空闲中断
@@ -32,12 +32,12 @@ void CatchControl::Init() {
     __HAL_DMA_ENABLE(&hdma_usart6_rx);
 }
 
-//void CatchControl::GET_Data(const volatile uint8_t *rx_buff) {
+//void ManiControl::GET_Data(const volatile uint8_t *rx_buff) {
 
 
 //}
 
-void CatchControl::IT_Handle() {
+void ManiControl::IT_Handle() {
     if (huart6.Instance->SR & UART_FLAG_RXNE)//接收到数据
     {
         __HAL_UART_CLEAR_PEFLAG(&huart6);
@@ -89,67 +89,49 @@ void CatchControl::IT_Handle() {
     }
 }
 
-void CatchControl::GetData(uint8_t bufIndex) {
-    int i = 0;
-    while (i < 14) {
-        if (rx_buff[bufIndex][i + 0] == 0x7A) {
-            if (rx_buff[bufIndex][i + 1] == 0x01) {
-                switch (rx_buff[bufIndex][i + 2]) {
+void ManiControl::GetData(uint8_t bufIndex) {
+        if (rx_buff[bufIndex][0] == 0x7A) {
+            if (rx_buff[bufIndex][1] == 0x01) {
+                switch (rx_buff[bufIndex][2]) {
                     case 0x01:{
                         TaskFlag = STOP;
-                        cc_ctrl.ChassisStopFlag = rx_buff[bufIndex][i + 7];
+                        mc_ctrl.ChassisStopFlag = rx_buff[bufIndex][7];
+                        StateMachine::add_function_to_state(ChassisStopTask);
                         break;
                     }
                     case 0x02:{
                         TaskFlag = MOVE;
-                        cc_ctrl.x = (rx_buff[bufIndex][i + 7] << 8u) | rx_buff[bufIndex][i + 8];
-                        cc_ctrl.y = (rx_buff[bufIndex][i + 9] << 8u) | rx_buff[bufIndex][i + 10];
+                        mc_ctrl.x = (rx_buff[bufIndex][7] << 8u) | rx_buff[bufIndex][8];
+                        mc_ctrl.y = (rx_buff[bufIndex][9] << 8u) | rx_buff[bufIndex][10];
+                        StateMachine::add_function_to_state(MoveTask);
                         break;
                     }
                     case 0x03:{
                         TaskFlag = ARM;
-                        cc_ctrl.ARM1.angle = (rx_buff[bufIndex][i + 8] << 8u) | rx_buff[bufIndex][i + 7];
-                        cc_ctrl.ARM2.angle = (rx_buff[bufIndex][i + 10] << 8u) | rx_buff[bufIndex][i + 9];
-                        cc_ctrl.ARM_Z_Flag = rx_buff[bufIndex][i + 12];
+                        mc_ctrl.ARM1.angle = (rx_buff[bufIndex][8] << 8u) | rx_buff[bufIndex][7];
+                        mc_ctrl.ARM2.angle = (rx_buff[bufIndex][10] << 8u) | rx_buff[bufIndex][9];
+                        mc_ctrl.ARM_Z_Flag = rx_buff[bufIndex][12];
+                        StateMachine::add_function_to_state(ArmTask);
                         break;
                     }
                     case 0x04:{
                         TaskFlag = CLAW;
-                        cc_ctrl.ArmServoFlag = rx_buff[bufIndex][i + 12];
+                        mc_ctrl.ArmServoFlag = rx_buff[bufIndex][12];
+                        StateMachine::add_function_to_state(ClawTask);
                         break;
                     }
                     case 0x05:{
                         TaskFlag = TRAY;
-                        cc_ctrl.TrayFlag = rx_buff[bufIndex][i + 12];
+                        mc_ctrl.TrayFlag = rx_buff[bufIndex][12];
+                        StateMachine::add_function_to_state(TrayTask);
                         break;
                     }
                 }
             }
         }
-        i++;
-    }
 
 }
 
-void CatchControl::AutoTask() {
-    switch (TaskFlag) {
-        case STOP:
-            AutoChassisStop();
-            break;
-        case MOVE:
-            AutoChassisSet(cc_ctrl.x,cc_ctrl.y,0);
-            break;
-        case ARM:
-            AutoArmSet(cc_ctrl.ARM1.angle,cc_ctrl.ARM2.angle,cc_ctrl.ARM_Z_Flag);
-            break;
-        case CLAW:
-            AutoClawSet(cc_ctrl.ArmServoFlag);
-            break;
-        case TRAY:
-            AutoTraySet(cc_ctrl.TrayFlag);
-            break;
-    }
-}
 
 void CompleteTask(){
     uint8_t tx_message[1] = {0x01};
@@ -158,6 +140,6 @@ void CompleteTask(){
 
 void USART6_IRQHandler() {
 
-    CatchControl::IT_Handle();
+    ManiControl::IT_Handle();
 
 }

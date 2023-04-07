@@ -36,7 +36,7 @@ bool clawFlag = false;
 void AutoClawSet(uint8_t clawflag){
     if(clawflag == 1 && !clawFlag){
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                              1500);
+                              1550);
         clawFlag = true;
         CompleteTask();
     }else if(clawflag == 0 && clawFlag){
