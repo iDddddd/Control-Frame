@@ -9,28 +9,80 @@
 #include "Device.h"
 #include "ManiControl.h"
 
-class Move {
-public:
-    static float expectPos[3];
-    float x_rel;
-    uint8_t Index;
-    float d1{};
-    float d2{};
-    float d_max{};
+/*结构体定义--------------------------------------------------------------*/
+typedef struct {
+    float d1;
+    float d2;
+    float d_max;
     float a;
-    float v{};
+    float v;
     float v_max;
-    float v_rel{};
-    EASY_PID pid;
-    static uint8_t FinishFlag;
+} Pos_Para_t;
 
-    Move(uint8_t _n);
-    ~Move();
+/*类型定义----------------------------------------------------------------*/
+class Move_X {
+public:
+    float expectPos{0};
+    Pos_Para_t Para{};
+    float x_rel{};
+    float v_rel{0};
+    EASY_PID pid;
+    bool FinishFlag{false};
+
+    Move_X();
+
+    ~Move_X() = default;
+
     bool stopFlag{false};
+
     void Calc(float target);
-    float Handle_X(float  reference);
-    float Handle_Y(float  reference);
-    float Handle_O(const float  reference);
+
+    float Handle(float reference);
+
+    void Stop();
+
+};
+
+class Move_Y {
+public:
+    float expectPos{0};
+    Pos_Para_t Para{};
+    float y_rel{};
+    float v_rel{0};
+    EASY_PID pid;
+    bool FinishFlag{false};
+
+    Move_Y();
+
+    ~Move_Y() = default;
+
+    bool stopFlag{false};
+
+    void Calc(float target);
+
+    float Handle(float reference);
+
+    void Stop();
+
+};
+
+class Spin {
+public:
+    float expectPos{0};
+    Pos_Para_t Para{};
+    float o_rel{};
+    float v_rel{0};
+    EASY_PID pid;
+
+    Spin();
+
+    ~Spin() = default;
+
+    bool stopFlag{false};
+
+    void Calc(float target);
+
+    float Handle(const float reference);
 
     void Stop();
 
@@ -39,14 +91,18 @@ public:
 class AutoMove {
 public:
 
-    uint8_t num;
     float vx{};
     float vy{};
     float vo{};
     bool StopFlag{true};
-    AutoMove(uint8_t _num);
+    bool SendFlag{false};
+
+    AutoMove() = default;
+
     void StartMove(float x_distance, float y_distance, float o_angle);
+
     void StopMove();
+
     ~AutoMove() = default;
 
     void Handle();

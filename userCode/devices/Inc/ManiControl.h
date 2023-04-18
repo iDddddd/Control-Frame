@@ -9,6 +9,7 @@
 #include "AutoTask.h"
 #define BUFF_SIZE 28u
 #define CONTROL_LENGTH 0x10
+#define MANI_LENGTH 0x0E
 typedef enum {
     STOP = 1,
     MOVE,

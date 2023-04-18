@@ -210,32 +210,32 @@ void Emm42Motor::Handle() {
     } else {
         if (NowPos == UP && TarPos == DOWN) {
             Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF,最大为4FF
-            Emm42Motor_Pos = 3200;
+            Emm42Motor_Pos = 3200*3;
             CANMessageGenerate();
             NowPos = DOWN;
         } else if (NowPos == UP && TarPos == MID) {
             Emm42Motor_Dir = 0x02;//0表示往下
-            Emm42Motor_Pos = 1600;
+            Emm42Motor_Pos = 1600*3;
             CANMessageGenerate();
             NowPos = MID;
         } else if (NowPos == DOWN && TarPos == UP) {
             Emm42Motor_Dir = 0x12;//1表示往上
-            Emm42Motor_Pos = 3200;
+            Emm42Motor_Pos = 3200*3;
             CANMessageGenerate();
             NowPos = UP;
         } else if (NowPos == DOWN && TarPos == MID) {
             Emm42Motor_Dir = 0x12;//1表示往上
-            Emm42Motor_Pos = 1600;
+            Emm42Motor_Pos = 1600*3;
             CANMessageGenerate();
             NowPos = MID;
         } else if (NowPos == MID && TarPos == UP) {
             Emm42Motor_Dir = 0x12;//1表示往上
-            Emm42Motor_Pos = 1600;
+            Emm42Motor_Pos = 1600*3;
             CANMessageGenerate();
             NowPos = UP;
         } else if (NowPos == MID && TarPos == DOWN) {
             Emm42Motor_Dir = 0x02;//1表示往上
-            Emm42Motor_Pos = 1600;
+            Emm42Motor_Pos = 1600*3;
             CANMessageGenerate();
             NowPos = DOWN;
         }

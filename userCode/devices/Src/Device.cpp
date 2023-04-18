@@ -299,7 +299,6 @@ int main() {
   //  bsp_BuzzerOn(1000);
     init_Flag = 1;
 
-  //  AutoChassisSet(0,0,PI/2);
     /* USER CODE END 2 */
 
     /* Infinite loop */

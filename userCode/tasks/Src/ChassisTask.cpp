@@ -84,7 +84,7 @@ Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
 Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
 
-AutoMove autoMove(1);
+AutoMove autoMove;
 bool ChassisStopFlag = true;
 float FBVelocity, LRVelocity, RTVelocity;
 float ZeroYaw;

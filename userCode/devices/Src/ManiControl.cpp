@@ -62,7 +62,7 @@ void ManiControl::IT_Handle() {
 
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
-            if (rx_len == CONTROL_LENGTH) {
+            if (rx_len == CONTROL_LENGTH||rx_len == MANI_LENGTH) {
                 GetData(0);
             }
         } else {
@@ -82,7 +82,7 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
 
-            if (rx_len == CONTROL_LENGTH) {
+            if (rx_len == CONTROL_LENGTH||rx_len == MANI_LENGTH) {
                 GetData(1);
             }
         }

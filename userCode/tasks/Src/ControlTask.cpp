@@ -18,13 +18,14 @@ void CtrlHandle() {
                     Headmemory();
                 }else if (RemoteControl::rcInfo.sRight == MID_POS){
                     StateMachine::stateHandle();
-                   // AutoSetVelocity();
+                    AutoSetVelocity();
                 }
                 break;
             case MID_POS://左侧二档
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
                                         RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
+                    AutoChassisSet(0,0,PI/2);
                 } else if (RemoteControl::rcInfo.sRight == MID_POS) {
                     HeadkeepSetVelocity(RemoteControl::rcInfo.right_col * 2,
                                         RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
