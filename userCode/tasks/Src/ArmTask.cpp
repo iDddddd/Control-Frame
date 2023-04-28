@@ -15,9 +15,9 @@ PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
-       .kp = 4.03f,
-        .ki = 0.1f,
-        .kd = 0.1f,
+       .kp = 0.0f,
+        .ki = 0.0f,
+        .kd = 0.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,

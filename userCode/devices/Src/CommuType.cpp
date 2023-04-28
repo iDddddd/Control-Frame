@@ -9,7 +9,6 @@ uint8_t RS485::rsmessage[4][11] = {0};
 TX_QUEUE_t CAN::canQueue = {
         .front = 0,
         .rear = 0,
-        .MAX_MESSAGE_COUNT = 8
 };
 
 
@@ -21,7 +20,7 @@ void CAN::CANInit() {
     HAL_CAN_Start(&hcan1);
     HAL_CAN_Start(&hcan2);
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
-    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
+    //   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
 
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
     HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
@@ -69,7 +68,7 @@ CAN::~CAN() = default;
 void CAN::CANPackageSend() {
     if (canQueue.front != canQueue.rear) {
         CAN_TxHeaderTypeDef txHeaderTypeDef;
-        uint32_t box;
+        uint32_t box = 0;
 
         txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;
         txHeaderTypeDef.DLC = 0x08;
@@ -82,7 +81,7 @@ void CAN::CANPackageSend() {
             HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
         }
 
-        canQueue.front = (canQueue.front + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;
     }
 }
 

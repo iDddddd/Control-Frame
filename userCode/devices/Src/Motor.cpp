@@ -99,7 +99,7 @@ void FOUR_Motor_4010::Handle() {
  * @brief 4010电机类的消息包获取任务
  */
 void FOUR_Motor_4010::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
@@ -112,7 +112,10 @@ void FOUR_Motor_4010::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[6] = motor4010_intensity[3];
         canQueue.Data[canQueue.rear].message[7] = motor4010_intensity[3] >> 8u;
 
-        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+    } else{
+        canQueue.rear = 0;
+        canQueue.front = 0;
     }
 }
 

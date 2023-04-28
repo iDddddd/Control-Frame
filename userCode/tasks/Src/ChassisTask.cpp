@@ -7,7 +7,7 @@
 constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
-PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底盘电机共用
+PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
         .kp = -0.215f,
         .ki = -0.0004f,
         .kd = 0,
@@ -16,7 +16,7 @@ PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体，四个底
         .componentKdMax = 0,
         .outputMax = 2000
 };
-PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底盘电机共用
+PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
         .kp = 0.215f,
         .ki = 0.0004f,
         .kd = 0,
@@ -25,34 +25,34 @@ PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体，四个底
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
-PID_Regulator_t pidRegulator8 = {//此为储存pid参数的结构体，四个底盘电机共用
-        .kp = 0.215f,
-        .ki = 0.0004f,
+PID_Regulator_t pidRegulator8 = {//此为储存pid参数的结构体
+        .kp = -0.215f,
+        .ki = -0.0004f,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
-MOTOR_INIT_t chassisMotorInit1 = {//四个底盘电机共用的初始化结构体
+MOTOR_INIT_t chassisMotorInit1 = {//底盘电机初始化结构体
         .speedPIDp = &pidRegulator1,
         .anglePIDp = nullptr,
         .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
 };
-MOTOR_INIT_t chassisMotorInit2 = {//四个底盘电机共用的初始化结构体
+MOTOR_INIT_t chassisMotorInit2 = {//底盘电机初始化结构体
         .speedPIDp = &pidRegulator2,
         .anglePIDp = nullptr,
         .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
 };
-MOTOR_INIT_t chassisMotorInit3 = {//四个底盘电机共用的初始化结构体
+MOTOR_INIT_t chassisMotorInit3 = {//底盘电机初始化结构体
         .speedPIDp = &pidRegulator8,
         .anglePIDp = nullptr,
         .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
 };
-MOTOR_INIT_t swerveMotorInit = {//四个底盘电机共用的初始化结构体
+MOTOR_INIT_t swerveMotorInit = {//底盘电机初始化结构体
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         .ctrlType = DIRECT,
@@ -194,7 +194,7 @@ void ChassisStop() {
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float ClassisSpeed[4];
     float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
-    rtVelocity *= -2.0f * PI;
+   // rtVelocity *= -2.0f * PI;
     float vx, vy, w;
     vx = lrVelocity;
     vy = fbVelocity;

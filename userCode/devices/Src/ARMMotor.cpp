@@ -24,7 +24,7 @@ void Motor_4010::SetTargetAngle(float _targetAngle) {
 
 void Motor_4010::CANMessageGenerate() {
 
-    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
@@ -37,7 +37,10 @@ void Motor_4010::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[6] = 0;
         canQueue.Data[canQueue.rear].message[7] = 0;
 
-        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+    }else{
+        canQueue.rear = 0;
+        canQueue.front = 0;
     }
 
 }
@@ -150,7 +153,7 @@ void Motor_4310::SetTargetSpeed(float _targetSpeed) {
 }
 
 void Motor_4310::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
@@ -163,7 +166,10 @@ void Motor_4310::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[6] = 0x00;
         canQueue.Data[canQueue.rear].message[7] = 0x40;
 
-        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+    }else{
+        canQueue.rear = 0;
+        canQueue.front = 0;
     }
 }
 
@@ -185,7 +191,7 @@ Emm42Motor::Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : Motor
 
 
 void Emm42Motor::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
@@ -198,7 +204,10 @@ void Emm42Motor::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
         canQueue.Data[canQueue.rear].message[7] = 0x6B;
 
-        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+    }else{
+        canQueue.rear = 0;
+        canQueue.front = 0;
     }
 }
 
@@ -296,7 +305,7 @@ void Motor_4010_TRAY::Handle() {
 }
 
 void Motor_4010_TRAY::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
@@ -309,7 +318,10 @@ void Motor_4010_TRAY::CANMessageGenerate() {
         canQueue.Data[canQueue.rear].message[6] = 0;
         canQueue.Data[canQueue.rear].message[7] = 0;
 
-        canQueue.rear = (canQueue.rear + 1) % canQueue.MAX_MESSAGE_COUNT;
+        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+    }else{
+        canQueue.rear = 0;
+        canQueue.front = 0;
     }
 }
 

@@ -12,22 +12,22 @@
 #define can1 1
 #define can2 2
 
+#define MAX_MESSAGE_COUNT 16
 /*结构体定义--------------------------------------------------------------*/
 
 typedef struct {
     uint32_t _id;//canID
-    int canType;
+    uint8_t canType;
 } COMMU_INIT_t;
 typedef struct {
     uint32_t ID;
-    int canType;
+    uint8_t canType;
     uint8_t message[8];
 }DATA_t;
 typedef struct {
-    DATA_t Data[8];
+    DATA_t Data[MAX_MESSAGE_COUNT];
     int front;
     int rear;
-    const int MAX_MESSAGE_COUNT;
 }TX_QUEUE_t;
 
 /*类型定义----------------------------------------------------------------*/
@@ -51,7 +51,7 @@ public:
     virtual void CANMessageGenerate() = 0;
 
 protected:
-    int canType;
+    uint8_t canType;
     static MyMap<uint32_t, uint8_t *> dict;
 
     void ID_Bind_Rx(uint8_t *RxMessage) const;
