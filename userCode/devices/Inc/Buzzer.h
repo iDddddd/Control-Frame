@@ -21,7 +21,5 @@ typedef struct {
 
 void bsp_BuzzerOn(float freq);
 void bsp_BuzzerOff();
-void my_buzzer_play();
-
 
 #endif //RM_FRAME_C_BUZZER_H

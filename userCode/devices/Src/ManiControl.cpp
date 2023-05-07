@@ -32,10 +32,7 @@ void ManiControl::Init() {
     __HAL_DMA_ENABLE(&hdma_usart6_rx);
 }
 
-//void ManiControl::GET_Data(const volatile uint8_t *rx_buff) {
 
-
-//}
 
 void ManiControl::IT_Handle() {
     if (huart6.Instance->SR & UART_FLAG_RXNE)//接收到数据

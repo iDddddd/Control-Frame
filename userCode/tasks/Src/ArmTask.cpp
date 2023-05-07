@@ -71,10 +71,10 @@ MOTOR_INIT_t arm3MotorInit = {
         .reductionRatio = 1.0f
 
 };
-Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
-Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
-Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
+//Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
+//Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
+//Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
+//Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
 static float arm1Angle, arm2Angle;
@@ -82,19 +82,19 @@ static float arm1data,arm2data;
 void ArmStop() {
     ArmStopFlag = true;
     // TrayMotor.Stop();
-     ArmMotor1.Stop();
+    /* ArmMotor1.Stop();
       ArmMotor2.Stop();
-     ArmMotorZ.Stop();
+     ArmMotorZ.Stop();*/
 }
 
 void ArmAngleCalc() {
   //   TrayMotor.SetTargetAngle(Angle);
-        ArmMotor1.SetTargetAngle(arm1Angle);
-       ArmMotor2.SetTargetAngle(arm2Angle);
+        /*ArmMotor1.SetTargetAngle(arm1Angle);
+       ArmMotor2.SetTargetAngle(arm2Angle);*/
     //  ArmMotorZ.SetTargetPosition(Position);
 }
 void AutoTraySet(uint8_t trayflag){
-    TrayMotor.SetTargetPos(trayflag);
+    //TrayMotor.SetTargetPos(trayflag);
     CompleteTask();
 }
 /*void ArmAngleCalc() {
@@ -157,9 +157,9 @@ void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
     }
     arm1Angle = arm1_angle;
     arm2Angle = arm2_angle;
-    ArmMotor1.SetTargetAngle(arm1_angle);
+   /* ArmMotor1.SetTargetAngle(arm1_angle);
     ArmMotor2.SetTargetAngle(arm2_angle);
-    ArmMotorZ.SetTargetPosition(pos);
+    ArmMotorZ.SetTargetPosition(pos);*/
 }
 
 void ARMHandle() {

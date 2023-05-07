@@ -25,9 +25,9 @@ PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
-PID_Regulator_t pidRegulator8 = {//此为储存pid参数的结构体
-        .kp = -0.215f,
-        .ki = -0.0004f,
+PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
+        .kp = 0.215f,
+        .ki = 0.0004f,
         .kd = 0,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -47,7 +47,7 @@ MOTOR_INIT_t chassisMotorInit2 = {//底盘电机初始化结构体
         .reductionRatio = 1.0f
 };
 MOTOR_INIT_t chassisMotorInit3 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator8,
+        .speedPIDp = &pidRegulator3,
         .anglePIDp = nullptr,
         .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f

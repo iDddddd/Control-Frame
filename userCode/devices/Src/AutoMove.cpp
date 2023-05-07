@@ -167,22 +167,21 @@ Spin::Spin() {
 
 void Spin::Calc(float target) {
     stopFlag = false;
-   /* Para.d_max = target-IMU::imu.attitude.yaw;
+    Para.d_max = target-IMU::imu.attitude.yaw;
     Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
     Para.d2 = target - 2 * Para.d1;
     if (Para.d2 < 0) {
         Para.d1 = target / 2;
         Para.d2 = 0;
         Para.v_max = sqrt(2 * Para.a * Para.d1);
-    }*/
-expectPos = target;
+    }
 }
 
 float Spin::Handle(const float reference) {
     if (stopFlag) {
         v_rel = 0;
     } else {
-    /*    if (expectPos >= Para.d_max) {
+        if (expectPos >= Para.d_max) {
             Para.v = 0;
         } else if (expectPos < Para.d1) {
             Para.v += Para.a * 0.001f;
@@ -192,11 +191,11 @@ float Spin::Handle(const float reference) {
             expectPos += (2 * Para.v + Para.a * 0.001f) / 2 * 0.001f;
         } else if (expectPos > Para.d1 && expectPos < (Para.d1 + Para.d2)) {
             expectPos += Para.v * 0.001f;
-        }*/
+        }
     if(abs(expectPos-reference) < 0.01){
         return 0;
     }
-        v_rel = /*Para.v +*/ pid.PIDCalc(expectPos, reference, 2.0);
+        v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
         if (v_rel > Para.v_max) {
             v_rel = Para.v_max;
         }
