@@ -112,7 +112,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 
         ChassisHandle();
-        ARMHandle();
+
         Motor::MotorsHandle();
         CAN::CANPackageSend();
 
@@ -125,7 +125,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
     if (htim == &htim6) {//4ms
         RS485::RS485PackageSend();
-
+            ARMHandle();
     }
     if (htim == &htim7) {
         IMU::imu.Handle();
@@ -213,7 +213,7 @@ int main() {
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                          1220);//初始化爪子
+                          1760);//初始化爪子
     //TODO adc校准？
     RemoteControl::init();
     ManiControl::Init();

@@ -6,8 +6,8 @@
 
 
 PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
-         .kp = 3.53f,
-        .ki = 0.05f,
+         .kp = 0.0f,
+        .ki = 0.0f,
         .kd = 0.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
@@ -55,7 +55,7 @@ COMMU_INIT_t arm2CommuInit = {
 MOTOR_INIT_t arm2MotorInit = {
         .speedPIDp = &pidRegulator5,
         .anglePIDp = &pidRegulator6,
-        .ctrlType = POSITION_Double,
+        .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 
 };
@@ -72,26 +72,25 @@ MOTOR_INIT_t arm3MotorInit = {
 
 };
 //Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
-//Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
-//Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-//Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
+Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
+Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
+Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
-static float arm1Angle, arm2Angle;
-static float arm1data,arm2data;
+static float arm1Angle, arm2Angle,armZSpeed;
 void ArmStop() {
     ArmStopFlag = true;
     // TrayMotor.Stop();
-    /* ArmMotor1.Stop();
+     ArmMotor1.Stop();
       ArmMotor2.Stop();
-     ArmMotorZ.Stop();*/
+     ArmMotorZ.Stop();
 }
 
 void ArmAngleCalc() {
   //   TrayMotor.SetTargetAngle(Angle);
-        /*ArmMotor1.SetTargetAngle(arm1Angle);
-       ArmMotor2.SetTargetAngle(arm2Angle);*/
-    //  ArmMotorZ.SetTargetPosition(Position);
+        ArmMotor1.SetTargetAngle(arm1Angle);
+       ArmMotor2.SetTargetAngle(arm2Angle);
+      ArmMotorZ.SetTargetSpeed(armZSpeed);
 }
 void AutoTraySet(uint8_t trayflag){
     //TrayMotor.SetTargetPos(trayflag);
@@ -119,17 +118,16 @@ void AutoTraySet(uint8_t trayflag){
 
 }*/
 
-void ArmSetAngle(float Arm1Angle, float Arm2Angle) {
+void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZSpeed) {
     ArmStopFlag = false;
 
     arm1Angle = Arm1Angle;
     arm2Angle = Arm2Angle;
+    armZSpeed = ArmZSpeed;
 
 }
 
 void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
-    arm1data = angle1;
-	arm2data = angle2;
     float arm1_angle = angle1 / 16384.0f * 2 * 3.1415926f;
     float arm2_angle = angle2 / 16384.0f * 360.0f;
     arm1_angle -= PI;
@@ -157,9 +155,9 @@ void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
     }
     arm1Angle = arm1_angle;
     arm2Angle = arm2_angle;
-   /* ArmMotor1.SetTargetAngle(arm1_angle);
+    ArmMotor1.SetTargetAngle(arm1_angle);
     ArmMotor2.SetTargetAngle(arm2_angle);
-    ArmMotorZ.SetTargetPosition(pos);*/
+    ArmMotorZ.SetTargetPosition(pos);
 }
 
 void ARMHandle() {

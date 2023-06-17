@@ -12,11 +12,13 @@
 #include "Servo.h"
 #include "Buzzer.h"
 
+
+
 void AngleCalc();
 
 void ArmStop();
 
-void ArmSetAngle(float Arm1Angle, float Arm2Angle);
+void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZSpeed);
 
 void ArmAngleCalc();
 

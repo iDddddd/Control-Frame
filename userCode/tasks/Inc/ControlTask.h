@@ -12,6 +12,7 @@
 #include "ServoTask.h"
 #include "ArmTask.h"
 #include "AutoTask.h"
+#include "ArmTask.h"
 
 /*枚举类型定义------------------------------------------------------------*/
 

@@ -218,10 +218,10 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBR.SetTargetAngle(RBRAngle);
 
     //计算四个轮子线速度，单位：m/s
-    ClassisSpeed[0] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
-    ClassisSpeed[1] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 360;//右前轮
-    ClassisSpeed[2] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
-    ClassisSpeed[3] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
+    ClassisSpeed[0] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 180 ;//左前轮
+    ClassisSpeed[1] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 180;//右前轮
+    ClassisSpeed[2] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 180;//右后轮
+    ClassisSpeed[3] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 180;//左后轮
 
     //控制底盘电机转速
     Classis_Motor.SetTargetSpeed(ClassisSpeed);

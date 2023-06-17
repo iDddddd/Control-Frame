@@ -6,7 +6,7 @@
 
 /*静态成员变量声明------------------------------------------------------------------*/
 
-int16_t Motor_4010::Intensity;
+//int16_t Motor_4010::Intensity;
 
 /*4010电机类------------------------------------------------------------------*/
 
@@ -19,6 +19,7 @@ Motor_4010::Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(c
 void Motor_4010::SetTargetAngle(float _targetAngle) {
     stopFlag = false;
     targetAngle = _targetAngle;
+    txPos = _targetAngle*100;
 }
 
 
@@ -28,14 +29,14 @@ void Motor_4010::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xA1;
-        canQueue.Data[canQueue.rear].message[1] = 0;
-        canQueue.Data[canQueue.rear].message[2] = 0;
-        canQueue.Data[canQueue.rear].message[3] = 0;
-        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity[id];
-        canQueue.Data[canQueue.rear].message[5] = motor4010_intensity[id] >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = 0;
-        canQueue.Data[canQueue.rear].message[7] = 0;
+        canQueue.Data[canQueue.rear].message[0] = 0xA4;
+        canQueue.Data[canQueue.rear].message[1] = 0x00;
+        canQueue.Data[canQueue.rear].message[2] = txSpeed;
+        canQueue.Data[canQueue.rear].message[3] = txSpeed >> 8u;
+        canQueue.Data[canQueue.rear].message[4] = txPos;
+        canQueue.Data[canQueue.rear].message[5] = txPos >> 8u;
+        canQueue.Data[canQueue.rear].message[6] = txPos >> 16u;
+        canQueue.Data[canQueue.rear].message[7] = txPos >> 24u;
 
         canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
     }else{
@@ -46,16 +47,18 @@ void Motor_4010::CANMessageGenerate() {
 }
 
 void Motor_4010::Handle() {
+/*
     int16_t intensity[8];
 
     MotorStateUpdate();
     intensity[id] = IntensityCalc();
-    Intensity = intensity[id];
+    //Intensity = intensity[id];
     if (stopFlag) {
         motor4010_intensity[id] = 0;
     } else {
         motor4010_intensity[id] = intensity[id];
     }
+*/
 
     CANMessageGenerate();
 }
@@ -195,14 +198,11 @@ void Emm42Motor::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xFD;
-        canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
-        canQueue.Data[canQueue.rear].message[2] = 0xFF;
+        canQueue.Data[canQueue.rear].message[0] = 0xF6;
+        canQueue.Data[canQueue.rear].message[1] = (Emm42Motor_Dir << 4) | (Emm42Motor_Speed >> 8);
+        canQueue.Data[canQueue.rear].message[2] = Emm42Motor_Speed;
         canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
-        canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
-        canQueue.Data[canQueue.rear].message[7] = 0x6B;
+        canQueue.Data[canQueue.rear].message[4] = 0x6B;
 
         canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
     }else{
@@ -212,8 +212,18 @@ void Emm42Motor::CANMessageGenerate() {
 }
 
 void Emm42Motor::Handle() {
+//速度模式
+      if(stopFlag) {
+          Emm42Motor_Speed = 0;
+      }else{
+          Emm42Motor_Speed = TarSpeed;
+      }
+      if(SendFlag) {
+          CANMessageGenerate();
+      }
 
-    if (stopFlag) {
+//位置模式
+    /*if (stopFlag) {
         Emm42Motor_Pos = 0;
         CANMessageGenerate();
     } else {
@@ -248,13 +258,37 @@ void Emm42Motor::Handle() {
             CANMessageGenerate();
             NowPos = DOWN;
         }
-    }
+    }*/
+
 }
 
 void Emm42Motor::SetTargetPosition(uint8_t pos) {
-    stopFlag = false;
-    TarPos = pos;
+   stopFlag = false;
+   TarPos = pos;
 }
+
+void Emm42Motor::SetTargetSpeed(float _speed) {
+   stopFlag = false;
+   if(_speed > 0.3){
+       Emm42Motor_Dir = 0x01;
+       TarSpeed = 31;
+   } else if(_speed < -0.3){
+       Emm42Motor_Dir = 0x00;
+       TarSpeed = 30;
+   }else{
+       Emm42Motor_Dir = 0x00;
+       TarSpeed = 0;
+   }
+   if(TarSpeed == NowSpeed){
+       SendFlag = false;
+   }else{
+       SendFlag = true;
+       NowSpeed = TarSpeed;
+   }
+
+}
+
+
 
 
 Emm42Motor::~Emm42Motor() = default;

@@ -25,7 +25,8 @@ class Motor_4010 : public Motor, public CAN {
 public:
     uint8_t RxMessage[8]{};
     int16_t motor4010_intensity[8]{};
-
+    int32_t txPos{};
+    uint16_t txSpeed{300};
     void CANMessageGenerate() override;
 
     void Handle() override;
@@ -107,9 +108,12 @@ public:
 
     uint8_t NowPos = DOWN;
     uint8_t TarPos = DOWN;
+    float NowSpeed = 0;
+    float TarSpeed = 0;
+    bool SendFlag = false;
     uint8_t Emm42Motor_Dir{};
     uint32_t Emm42Motor_Pos{};
-
+    uint16_t Emm42Motor_Speed{};
     ~Emm42Motor();
 
     void CANMessageGenerate() override;
@@ -117,7 +121,7 @@ public:
     void Handle() override;
 
     void SetTargetPosition(uint8_t pos);
-
+    void SetTargetSpeed(float _speed);
 private:
     float targetPosition{}; //单位mm
 
