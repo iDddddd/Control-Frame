@@ -77,7 +77,7 @@ Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
 Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
 bool ArmStopFlag = true;
 float Position, Angle;
-static float arm1Angle, arm2Angle,armZSpeed;
+static float arm1Angle, arm2Angle,armZSpeed,armZPos;
 void ArmStop() {
     ArmStopFlag = true;
     // TrayMotor.Stop();
@@ -90,7 +90,11 @@ void ArmAngleCalc() {
   //   TrayMotor.SetTargetAngle(Angle);
         ArmMotor1.SetTargetAngle(arm1Angle);
        ArmMotor2.SetTargetAngle(arm2Angle);
-      ArmMotorZ.SetTargetSpeed(armZSpeed);
+       if(armZPos > 0.7){
+           ArmMotorZ.SetTargetPosition(2);
+       }else if (armZPos < -0.7) {
+           ArmMotorZ.SetTargetPosition(0);
+       }
 }
 void AutoTraySet(uint8_t trayflag){
     //TrayMotor.SetTargetPos(trayflag);
@@ -118,12 +122,13 @@ void AutoTraySet(uint8_t trayflag){
 
 }*/
 
-void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZSpeed) {
+void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZPos) {
     ArmStopFlag = false;
 
     arm1Angle = Arm1Angle;
     arm2Angle = Arm2Angle;
-    armZSpeed = ArmZSpeed;
+    armZPos = ArmZPos;
+
 
 }
 

@@ -78,12 +78,12 @@ void CAN::CANPackageSend() {
         if (canQueue.Data[canQueue.front].canType == can1) {
             HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
         } else if (canQueue.Data[canQueue.front].canType == can2) {
-                if (canQueue.Data[canQueue.front].ID == 0x01) {
+                /*if (canQueue.Data[canQueue.front].ID == 0x01) {
                     txHeaderTypeDef.DLC = 0x05;
                     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-                } else {
+                } else {*/
                     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-                }
+               // }
         }
         canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;
     }

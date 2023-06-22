@@ -8,27 +8,27 @@ constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = -0.215f,
-        .ki = -0.0004f,
-        .kd = 0,
+        .kp = -0.6f,
+        .ki = -0.004f,
+        .kd = 0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
-        .kp = 0.215f,
-        .ki = 0.0004f,
-        .kd = 0,
+        .kp = 0.6f,
+        .ki = 0.004f,
+        .kd = 0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
-        .kp = 0.215f,
-        .ki = 0.0004f,
-        .kd = 0,
+        .kp = 0.6f,
+        .ki = 0.004f,
+        .kd = 0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,

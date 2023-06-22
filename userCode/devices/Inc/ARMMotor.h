@@ -40,11 +40,12 @@ public:
 private:
     uint8_t id;
     C6x0Rx_t feedback{};
+    //位置模式
     float targetAngle{};
     MOTOR_STATE_t state{};
     float realAngle{0};
-    float thisAngle;
-    float lastRead;
+    float thisAngle{};
+    float lastRead{};
     static int16_t Intensity;
 
     void MotorStateUpdate();

@@ -198,11 +198,14 @@ void Emm42Motor::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xF6;
-        canQueue.Data[canQueue.rear].message[1] = (Emm42Motor_Dir << 4) | (Emm42Motor_Speed >> 8);
-        canQueue.Data[canQueue.rear].message[2] = Emm42Motor_Speed;
+        canQueue.Data[canQueue.rear].message[0] = 0xFD;
+        canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
+        canQueue.Data[canQueue.rear].message[2] = 0xFF;
         canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = 0x6B;
+        canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
+        canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
+        canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
+        canQueue.Data[canQueue.rear].message[7] = 0x6B;
 
         canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
     }else{
@@ -213,14 +216,14 @@ void Emm42Motor::CANMessageGenerate() {
 
 void Emm42Motor::Handle() {
 //速度模式
-      if(stopFlag) {
+  /*    if(stopFlag) {
           Emm42Motor_Speed = 0;
       }else{
           Emm42Motor_Speed = TarSpeed;
       }
       if(SendFlag) {
           CANMessageGenerate();
-      }
+      }*/
 
 //位置模式
     /*if (stopFlag) {
@@ -259,7 +262,22 @@ void Emm42Motor::Handle() {
             NowPos = DOWN;
         }
     }*/
-
+    if (stopFlag) {
+        Emm42Motor_Pos = 0;
+        CANMessageGenerate();
+    } else {
+        if (NowPos == UP && TarPos == DOWN) {
+            Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF,最大为4FF
+            Emm42Motor_Pos = 3200 * 26;
+            CANMessageGenerate();
+            NowPos = DOWN;
+        } else if (NowPos == DOWN && TarPos == UP) {
+            Emm42Motor_Dir = 0x12;//0表示往下
+            Emm42Motor_Pos = 3200 * 26;
+            CANMessageGenerate();
+            NowPos = UP;
+        }
+    }
 }
 
 void Emm42Motor::SetTargetPosition(uint8_t pos) {
