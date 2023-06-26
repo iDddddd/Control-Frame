@@ -11,7 +11,6 @@
 #include "PID.h"
 #include "MahonyAHRS.h"
 #include "bsp_spi.h"
-
 #include <stdint.h>
 
 //#define IMU_USE_MAG
@@ -59,10 +58,10 @@ constexpr float zero_az = 9.63659286f;*/
 /*枚举类型定义------------------------------------------------------------*/
 /*结构体定义--------------------------------------------------------------*/
 struct IMU_Raw_Data_t {
-    float accel[3], gyro[3], temp, time, mag[3], accel_offset[3], ax, ay, az;
+    float accel[3], gyro[3], temp, time, mag[3], accel_offset[3];
 };
 struct IMU_Pro_Data_t {
-    float accel[3], gyro[3], temp, time, mag[3], ay;
+    float accel[3], gyro[3], temp, time, mag[3];
 };
 
 struct IMU_Attitude_t {
@@ -86,8 +85,6 @@ struct IMU_Position_t {
     float velocity[3] = {0};
     float _velocity[3] = {0};
     float displace[3] = {0};
-    float vy;
-    float xy;
 };
 struct IMU_Filter_t {
     float current;
@@ -109,6 +106,11 @@ struct IMU_buffer_t {
 
     uint8_t accel_temp_dma_rx_buf[SPI_DMA_ACCEL_TEMP_LENGHT];
     uint8_t accel_temp_dma_tx_buf[SPI_DMA_ACCEL_TEMP_LENGHT] = {0xA2, 0xFF, 0xFF, 0xFF};
+};
+struct IMU_Send_t {
+    f_u8_t accel[3];
+    f_u8_t gyro[3];
+    f_u8_t mag[3];
 };
 
 /*类型定义----------------------------------------------------------------*/
@@ -174,14 +176,18 @@ public:
 
     void Init();
 
+    void IMU_Send();
+
     IMU_Raw_Data_t rawData;
     IMU_Pro_Data_t proData;
     IMU_Attitude_t attitude;
     IMU_Position_t position;
     IMU_Filter_t axFilter;
     IMU_Filter_t ayFilter;
+    IMU_Send_t imu_data;
+    uint8_t imu_send_data[41];
 };
-
+uint8_t LRCcalc(uint8_t* data, int data_len);
 
 /*结构体成员取值定义组------------------------------------------------------*/
 /*外部变量声明-------------------------------------------------------------*/

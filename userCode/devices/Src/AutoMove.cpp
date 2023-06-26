@@ -17,11 +17,11 @@ void AutoMove::Handle() {
     } else {
         AutoChassisStop();
     }
-  /*  if (X.FinishFlag && Y.FinishFlag && !SendFlag) {
+    if (X.FinishFlag && Y.FinishFlag && !SendFlag) {
         StopMove();
         CompleteTask();
         SendFlag = true;
-    }//完成后发送*/
+    }//完成后发送
 }
 
 void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
@@ -87,8 +87,8 @@ float Move_X::Handle(float reference) {
             v_rel = Para.v_max;
         }
     }
-    if (reference >= Para.d_max) {
-        //if (expectPos[Index] >= d_max) {
+   // if (reference >= Para.d_max) {
+        if (expectPos >= Para.d_max) {
         Stop();
         FinishFlag = true;
     }
@@ -142,8 +142,8 @@ float Move_Y::Handle(float reference) {
         if (v_rel > Para.v_max) {
             v_rel = Para.v_max;
         }
-        if (reference >= Para.d_max) {
-            //if (expectPos[Index] >= d_max) {
+        //if (reference >= Para.d_max) {
+            if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;
         }

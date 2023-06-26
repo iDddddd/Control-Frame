@@ -4,7 +4,6 @@
 #include "ControlTask.h"
 
 
-/*
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
@@ -15,7 +14,6 @@ void CtrlHandle() {
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
-                    ArmSetAngle(RemoteControl::rcInfo.left_col, RemoteControl::rcInfo.left_col * 90);
                     Headmemory();
                 }else if (RemoteControl::rcInfo.sRight == MID_POS){
                     StateMachine::stateHandle();
@@ -43,7 +41,8 @@ void CtrlHandle() {
 
     }
 
-}*/
+}
+/*
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
@@ -85,4 +84,4 @@ void CtrlHandle() {
 
     }
 
-}
+}*/

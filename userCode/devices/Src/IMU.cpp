@@ -4,6 +4,7 @@
 
 #include "IMU.h"
 
+#define IMU_USE_MAG
 IMU IMU::imu;
 
 void IMU::Init() {
@@ -43,9 +44,7 @@ void IMU::Handle() {
     if (state.accel_update_flag & (1u << IMU_UPDATE_SHFITS)) {
         state.accel_update_flag &= ~(1u << IMU_UPDATE_SHFITS);
         BMI088_accel_read_over(buf.accel_dma_rx_buf + BMI088_ACCEL_RX_BUF_DATA_OFFSET, rawData.accel, &rawData.time);
-        rawData.ax = rawData.accel[0];
-        rawData.ay = rawData.accel[1];
-        rawData.az = rawData.accel[2];
+
     }
 
     if (state.accel_temp_update_flag & (1u << IMU_UPDATE_SHFITS)) {
@@ -57,13 +56,9 @@ void IMU::Handle() {
 
     filter(&proData.accel[0], axFilter);
     filter(&proData.accel[1], ayFilter);
-
-    proData.ay = proData.accel[1];
     velocityVerify();
     get_velocity(position.velocity, position._accel, proData.accel);
     get_displace(position.displace, position._velocity, position.velocity);
-    position.vy = position.velocity[1];
-    position.xy = position.displace[1];
     AHRS_update(quat, 0.001f, rawData.gyro, proData.accel, rawData.mag);
     get_angle(quat, &attitude.yaw, &attitude.pitch, &attitude.rol);
     attitude.yaw_v = rawData.gyro[2];
@@ -376,4 +371,66 @@ void IMU::filter(float *current, IMU_Filter_t Filter) {
         *current = sum / Filter.K;
     }
 }
+uint8_t LRCcalc(uint8_t* data, int data_len){
+    uint8_t LRC = 0;
+    for(int i = 0; i < data_len; i++){
+        LRC += data[i];
+    }
+    return LRC;
+}
 
+void IMU::IMU_Send() {
+    imu_data.accel[0].f = rawData.accel[0];
+    imu_data.accel[1].f = rawData.accel[1];
+    imu_data.accel[2].f = rawData.accel[2];
+    imu_data.gyro[0].f = rawData.gyro[0];
+    imu_data.gyro[1].f = rawData.gyro[1];
+    imu_data.gyro[2].f = rawData.gyro[2];
+    imu_data.mag[0].f = rawData.mag[0];
+    imu_data.mag[1].f = rawData.mag[1];
+    imu_data.mag[2].f = rawData.mag[2];
+
+    imu_send_data[0] = 0x7A;
+    imu_send_data[1] = 0x02;
+    imu_send_data[2] = 0x03;
+    imu_send_data[3] = 0x24;
+    imu_send_data[4] = imu_data.accel[0].u8[0];
+    imu_send_data[5] = imu_data.accel[0].u8[1];
+    imu_send_data[6] = imu_data.accel[0].u8[2];
+    imu_send_data[7] = imu_data.accel[0].u8[3];
+    imu_send_data[8] = imu_data.accel[1].u8[0];
+    imu_send_data[9] = imu_data.accel[1].u8[1];
+    imu_send_data[10] = imu_data.accel[1].u8[2];
+    imu_send_data[11] = imu_data.accel[1].u8[3];
+    imu_send_data[12] = imu_data.accel[2].u8[0];
+    imu_send_data[13] = imu_data.accel[2].u8[1];
+    imu_send_data[14] = imu_data.accel[2].u8[2];
+    imu_send_data[15] = imu_data.accel[2].u8[3];
+    imu_send_data[16] = imu_data.gyro[0].u8[0];
+    imu_send_data[17] = imu_data.gyro[0].u8[1];
+    imu_send_data[18] = imu_data.gyro[0].u8[2];
+    imu_send_data[19] = imu_data.gyro[0].u8[3];
+    imu_send_data[20] = imu_data.gyro[1].u8[0];
+    imu_send_data[21] = imu_data.gyro[1].u8[1];
+    imu_send_data[22] = imu_data.gyro[1].u8[2];
+    imu_send_data[23] = imu_data.gyro[1].u8[3];
+    imu_send_data[24] = imu_data.gyro[2].u8[0];
+    imu_send_data[25] = imu_data.gyro[2].u8[1];
+    imu_send_data[26] = imu_data.gyro[2].u8[2];
+    imu_send_data[27] = imu_data.gyro[2].u8[3];
+    imu_send_data[28] = imu_data.mag[0].u8[0];
+    imu_send_data[29] = imu_data.mag[0].u8[1];
+    imu_send_data[30] = imu_data.mag[0].u8[2];
+    imu_send_data[31] = imu_data.mag[0].u8[3];
+    imu_send_data[32] = imu_data.mag[1].u8[0];
+    imu_send_data[33] = imu_data.mag[1].u8[1];
+    imu_send_data[34] = imu_data.mag[1].u8[2];
+    imu_send_data[35] = imu_data.mag[1].u8[3];
+    imu_send_data[36] = imu_data.mag[2].u8[0];
+    imu_send_data[37] = imu_data.mag[2].u8[1];
+    imu_send_data[38] = imu_data.mag[2].u8[2];
+    imu_send_data[39] = imu_data.mag[2].u8[3];
+    imu_send_data[40] = LRCcalc(imu_send_data, 40);
+    HAL_UART_Transmit(&huart6, imu_send_data, sizeof(imu_send_data),5);
+
+}

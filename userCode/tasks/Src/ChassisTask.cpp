@@ -146,7 +146,7 @@ void AutoSetVelocity() {
     autoMove.Handle();
     FBVelocity = autoMove.vx;
     LRVelocity = autoMove.vy;
-    RTVelocity = autoMove.vo;
+    RTVelocity = 0;
 
 }
 

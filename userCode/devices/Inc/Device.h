@@ -62,12 +62,12 @@ typedef struct {
     uint32_t pitch_zero;
     uint32_t pat[125];
 } flash_data_t;
-
-typedef struct {
-    float x, y, z;
-    float temp;
-} ist8310_t;
-
+/*联合体定义--------------------------------------------------------------*/
+typedef union {
+    uint8_t u8[4];
+    int32_t i32;
+    float f;
+} f_u8_t;
 /*类型定义----------------------------------------------------------------*/
 
 class Device {
