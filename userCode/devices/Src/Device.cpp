@@ -95,7 +95,6 @@ void bsp_flash_read(flash_data_t *_flashData) {
     memcpy(_flashData, (uint32_t *) FLASH_SECTOR_9_ADDRESS, sizeof(flash_data_t) / 4);
 }
 
-
 uint32_t init_Flag = 0;
 uint32_t period = 5000;
 
