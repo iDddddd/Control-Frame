@@ -68,7 +68,12 @@ void IMU::Handle() {
     attitude.neg_yaw_v = -attitude.yaw_v;
     attitude.neg_pitch_v = -attitude.pitch_v;
     attitude.neg_rol_v = -attitude.rol_v;
-
+		static int imu_cut = 0;
+		if(imu_cut > 5){
+			IMU_Send();
+			imu_cut = 0;
+		}
+		imu_cut++;
 }
 
 void IMU::ITHandle(uint16_t GPIO_Pin) {
@@ -431,6 +436,11 @@ void IMU::IMU_Send() {
     imu_send_data[38] = imu_data.mag[2].u8[2];
     imu_send_data[39] = imu_data.mag[2].u8[3];
     imu_send_data[40] = LRCcalc(imu_send_data, 40);
-    HAL_UART_Transmit(&huart6, imu_send_data, sizeof(imu_send_data),5);
+    HAL_UART_Transmit_DMA(&huart6, imu_send_data, sizeof(imu_send_data));
 
+}
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+    if(huart->Instance == USART6){
+      
+    }
 }

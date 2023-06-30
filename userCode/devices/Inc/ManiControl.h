@@ -45,6 +45,7 @@ public:
 };
 void CompleteTask();
 
+/*
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,5 +53,6 @@ extern void USART6_IRQHandler(void);
 #ifdef __cplusplus
 }
 #endif
+*/
 
 #endif //RM_FRAME_C_MANICONTROL_H

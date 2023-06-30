@@ -135,8 +135,15 @@ void CompleteTask(){
     HAL_UART_Transmit(&huart6,tx_message,1,3);
 }
 
+/*
 void USART6_IRQHandler() {
 
     ManiControl::IT_Handle();
 
+}
+*/
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if(huart->Instance == USART6) {
+        ManiControl::IT_Handle();
+    }
 }

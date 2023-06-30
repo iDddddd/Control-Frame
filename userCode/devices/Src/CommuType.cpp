@@ -144,6 +144,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-    CAN::CANPackageSend();
+  //  CAN::CANPackageSend();此句貌似无用
 }
 

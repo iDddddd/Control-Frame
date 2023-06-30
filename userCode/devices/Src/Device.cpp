@@ -125,13 +125,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
     if (htim == &htim6) {//4ms
         RS485::RS485PackageSend();
-        ARMHandle();
-        static int imu_cnt = 0;
-        if(imu_cnt++ > 1000) {
-            IMU::imu.IMU_Send();
-            imu_cnt = 0;
-        }
-        imu_cnt++;
+      //  ARMHandle();
     }
     if (htim == &htim7) {
         IMU::imu.Handle();
