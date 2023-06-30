@@ -32,31 +32,34 @@ typedef struct {
 
 /*类型定义----------------------------------------------------------------*/
 /*CAN类------------------------------------------------------------------*/
+/**
+ * @class CAN类
+ */
 class CAN {
 public:
-    uint32_t can_ID;
-    static TX_QUEUE_t canQueue;
-    static void CANInit();
+    uint32_t can_ID;//CAN ID
+    static TX_QUEUE_t canQueue;//CAN发送队列
+    static void CANInit();//CAN初始化函数,需在main函数中调用，无需过多关注
 
-    CAN();
+    CAN();//can无参数构造函数，目的是设置多电机模式下的0x280ID，其他正常模式不使用该构造函数
 
-    explicit CAN(COMMU_INIT_t *_init);
+    explicit CAN(COMMU_INIT_t *_init);//默认构造函数，用于设置canID和canType
 
     ~CAN();
 
-    static void CANPackageSend();
+    static void CANPackageSend();//can消息包发送任务
 
-    static void Rx_Handle(CAN_HandleTypeDef *hcan);
+    static void Rx_Handle(CAN_HandleTypeDef *hcan);//can中断处理函数，用于电机返回数据的接受
 
-    virtual void CANMessageGenerate() = 0;
+    virtual void CANMessageGenerate() = 0;//can消息包生成函数,需在每个电机类中实现
 
 protected:
-    uint8_t canType;
-    static MyMap<uint32_t, uint8_t *> dict;
+    uint8_t canType;//can类型
+    static MyMap<uint32_t, uint8_t *> dict;//canID与can回传消息的字典
 
-    void ID_Bind_Rx(uint8_t *RxMessage) const;
+    void ID_Bind_Rx(uint8_t *RxMessage) const;//将canID与can回传消息绑定
 
-    void FOURID_Bind_Rx(uint32_t *canID, uint8_t (*RxMessage)[8]);
+    void FOURID_Bind_Rx(uint32_t *canID, uint8_t (*RxMessage)[8]);//将四个canID与can回传消息绑定,用于多电机模式
 };
 
 /*RS485类------------------------------------------------------------------*/

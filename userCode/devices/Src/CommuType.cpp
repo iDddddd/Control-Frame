@@ -51,8 +51,8 @@ CAN::CAN() {
 }
 
 CAN::CAN(COMMU_INIT_t *_init) {
-    can_ID = _init->_id;
-    canType = _init->canType;
+    can_ID = _init->_id;//CAN ID
+    canType = _init->canType;//CAN类型
 }
 
 /**
@@ -68,16 +68,18 @@ CAN::~CAN() = default;
 void CAN::CANPackageSend() {
     if (canQueue.front != canQueue.rear) {
         CAN_TxHeaderTypeDef txHeaderTypeDef;
-        uint32_t box = 0;
+        uint32_t box = 0;//邮箱号
 
-        txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;
-        txHeaderTypeDef.DLC = 0x08;
-        txHeaderTypeDef.IDE = CAN_ID_STD;
-        txHeaderTypeDef.RTR = CAN_RTR_DATA;
+        txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
+        txHeaderTypeDef.DLC = 0x08;//数据长度
+        txHeaderTypeDef.IDE = CAN_ID_STD;//标准帧
+        txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
         txHeaderTypeDef.TransmitGlobalTime = DISABLE;
+        //根据canType选择发送的can总线
         if (canQueue.Data[canQueue.front].canType == can1) {
             HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
         } else if (canQueue.Data[canQueue.front].canType == can2) {
+            /**此处注释用于Z轴电机位置模式下can消息包数据长度只有5位的情况*/
                 /*if (canQueue.Data[canQueue.front].ID == 0x01) {
                     txHeaderTypeDef.DLC = 0x05;
                     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
@@ -85,7 +87,7 @@ void CAN::CANPackageSend() {
                     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
                // }
         }
-        canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;
+        canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
 }
 
@@ -96,18 +98,21 @@ void CAN::CANPackageSend() {
 void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     uint8_t canBuf[8];
     CAN_RxHeaderTypeDef rx_header;
-    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);//获取接收到的数据,完成后调用CAN中断处理函数，再次进入此函数等待接收
 
-    memcpy(dict[rx_header.StdId], canBuf, sizeof(canBuf));
+    memcpy(dict[rx_header.StdId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 
 }
-
+/**
+ * @brief CAN ID与RxMessage绑定
+ * @param RxMessage
+ */
 void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
-    dict.insert(can_ID, RxMessage);
+    dict.insert(can_ID, RxMessage);//将对应电机的canID与RxMessage绑定
 }
 
 void CAN::FOURID_Bind_Rx(uint32_t *canIDs, uint8_t (*RxMessage)[8]) {
-
+    //将对应电机的canID与RxMessage绑定,多电机使用
     dict.insert(canIDs[0], RxMessage[0]);
     dict.insert(canIDs[1], RxMessage[1]);
     dict.insert(canIDs[2], RxMessage[2]);

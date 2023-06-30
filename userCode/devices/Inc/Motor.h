@@ -20,9 +20,9 @@
 
 /*结构体定义--------------------------------------------------------------*/
 typedef enum {
-    DIRECT = 0,
-    SPEED_Single,
-    POSITION_Double
+    DIRECT = 0,//使用电机内部PID
+    SPEED_Single,//单环电机，控制速度,需要一个pid参数
+    POSITION_Double//双环电机，控制角度，需要两个pid参数
 } MOTOR_CTRL_TYPE_e;
 
 typedef struct {
@@ -30,12 +30,12 @@ typedef struct {
     int16_t speed;
     int16_t moment;
     int8_t temp;
-} C6x0Rx_t;
+} C6x0Rx_t;//电机反馈数据结构体
 
 typedef struct {
     PID_Regulator_t *speedPIDp;//速度环pid参数结构体指针
     PID_Regulator_t *anglePIDp;//角度环pid参数结构体指针
-    MOTOR_CTRL_TYPE_e ctrlType;
+    MOTOR_CTRL_TYPE_e ctrlType;//控制电机的方式
     float reductionRatio;//减速比
 } MOTOR_INIT_t;
 
@@ -54,30 +54,33 @@ class Motor;
 struct Motor_Object_t {
     Motor *motor_object;
     Motor_Object_t *next;
-};
+};//电机对象结构体
 
 /*类型定义----------------------------------------------------------------*/
 
 /*Motor类----------------------------------------------------------------*/
+/**
+ * @class Motor类
+ */
 class Motor : private Device {
 public:
-    Motor(MOTOR_INIT_t *_init, Motor *motor);
+    Motor(MOTOR_INIT_t *_init, Motor *motor);//电机初始化函数
 
     ~Motor();
 
     void ErrorHandle() override;
 
-    void Stop();
+    void Stop();//停止电机
 
-    static void MotorsHandle();
+    static void MotorsHandle();//电机处理函数,在中断中调用,处理所有电机
 
 protected:
-    PID speedPID, anglePID;
-    float reductionRatio;
-    bool stopFlag{true};
-    MOTOR_CTRL_TYPE_e ctrlType;
+    PID speedPID, anglePID;//速度环和角度环PID对象
+    float reductionRatio;//减速比为1
+    bool stopFlag{true};//停止标志位
+    MOTOR_CTRL_TYPE_e ctrlType;//控制电机的方式
 private:
-    static Motor_Object_t *head_;
+    static Motor_Object_t *head_;//电机对象链表头指针
 
 };
 
@@ -107,33 +110,39 @@ private:
 };
 
 /*4*4010电机类------------------------------------------------------------------*/
+/**
+ * @class FOUR_Motor_4010
+ * @brief 4*4010电机类
+ * @example FOUR_Motor_4010 motor4010(&commu_init1,&commu_init2,&commu_init3,&commu_init4,&motor_init1,&motor_init2,&motor_init3,&motor_init4);
+ * @note 使用该类前需要使用上位机打开电机的多电机模式
+ */
 class FOUR_Motor_4010 : public Motor, public CAN {
 public:
-    uint8_t RxMessage[4][8]{};
-    int16_t motor4010_intensity[4]{};
+    uint8_t RxMessage[4][8]{};//接收到的电机数据
+    int16_t motor4010_intensity[4]{};//电机转矩
 
-    void CANMessageGenerate() override;
+    void CANMessageGenerate() override;//CAN报文生成函数,CAN类纯虚函数的重写
 
-    void Handle() override;
+    void Handle() override;//电机处理函数,由MotorsHandle统一调用
 
-    void SetTargetSpeed(const float *_targetSpeed);
+    void SetTargetSpeed(const float *_targetSpeed);//设置目标速度
 
     FOUR_Motor_4010(COMMU_INIT_t *commu_init1, COMMU_INIT_t *commu_init2,
                     COMMU_INIT_t *commu_init3, COMMU_INIT_t *commu_init4, MOTOR_INIT_t *motor_init1,
-                    MOTOR_INIT_t *motor_init2,MOTOR_INIT_t *motor_init3,MOTOR_INIT_t *motor_init4);
+                    MOTOR_INIT_t *motor_init2,MOTOR_INIT_t *motor_init3,MOTOR_INIT_t *motor_init4);//电机初始化函数
 
     ~FOUR_Motor_4010();
 
 private:
-    uint32_t canIDs[4]{};
-    PID speedPIDs[4];
-    C6x0Rx_t feedback[4]{};
-    float targetSpeed[4]{};
-    MOTOR_STATE_t state[4]{};
+    uint32_t canIDs[4]{};//电机ID
+    PID speedPIDs[4];//速度环PID对象,若控位置还新建需一个角度环PID对象
+    C6x0Rx_t feedback[4]{};//电机反馈数据
+    float targetSpeed[4]{};//目标速度
+    MOTOR_STATE_t state[4]{};//电机状态,包含速度、角度、转矩、温度
 
-    void MotorStateUpdate(uint32_t id);
+    void MotorStateUpdate(uint32_t id);//电机状态更新函数
 
-    int16_t IntensityCalc(uint32_t id);
+    int16_t IntensityCalc(uint32_t id);//转矩计算函数
 };
 /*结构体成员取值定义组------------------------------------------------------*/
 

@@ -110,12 +110,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         static uint32_t cnt = 0;
         cnt++;
 
+        /**只需关注该部分代码**/
+        ChassisHandle();//底盘数据处理
 
-        ChassisHandle();
+        Motor::MotorsHandle();//电机数据处理
+        CAN::CANPackageSend();//CAN发送
 
-        Motor::MotorsHandle();
-        CAN::CANPackageSend();
-
+        /**只需关注该部分代码**/
 
         if (cnt > 20) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
@@ -199,11 +200,11 @@ int main() {
     MX_I2C3_Init();
     MX_SPI1_Init();
     MX_SPI2_Init();
-    MX_IWDG_Init();
+    MX_IWDG_Init();//看门狗,若不使用遥控器需注释改行，否则程序不运行
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
 
-    HAL_TIM_Base_Start_IT(&htim5);
+    HAL_TIM_Base_Start_IT(&htim5);//该定时器作PWM输出
 
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
@@ -215,16 +216,15 @@ int main() {
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
                           1760);//初始化爪子
     //TODO adc校准？
-    RemoteControl::init();
-    ManiControl::Init();
+    RemoteControl::init();//遥控器通讯初始化，使用UART3串口
+    ManiControl::Init();//上位机通讯初始化，使用UART6串口
     bsp_flash_read(&flashData);
-    HAL_TIM_Base_Start_IT(&htim10);
-    HAL_TIM_Base_Start_IT(&htim6);
-    HAL_TIM_Base_Start_IT(&htim7);
-    CAN::CANInit();
-    Motor_4310::Init();
-    IMU::imu.Init();
-    ChassisStart();
+    HAL_TIM_Base_Start_IT(&htim10);//1ms
+    HAL_TIM_Base_Start_IT(&htim6);//4ms
+    HAL_TIM_Base_Start_IT(&htim7);//1ms
+    CAN::CANInit();//CAN初始化
+    Motor_4310::Init();//电机初始化(大部分电机不需初始化）
+    IMU::imu.Init();//IMU初始化
   //  bsp_BuzzerOn(1000);
     init_Flag = 1;
 
@@ -234,7 +234,7 @@ int main() {
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-
+        //循环中不做处理，所有处理在中断中完成
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */

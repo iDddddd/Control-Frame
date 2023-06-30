@@ -59,9 +59,11 @@ void ManiControl::IT_Handle() {
 
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
+            /**只需关注该部分代码**/
             if (rx_len == CONTROL_LENGTH||rx_len == MANI_LENGTH) {
                 GetData(0);
             }
+            /**只需关注该部分代码**/
         } else {
             /* Current memory buffer used is Memory 1 */
             //失效DMA
@@ -78,14 +80,20 @@ void ManiControl::IT_Handle() {
 
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
-
+            /**只需关注该部分代码**/
             if (rx_len == CONTROL_LENGTH||rx_len == MANI_LENGTH) {
                 GetData(1);
             }
+            /**只需关注该部分代码**/
         }
     }
 }
 
+/**
+ * @brief 串口数据解析
+ * @param bufIndex 缓冲区索引
+ * @note 可根据实际需要修改
+ */
 void ManiControl::GetData(uint8_t bufIndex) {
         if (rx_buff[bufIndex][0] == 0x7A) {
             if (rx_buff[bufIndex][1] == 0x01) {
@@ -142,6 +150,10 @@ void USART6_IRQHandler() {
 
 }
 */
+/**
+ * @brief 串口接收中断回调函数,再次调用串口接收函数，实现空闲中断接收
+ * @param huart 串口句柄
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     if(huart->Instance == USART6) {
         ManiControl::IT_Handle();

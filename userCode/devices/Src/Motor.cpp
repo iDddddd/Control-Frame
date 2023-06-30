@@ -13,13 +13,13 @@ Motor_Object_t *Motor::head_;
  * @param _init 类的初始化结构体指针
  */
 Motor::Motor(MOTOR_INIT_t *_init, Motor *motor) {
-    deviceType = MOTOR;
+    deviceType = MOTOR;//设备类型为电机
 
-    if (_init->speedPIDp) speedPID.PIDInfo = *_init->speedPIDp;
-    if (_init->anglePIDp) anglePID.PIDInfo = *_init->anglePIDp;
-    ctrlType = _init->ctrlType;
-    reductionRatio = _init->reductionRatio;
-
+    if (_init->speedPIDp) speedPID.PIDInfo = *_init->speedPIDp;//如果速度环pid参数结构体指针不为空，则将参数结构体赋值给类的参数结构体
+    if (_init->anglePIDp) anglePID.PIDInfo = *_init->anglePIDp;//如果角度环pid参数结构体指针不为空，则将参数结构体赋值给类的参数结构体
+    ctrlType = _init->ctrlType;//控制电机的方式
+    reductionRatio = _init->reductionRatio;//减速比
+    //将电机对象加入电机链表，实现后续中断处理
     auto *new_object = new Motor_Object_t();
     new_object->motor_object = motor;
     new_object->next = head_;
@@ -38,7 +38,7 @@ void Motor::MotorsHandle() {
 
     Motor_Object_t *current = head_;
     while (current) {
-        current->motor_object->Handle();
+        current->motor_object->Handle();//调用每个电机的中断处理函数
         current = current->next;
     }
 
@@ -83,37 +83,37 @@ void FOUR_Motor_4010::Handle() {
     uint32_t id;
 
     for (auto canID: canIDs) {
-        id = canID - 0x141;
-        MotorStateUpdate(id);
-        intensity[id] = IntensityCalc(id);
-        if (stopFlag) {
+        id = canID - 0x141;//将电机id与数组下标对应
+        MotorStateUpdate(id);//更新电机状态
+        intensity[id] = IntensityCalc(id);//计算电机转矩值
+        if (stopFlag) {//如果停止标志位为真，则将电机转矩值置为0
             motor4010_intensity[id] = 0;
         } else {
             motor4010_intensity[id] = intensity[id];
         }
     }
-    CANMessageGenerate();
+    CANMessageGenerate();//生成can消息包
 }
 
 /**
  * @brief 4010电机类的消息包获取任务
  */
 void FOUR_Motor_4010::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {//如果队列未满
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = motor4010_intensity[0];
+        canQueue.Data[canQueue.rear].ID = can_ID;//can_ID用于记录当前发送的canID，此处由于同时控四个电机，根据电机应为0x280
+        canQueue.Data[canQueue.rear].canType = canType;//canType用于记录当前发送的can类型
+        canQueue.Data[canQueue.rear].message[0] = motor4010_intensity[0];//第一个电机转矩值，对应id为0x141
         canQueue.Data[canQueue.rear].message[1] = motor4010_intensity[0] >> 8u;
-        canQueue.Data[canQueue.rear].message[2] = motor4010_intensity[1];
+        canQueue.Data[canQueue.rear].message[2] = motor4010_intensity[1];//第二个电机转矩值，对应id为0x142
         canQueue.Data[canQueue.rear].message[3] = motor4010_intensity[1] >> 8u;
-        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity[2];
+        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity[2];//第三个电机转矩值，对应id为0x143
         canQueue.Data[canQueue.rear].message[5] = motor4010_intensity[2] >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = motor4010_intensity[3];
+        canQueue.Data[canQueue.rear].message[6] = motor4010_intensity[3];//第四个电机转矩值，对应id为0x144
         canQueue.Data[canQueue.rear].message[7] = motor4010_intensity[3] >> 8u;
 
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    } else{
+        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;//队尾指针后移
+    } else{//如果队列已满,则清空队列
         canQueue.rear = 0;
         canQueue.front = 0;
     }
@@ -124,8 +124,8 @@ void FOUR_Motor_4010::CANMessageGenerate() {
  * @param _targetSpeed 目标速度
  */
 void FOUR_Motor_4010::SetTargetSpeed(const float *_targetSpeed) {
-    stopFlag = false;
-    targetSpeed[0] = _targetSpeed[0];
+    stopFlag = false;//停止标志位为假
+    targetSpeed[0] = _targetSpeed[0];//将目标速度赋值给目标速度数组
     targetSpeed[1] = _targetSpeed[1];
     targetSpeed[2] = _targetSpeed[2];
     targetSpeed[3] = _targetSpeed[3];
@@ -138,16 +138,19 @@ void FOUR_Motor_4010::SetTargetSpeed(const float *_targetSpeed) {
  * @callergraph this->Handle()
  */
 void FOUR_Motor_4010::MotorStateUpdate(uint32_t id) {
+    //接收电机反馈信息并处理
     feedback[id].angle = RxMessage[id][6] | (RxMessage[id][7] << 8u);
     feedback[id].speed = RxMessage[id][4] | (RxMessage[id][5] << 8u);
     feedback[id].moment = RxMessage[id][2] | (RxMessage[id][3] << 8u);
     feedback[id].temp = RxMessage[id][1];
 
     switch (ctrlType) {
-        case SPEED_Single: {
+        case SPEED_Single: {//电机速度控制
+            //直接将电机反馈值赋值给state
             state[id].speed = feedback[id].speed / reductionRatio;
         }
-        case POSITION_Double: {
+        case POSITION_Double: {//电机位置控制
+            //此处代码是为了使电机在位置控制模式下可以跨越0-360度的位置
             state[id].speed = feedback[id].speed / reductionRatio;
             state[id].moment = feedback[id].moment;
             state[id].temperature = feedback[id].temp;
@@ -170,7 +173,7 @@ void FOUR_Motor_4010::MotorStateUpdate(uint32_t id) {
             lastRead = feedback[id].angle;
             break;
         }
-        case DIRECT:
+        case DIRECT://电机内部控制
 
             break;
     }
@@ -185,15 +188,18 @@ int16_t FOUR_Motor_4010::IntensityCalc(uint32_t id) {
     int16_t intensity = 0;
 
     switch (ctrlType) {
-        case DIRECT:
+        case DIRECT://电机内部控制
             intensity = targetSpeed[id] * 16384 / 360.0f;
             break;
 
-        case SPEED_Single:
+        case SPEED_Single://电机速度控制
             intensity = speedPIDs[id].PIDCalc(targetSpeed[id], state[id].speed);
             break;
 
-        case POSITION_Double:
+        case POSITION_Double://电机位置控制
+        //目前不做多电机位置位置，此处缺少参数targetAngle，故注释
+            /*float _targetSpeed = anglePID.PIDCalc(targetAngle, state.angle);
+            intensity = (int16_t) speedPID.PIDCalc(_targetSpeed, state.speed);*/
             break;
     }
     return intensity;

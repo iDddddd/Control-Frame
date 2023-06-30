@@ -37,8 +37,6 @@
 
 /*枚举类型定义------------------------------------------------------------*/
 
-extern void ChassisStart();
-
 extern void ChassisHandle();
 
 extern void CtrlHandle();
