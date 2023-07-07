@@ -17,7 +17,7 @@ void CtrlHandle() {
                     Headmemory();
                 }else if (RemoteControl::rcInfo.sRight == MID_POS){
                     StateMachine::stateHandle();
-                    AutoSetVelocity();
+                  //  AutoSetVelocity();
                 }
                 break;
             case MID_POS://左侧二档
@@ -32,7 +32,7 @@ void CtrlHandle() {
                 break;
             case DOWN_POS:
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-                AutoSetVelocity();
+                    ArmSet(RemoteControl::rcInfo.left_col, RemoteControl::rcInfo.left_col * 90,RemoteControl::rcInfo.left_col);
                 }
                 break;
             default:

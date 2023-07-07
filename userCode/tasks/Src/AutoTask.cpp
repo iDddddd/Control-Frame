@@ -16,7 +16,7 @@ void MoveTask(){
     StateMachine::remove_function_from_state(MoveTask);
 }
 void ArmTask(){
-    AutoArmSet(ManiControl::mc_ctrl.ARM1.angle, ManiControl::mc_ctrl.ARM2.angle, ManiControl::mc_ctrl.ARM_Z_Flag);
+    AutoArmSet(ManiControl::mc_ctrl.ARMZ_Pos.f, ManiControl::mc_ctrl.ARM1_Pos.f, ManiControl::mc_ctrl.ARM2_Pos.f);
     StateMachine::remove_function_from_state(ArmTask);
 }
 void TrayTask(){

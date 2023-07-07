@@ -88,39 +88,18 @@ void ArmStop() {
 
 void ArmAngleCalc() {
   //   TrayMotor.SetTargetAngle(Angle);
-        ArmMotor1.SetTargetAngle(arm1Angle);
-       ArmMotor2.SetTargetAngle(arm2Angle);
-       if(armZPos > 0.7){
+        ArmMotor1.SetTargetAngle(-arm1Angle);
+       ArmMotor2.SetTargetAngle(-arm2Angle);
+    /*   if(armZPos > 0.7){
            ArmMotorZ.SetTargetPosition(2);
        }else if (armZPos < -0.7) {
            ArmMotorZ.SetTargetPosition(0);
-       }
+       }*/
 }
-void AutoTraySet(uint8_t trayflag){
+void AutoTraySet(uint8_t trayflag) {
     //TrayMotor.SetTargetPos(trayflag);
     CompleteTask();
 }
-/*void ArmAngleCalc() {
-    float arm1_angle = arm1Angle / 16384.0f * 2 * 3.1415f;
-    float arm2_angle = arm2Angle / 16384.0f * 360.0f;
-    arm1_angle -= PI;
-    if (arm2_angle > 180) {
-        arm2_angle -= 360;
-    }
-    if (arm1_angle > 1.2) {
-        arm1_angle = 1.2f;
-    } else if (arm1_angle < -1.2f) {
-        arm1_angle = -1.2f;
-    }
-    if (arm2_angle > 90) {
-        arm2_angle = 90;
-    } else if (arm2_angle < -90) {
-        arm2_angle = -90;
-    }
-    ArmMotor1.SetTargetAngle(arm1_angle);
-   // ArmMotor2.SetTargetAngle(arm2_angle);
-
-}*/
 
 void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZPos) {
     ArmStopFlag = false;
@@ -132,37 +111,32 @@ void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZPos) {
 
 }
 
-void AutoArmSet(uint16_t angle1, uint16_t angle2, uint8_t pos) {
-    float arm1_angle = angle1 / 16384.0f * 2 * 3.1415926f;
-    float arm2_angle = angle2 / 16384.0f * 360.0f;
-    arm1_angle -= PI;
-    /*if (arm2_angle > 180) {
-        arm2_angle -= 360;
-    }*/
-    arm2_angle -= 180;
-    if (arm1_angle > 1.2) {
-        arm1_angle = 1.2f;
+void AutoArmSet(float armzPos,float arm1Pos,float arm2Pos){
+    arm2Pos = arm2Pos * 180 / PI;
+    if (arm1Pos > 1.2) {
+        arm1Pos = 1.2f;
         bsp_BuzzerOn(500);
-    } else if (arm1_angle < -1.2f) {
-        arm1_angle = -1.2f;
+    } else if (arm1Pos < -1.2f) {
+        arm1Pos = -1.2f;
         bsp_BuzzerOn(500);
     } else{
         bsp_BuzzerOff();
     }
-    if (arm2_angle > 150) {
-        arm2_angle = 150;
+    if (arm2Pos > 150) {
+        arm2Pos = 150;
         bsp_BuzzerOn(1000);
-    } else if (arm2_angle < -150) {
-        arm2_angle = -150;
+    } else if (arm2Pos < -150) {
+        arm2Pos = -150;
         bsp_BuzzerOn(1000);
     } else{
         bsp_BuzzerOff();
     }
-    arm1Angle = arm1_angle;
-    arm2Angle = arm2_angle;
-    ArmMotor1.SetTargetAngle(arm1_angle);
-    ArmMotor2.SetTargetAngle(arm2_angle);
-    ArmMotorZ.SetTargetPosition(pos);
+    arm1Angle = arm1Pos;
+    arm2Angle = arm2Pos;
+    armZPos = armzPos;
+  //  ArmMotor1.SetTargetAngle(arm1Pos);
+   // ArmMotor2.SetTargetAngle(arm2Pos);
+   // ArmMotorZ.SetTargetPosition(0);
 }
 
 void ARMHandle() {

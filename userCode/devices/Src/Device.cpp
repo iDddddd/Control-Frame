@@ -112,7 +112,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
-
+        ARMHandle();
         Motor::MotorsHandle();//电机数据处理
         CAN::CANPackageSend();//CAN发送
 
@@ -126,7 +126,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
     if (htim == &htim6) {//4ms
         RS485::RS485PackageSend();
-      //  ARMHandle();
+
     }
     if (htim == &htim7) {
         IMU::imu.Handle();

@@ -61,19 +61,19 @@ void IMU::Handle() {
     get_displace(position.displace, position._velocity, position.velocity);
     AHRS_update(quat, 0.001f, rawData.gyro, proData.accel, rawData.mag);
     get_angle(quat, &attitude.yaw, &attitude.pitch, &attitude.rol);
-    attitude.yaw_v = rawData.gyro[2];
     attitude.pitch_v = rawData.gyro[0];
     attitude.rol_v = rawData.gyro[1];
+    attitude.yaw_v = rawData.gyro[2];
 
     attitude.neg_yaw_v = -attitude.yaw_v;
     attitude.neg_pitch_v = -attitude.pitch_v;
     attitude.neg_rol_v = -attitude.rol_v;
-		static int imu_cut = 0;
+		/*static int imu_cut = 0;
 		if(imu_cut > 5){
 			IMU_Send();
 			imu_cut = 0;
 		}
-		imu_cut++;
+		imu_cut++;*/
 }
 
 void IMU::ITHandle(uint16_t GPIO_Pin) {

@@ -60,7 +60,7 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
             /**只需关注该部分代码**/
-            if (rx_len == CONTROL_LENGTH||rx_len == MANI_LENGTH) {
+            if (LRC_calc(rx_buff[0], rx_len-1) == rx_buff[0][rx_len-1] && (rx_buff[0][0] == 0x7A)) {
                 GetData(0);
             }
             /**只需关注该部分代码**/
@@ -81,7 +81,7 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
             /**只需关注该部分代码**/
-            if (rx_len == CONTROL_LENGTH||rx_len == MANI_LENGTH) {
+            if (LRC_calc(rx_buff[1], rx_len-1) == rx_buff[1][rx_len-1] && (rx_buff[1][0] == 0x7A)) {
                 GetData(1);
             }
             /**只需关注该部分代码**/
@@ -95,46 +95,53 @@ void ManiControl::IT_Handle() {
  * @note 可根据实际需要修改
  */
 void ManiControl::GetData(uint8_t bufIndex) {
-        if (rx_buff[bufIndex][0] == 0x7A) {
-            if (rx_buff[bufIndex][1] == 0x01) {
-                switch (rx_buff[bufIndex][2]) {
-                    case 0x01:{
-                        TaskFlag = STOP;
-                        mc_ctrl.ChassisStopFlag = rx_buff[bufIndex][7];
-                        StateMachine::add_function_to_state(ChassisStopTask);
-                        break;
-                    }
-                    case 0x02:{
-                        TaskFlag = MOVE;
-                        mc_ctrl.x = (rx_buff[bufIndex][7] << 8u) | rx_buff[bufIndex][8];
-                        mc_ctrl.y = (rx_buff[bufIndex][9] << 8u) | rx_buff[bufIndex][10];
-                        StateMachine::add_function_to_state(MoveTask);
-                        break;
-                    }
-                    case 0x03:{
-                        TaskFlag = ARM;
-                        mc_ctrl.ARM1.angle = (rx_buff[bufIndex][8] << 8u) | rx_buff[bufIndex][7];
-                        mc_ctrl.ARM2.angle = (rx_buff[bufIndex][10] << 8u) | rx_buff[bufIndex][9];
-                        mc_ctrl.ARM_Z_Flag = rx_buff[bufIndex][12];
-                        StateMachine::add_function_to_state(ArmTask);
-                        break;
-                    }
-                    case 0x04:{
-                        TaskFlag = CLAW;
-                        mc_ctrl.ArmServoFlag = rx_buff[bufIndex][12];
-                        StateMachine::add_function_to_state(ClawTask);
-                        break;
-                    }
-                    case 0x05:{
-                        TaskFlag = TRAY;
-                        mc_ctrl.TrayFlag = rx_buff[bufIndex][12];
-                        StateMachine::add_function_to_state(TrayTask);
-                        break;
-                    }
+        if (rx_buff[bufIndex][1] == 0x01) {
+            switch (rx_buff[bufIndex][2]) {
+                case 0x01:{
+                    TaskFlag = STOP;
+                    mc_ctrl.ChassisStopFlag = rx_buff[bufIndex][7];
+                    StateMachine::add_function_to_state(ChassisStopTask);
+                    break;
+                }
+                case 0x02:{
+                    TaskFlag = MOVE;
+                    mc_ctrl.x = (rx_buff[bufIndex][7] << 8u) | rx_buff[bufIndex][8];
+                    mc_ctrl.y = (rx_buff[bufIndex][9] << 8u) | rx_buff[bufIndex][10];
+                    StateMachine::add_function_to_state(MoveTask);
+                    break;
+                }
+                case 0x03:{
+                    TaskFlag = ARM;
+                    mc_ctrl.ARMZ_Pos.u8[0] = rx_buff[bufIndex][4];
+                    mc_ctrl.ARMZ_Pos.u8[1] = rx_buff[bufIndex][5];
+                    mc_ctrl.ARMZ_Pos.u8[2] = rx_buff[bufIndex][6];
+                    mc_ctrl.ARMZ_Pos.u8[3] = rx_buff[bufIndex][7];
+                    mc_ctrl.ARM1_Pos.u8[0] = rx_buff[bufIndex][8];
+                    mc_ctrl.ARM1_Pos.u8[1] = rx_buff[bufIndex][9];
+                    mc_ctrl.ARM1_Pos.u8[2] = rx_buff[bufIndex][10];
+                    mc_ctrl.ARM1_Pos.u8[3] = rx_buff[bufIndex][11];
+                    mc_ctrl.ARM2_Pos.u8[0] = rx_buff[bufIndex][12];
+                    mc_ctrl.ARM2_Pos.u8[1] = rx_buff[bufIndex][13];
+                    mc_ctrl.ARM2_Pos.u8[2] = rx_buff[bufIndex][14];
+                    mc_ctrl.ARM2_Pos.u8[3] = rx_buff[bufIndex][15];
+
+                    StateMachine::add_function_to_state(ArmTask);
+                    break;
+                }
+                case 0x04:{
+                    TaskFlag = CLAW;
+                    mc_ctrl.ArmServoFlag = rx_buff[bufIndex][12];
+                    StateMachine::add_function_to_state(ClawTask);
+                    break;
+                }
+                case 0x05:{
+                    TaskFlag = TRAY;
+                    mc_ctrl.TrayFlag = rx_buff[bufIndex][12];
+                    StateMachine::add_function_to_state(TrayTask);
+                    break;
                 }
             }
         }
-
 }
 
 
@@ -142,20 +149,17 @@ void CompleteTask(){
     uint8_t tx_message[1] = {0x01};
     HAL_UART_Transmit(&huart6,tx_message,1,3);
 }
+uint8_t LRC_calc(uint8_t *data, uint8_t len){
+    uint8_t LRC = 0;
+    for(uint8_t i = 0; i < len; i++){
+        LRC += data[i];
+    }
+    return LRC;
+}
 
-/*
 void USART6_IRQHandler() {
 
     ManiControl::IT_Handle();
+ //   HAL_UART_IRQHandler(&huart6);
+}
 
-}
-*/
-/**
- * @brief 串口接收中断回调函数,再次调用串口接收函数，实现空闲中断接收
- * @param huart 串口句柄
- */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if(huart->Instance == USART6) {
-        ManiControl::IT_Handle();
-    }
-}
