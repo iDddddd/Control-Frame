@@ -29,8 +29,9 @@ typedef struct {
     f_u8_t ARM1_Pos;
     f_u8_t ARM2_Pos;
     f_u8_t ARMZ_Pos;
-    uint16_t x;
-    uint16_t y;
+    f_u8_t x_Dis;
+    f_u8_t y_Dis;
+    f_u8_t Theta;
     uint8_t TrayFlag;
     uint8_t ChassisStopFlag;
     uint8_t ArmServoFlag;

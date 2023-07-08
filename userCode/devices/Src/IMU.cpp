@@ -399,6 +399,7 @@ void IMU::IMU_Send() {
     imu_send_data[1] = 0x02;
     imu_send_data[2] = 0x03;
     imu_send_data[3] = 0x24;
+    //memcpy(&imu_send_data[4], &imu_data, sizeof(imu_data));不知道行不行，待测试
     imu_send_data[4] = imu_data.accel[0].u8[0];
     imu_send_data[5] = imu_data.accel[0].u8[1];
     imu_send_data[6] = imu_data.accel[0].u8[2];

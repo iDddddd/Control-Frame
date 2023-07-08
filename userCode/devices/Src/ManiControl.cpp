@@ -99,20 +99,36 @@ void ManiControl::GetData(uint8_t bufIndex) {
             switch (rx_buff[bufIndex][2]) {
                 case 0x01:{
                     TaskFlag = STOP;
-                    mc_ctrl.ChassisStopFlag = rx_buff[bufIndex][7];
+                    mc_ctrl.ChassisStopFlag = rx_buff[bufIndex][4];
                     StateMachine::add_function_to_state(ChassisStopTask);
                     break;
                 }
                 case 0x02:{
                     TaskFlag = MOVE;
-                    mc_ctrl.x = (rx_buff[bufIndex][7] << 8u) | rx_buff[bufIndex][8];
-                    mc_ctrl.y = (rx_buff[bufIndex][9] << 8u) | rx_buff[bufIndex][10];
+                    memcpy(&mc_ctrl.x_Dis, &rx_buff[bufIndex][4], 4);
+                    memcpy(&mc_ctrl.y_Dis, &rx_buff[bufIndex][8], 4);
+                    memcpy(&mc_ctrl.Theta, &rx_buff[bufIndex][12], 4);
+                    /*mc_ctrl.x_Dis.u8[0] = rx_buff[bufIndex][4];
+                    mc_ctrl.x_Dis.u8[1] = rx_buff[bufIndex][5];
+                    mc_ctrl.x_Dis.u8[2] = rx_buff[bufIndex][6];
+                    mc_ctrl.x_Dis.u8[3] = rx_buff[bufIndex][7];
+                    mc_ctrl.y_Dis.u8[0] = rx_buff[bufIndex][8];
+                    mc_ctrl.y_Dis.u8[1] = rx_buff[bufIndex][9];
+                    mc_ctrl.y_Dis.u8[2] = rx_buff[bufIndex][10];
+                    mc_ctrl.y_Dis.u8[3] = rx_buff[bufIndex][11];
+                    mc_ctrl.Theta.u8[0] = rx_buff[bufIndex][12];
+                    mc_ctrl.Theta.u8[1] = rx_buff[bufIndex][13];
+                    mc_ctrl.Theta.u8[2] = rx_buff[bufIndex][14];
+                    mc_ctrl.Theta.u8[3] = rx_buff[bufIndex][15];*/
                     StateMachine::add_function_to_state(MoveTask);
                     break;
                 }
                 case 0x03:{
                     TaskFlag = ARM;
-                    mc_ctrl.ARMZ_Pos.u8[0] = rx_buff[bufIndex][4];
+                    memcpy(&mc_ctrl.ARMZ_Pos, &rx_buff[bufIndex][4], 4);
+                    memcpy(&mc_ctrl.ARM1_Pos, &rx_buff[bufIndex][8], 4);
+                    memcpy(&mc_ctrl.ARM2_Pos, &rx_buff[bufIndex][12], 4);
+                    /*mc_ctrl.ARMZ_Pos.u8[0] = rx_buff[bufIndex][4];
                     mc_ctrl.ARMZ_Pos.u8[1] = rx_buff[bufIndex][5];
                     mc_ctrl.ARMZ_Pos.u8[2] = rx_buff[bufIndex][6];
                     mc_ctrl.ARMZ_Pos.u8[3] = rx_buff[bufIndex][7];
@@ -123,20 +139,20 @@ void ManiControl::GetData(uint8_t bufIndex) {
                     mc_ctrl.ARM2_Pos.u8[0] = rx_buff[bufIndex][12];
                     mc_ctrl.ARM2_Pos.u8[1] = rx_buff[bufIndex][13];
                     mc_ctrl.ARM2_Pos.u8[2] = rx_buff[bufIndex][14];
-                    mc_ctrl.ARM2_Pos.u8[3] = rx_buff[bufIndex][15];
+                    mc_ctrl.ARM2_Pos.u8[3] = rx_buff[bufIndex][15];*/
 
                     StateMachine::add_function_to_state(ArmTask);
                     break;
                 }
                 case 0x04:{
                     TaskFlag = CLAW;
-                    mc_ctrl.ArmServoFlag = rx_buff[bufIndex][12];
+                    mc_ctrl.ArmServoFlag = rx_buff[bufIndex][5];
                     StateMachine::add_function_to_state(ClawTask);
                     break;
                 }
                 case 0x05:{
                     TaskFlag = TRAY;
-                    mc_ctrl.TrayFlag = rx_buff[bufIndex][12];
+                    mc_ctrl.TrayFlag = rx_buff[bufIndex][5];
                     StateMachine::add_function_to_state(TrayTask);
                     break;
                 }
