@@ -147,7 +147,7 @@ void AutoSetVelocity() {
 
 }
 
-void AutoChassisSet(uint16_t x, uint16_t y, uint16_t o) {
+void AutoChassisSet(float x, float y, float o) {
     autoMove.StartMove(x, y, o);
 }
 

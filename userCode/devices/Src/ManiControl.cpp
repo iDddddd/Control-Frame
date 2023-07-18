@@ -146,7 +146,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 }
                 case 0x04:{
                     TaskFlag = CLAW;
-                    mc_ctrl.ArmServoFlag = rx_buff[bufIndex][5];
+                    mc_ctrl.ClawFlag = rx_buff[bufIndex][5];
                     StateMachine::add_function_to_state(ClawTask);
                     break;
                 }

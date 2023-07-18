@@ -34,7 +34,7 @@ typedef struct {
     f_u8_t Theta;
     uint8_t TrayFlag;
     uint8_t ChassisStopFlag;
-    uint8_t ArmServoFlag;
+    uint8_t ClawFlag;
 } MC_ctrl_t;
 /*类定义------------------------------------------------------------------*/
 class ManiControl : public Device {

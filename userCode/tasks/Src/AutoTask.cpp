@@ -12,7 +12,7 @@ void ChassisStopTask(){
     CompleteTask();
 }
 void MoveTask(){
-    AutoChassisSet(ManiControl::mc_ctrl.x, ManiControl::mc_ctrl.y, 0);
+    AutoChassisSet(ManiControl::mc_ctrl.x_Dis.f, ManiControl::mc_ctrl.y_Dis.f, 0);
     StateMachine::remove_function_from_state(MoveTask);
 }
 void ArmTask(){
@@ -24,6 +24,6 @@ void TrayTask(){
     StateMachine::remove_function_from_state(TrayTask);
 }
 void ClawTask(){
-    AutoClawSet(ManiControl::mc_ctrl.ArmServoFlag);
+    AutoClawSet(ManiControl::mc_ctrl.ClawFlag);
     StateMachine::remove_function_from_state(ClawTask);
 }
