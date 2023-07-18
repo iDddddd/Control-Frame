@@ -164,7 +164,7 @@
           <Type>0</Type>
           <LineNumber>99</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134304714</Address>
+          <Address>134305850</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -178,18 +178,18 @@
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>85</LineNumber>
+          <LineNumber>216</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134305428</Address>
+          <Address>134319112</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\devices\Src\ManiControl.cpp</Filename>
+          <Filename>..\userCode\devices\Src\CommuType.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/ManiControl.cpp\85</Expression>
+          <Expression>\\RM_Frame_C\../userCode/devices/Src/CommuType.cpp\216</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -247,6 +247,16 @@
           <count>10</count>
           <WinNumber>1</WinNumber>
           <ItemText>huart6</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>RFL</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>rs485_rx_buff</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

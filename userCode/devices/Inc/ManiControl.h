@@ -40,7 +40,7 @@ typedef struct {
 class ManiControl : public Device {
 public:
     static MC_ctrl_t mc_ctrl;
-    static uint8_t rx_buff[2][BUFF_SIZE];
+    static uint8_t mani_rx_buff[2][BUFF_SIZE];
     static TASK_FLAG_t TaskFlag;
 
     static void Init();//串口通信初始化函数，对应UART6

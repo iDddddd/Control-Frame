@@ -89,8 +89,10 @@ private:
 class Motor_4315 : public Motor, public RS485 {
 public:
     int32_t motor4315_angle[8]{};
+    float nowAngle{0};
     float targetAngle{0};
     float zeroAngle{0};
+    uint8_t RxMessage[15]{};//接收到的电机数据
     void RS485MessageGenerate() override;
 
     void Handle() override;

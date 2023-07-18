@@ -221,6 +221,6 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[3] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
 
     //控制底盘电机转速
-    Classis_Motor.SetTargetSpeed(ClassisSpeed);
+  //  Classis_Motor.SetTargetSpeed(ClassisSpeed);
 }
 

@@ -218,6 +218,7 @@ int main() {
     //TODO adc校准？
     RemoteControl::init();//遥控器通讯初始化，使用UART3串口
     ManiControl::Init();//上位机通讯初始化，使用UART6串口
+    RS485::RS485Init();//RS485通讯初始化，使用UART1串口
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);//1ms
     HAL_TIM_Base_Start_IT(&htim6);//4ms

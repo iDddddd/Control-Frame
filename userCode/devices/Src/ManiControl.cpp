@@ -5,7 +5,7 @@
 #include "ManiControl.h"
 
 MC_ctrl_t ManiControl::mc_ctrl{};
-uint8_t ManiControl::rx_buff[2][BUFF_SIZE];
+uint8_t ManiControl::mani_rx_buff[2][BUFF_SIZE];
 TASK_FLAG_t ManiControl::TaskFlag;
 
 void ManiControl::Init() {
@@ -20,9 +20,9 @@ void ManiControl::Init() {
     }
     hdma_usart6_rx.Instance->PAR = (uint32_t) &(USART6->DR);
     //内存缓冲区 1
-    hdma_usart6_rx.Instance->M0AR = (uint32_t) (rx_buff[0]);
+    hdma_usart6_rx.Instance->M0AR = (uint32_t) (mani_rx_buff[0]);
     //内存缓冲区 2
-    hdma_usart6_rx.Instance->M1AR = (uint32_t) (rx_buff[1]);
+    hdma_usart6_rx.Instance->M1AR = (uint32_t) (mani_rx_buff[1]);
     //数据长度
     hdma_usart6_rx.Instance->NDTR = BUFF_SIZE;//不确定需不需要
     //使能双缓冲区
@@ -60,7 +60,7 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
             /**只需关注该部分代码**/
-            if (LRC_calc(rx_buff[0], rx_len-1) == rx_buff[0][rx_len-1] && (rx_buff[0][0] == 0x7A)) {
+            if (LRC_calc(mani_rx_buff[0], rx_len - 1) == mani_rx_buff[0][rx_len - 1] && (mani_rx_buff[0][0] == 0x7A)) {
                 GetData(0);
             }
             /**只需关注该部分代码**/
@@ -81,7 +81,7 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
             /**只需关注该部分代码**/
-            if (LRC_calc(rx_buff[1], rx_len-1) == rx_buff[1][rx_len-1] && (rx_buff[1][0] == 0x7A)) {
+            if (LRC_calc(mani_rx_buff[1], rx_len - 1) == mani_rx_buff[1][rx_len - 1] && (mani_rx_buff[1][0] == 0x7A)) {
                 GetData(1);
             }
             /**只需关注该部分代码**/
@@ -95,64 +95,64 @@ void ManiControl::IT_Handle() {
  * @note 可根据实际需要修改
  */
 void ManiControl::GetData(uint8_t bufIndex) {
-        if (rx_buff[bufIndex][1] == 0x01) {
-            switch (rx_buff[bufIndex][2]) {
+        if (mani_rx_buff[bufIndex][1] == 0x01) {
+            switch (mani_rx_buff[bufIndex][2]) {
                 case 0x01:{
                     TaskFlag = STOP;
-                    mc_ctrl.ChassisStopFlag = rx_buff[bufIndex][4];
+                    mc_ctrl.ChassisStopFlag = mani_rx_buff[bufIndex][4];
                     StateMachine::add_function_to_state(ChassisStopTask);
                     break;
                 }
                 case 0x02:{
                     TaskFlag = MOVE;
-                    memcpy(&mc_ctrl.x_Dis, &rx_buff[bufIndex][4], 4);
-                    memcpy(&mc_ctrl.y_Dis, &rx_buff[bufIndex][8], 4);
-                    memcpy(&mc_ctrl.Theta, &rx_buff[bufIndex][12], 4);
-                    /*mc_ctrl.x_Dis.u8[0] = rx_buff[bufIndex][4];
-                    mc_ctrl.x_Dis.u8[1] = rx_buff[bufIndex][5];
-                    mc_ctrl.x_Dis.u8[2] = rx_buff[bufIndex][6];
-                    mc_ctrl.x_Dis.u8[3] = rx_buff[bufIndex][7];
-                    mc_ctrl.y_Dis.u8[0] = rx_buff[bufIndex][8];
-                    mc_ctrl.y_Dis.u8[1] = rx_buff[bufIndex][9];
-                    mc_ctrl.y_Dis.u8[2] = rx_buff[bufIndex][10];
-                    mc_ctrl.y_Dis.u8[3] = rx_buff[bufIndex][11];
-                    mc_ctrl.Theta.u8[0] = rx_buff[bufIndex][12];
-                    mc_ctrl.Theta.u8[1] = rx_buff[bufIndex][13];
-                    mc_ctrl.Theta.u8[2] = rx_buff[bufIndex][14];
-                    mc_ctrl.Theta.u8[3] = rx_buff[bufIndex][15];*/
+                    memcpy(&mc_ctrl.x_Dis, &mani_rx_buff[bufIndex][4], 4);
+                    memcpy(&mc_ctrl.y_Dis, &mani_rx_buff[bufIndex][8], 4);
+                    memcpy(&mc_ctrl.Theta, &mani_rx_buff[bufIndex][12], 4);
+                    /*mc_ctrl.x_Dis.u8[0] = mani_rx_buff[bufIndex][4];
+                    mc_ctrl.x_Dis.u8[1] = mani_rx_buff[bufIndex][5];
+                    mc_ctrl.x_Dis.u8[2] = mani_rx_buff[bufIndex][6];
+                    mc_ctrl.x_Dis.u8[3] = mani_rx_buff[bufIndex][7];
+                    mc_ctrl.y_Dis.u8[0] = mani_rx_buff[bufIndex][8];
+                    mc_ctrl.y_Dis.u8[1] = mani_rx_buff[bufIndex][9];
+                    mc_ctrl.y_Dis.u8[2] = mani_rx_buff[bufIndex][10];
+                    mc_ctrl.y_Dis.u8[3] = mani_rx_buff[bufIndex][11];
+                    mc_ctrl.Theta.u8[0] = mani_rx_buff[bufIndex][12];
+                    mc_ctrl.Theta.u8[1] = mani_rx_buff[bufIndex][13];
+                    mc_ctrl.Theta.u8[2] = mani_rx_buff[bufIndex][14];
+                    mc_ctrl.Theta.u8[3] = mani_rx_buff[bufIndex][15];*/
                     StateMachine::add_function_to_state(MoveTask);
                     break;
                 }
                 case 0x03:{
                     TaskFlag = ARM;
-                    memcpy(&mc_ctrl.ARMZ_Pos, &rx_buff[bufIndex][4], 4);
-                    memcpy(&mc_ctrl.ARM1_Pos, &rx_buff[bufIndex][8], 4);
-                    memcpy(&mc_ctrl.ARM2_Pos, &rx_buff[bufIndex][12], 4);
-                    /*mc_ctrl.ARMZ_Pos.u8[0] = rx_buff[bufIndex][4];
-                    mc_ctrl.ARMZ_Pos.u8[1] = rx_buff[bufIndex][5];
-                    mc_ctrl.ARMZ_Pos.u8[2] = rx_buff[bufIndex][6];
-                    mc_ctrl.ARMZ_Pos.u8[3] = rx_buff[bufIndex][7];
-                    mc_ctrl.ARM1_Pos.u8[0] = rx_buff[bufIndex][8];
-                    mc_ctrl.ARM1_Pos.u8[1] = rx_buff[bufIndex][9];
-                    mc_ctrl.ARM1_Pos.u8[2] = rx_buff[bufIndex][10];
-                    mc_ctrl.ARM1_Pos.u8[3] = rx_buff[bufIndex][11];
-                    mc_ctrl.ARM2_Pos.u8[0] = rx_buff[bufIndex][12];
-                    mc_ctrl.ARM2_Pos.u8[1] = rx_buff[bufIndex][13];
-                    mc_ctrl.ARM2_Pos.u8[2] = rx_buff[bufIndex][14];
-                    mc_ctrl.ARM2_Pos.u8[3] = rx_buff[bufIndex][15];*/
+                    memcpy(&mc_ctrl.ARMZ_Pos, &mani_rx_buff[bufIndex][4], 4);
+                    memcpy(&mc_ctrl.ARM1_Pos, &mani_rx_buff[bufIndex][8], 4);
+                    memcpy(&mc_ctrl.ARM2_Pos, &mani_rx_buff[bufIndex][12], 4);
+                    /*mc_ctrl.ARMZ_Pos.u8[0] = mani_rx_buff[bufIndex][4];
+                    mc_ctrl.ARMZ_Pos.u8[1] = mani_rx_buff[bufIndex][5];
+                    mc_ctrl.ARMZ_Pos.u8[2] = mani_rx_buff[bufIndex][6];
+                    mc_ctrl.ARMZ_Pos.u8[3] = mani_rx_buff[bufIndex][7];
+                    mc_ctrl.ARM1_Pos.u8[0] = mani_rx_buff[bufIndex][8];
+                    mc_ctrl.ARM1_Pos.u8[1] = mani_rx_buff[bufIndex][9];
+                    mc_ctrl.ARM1_Pos.u8[2] = mani_rx_buff[bufIndex][10];
+                    mc_ctrl.ARM1_Pos.u8[3] = mani_rx_buff[bufIndex][11];
+                    mc_ctrl.ARM2_Pos.u8[0] = mani_rx_buff[bufIndex][12];
+                    mc_ctrl.ARM2_Pos.u8[1] = mani_rx_buff[bufIndex][13];
+                    mc_ctrl.ARM2_Pos.u8[2] = mani_rx_buff[bufIndex][14];
+                    mc_ctrl.ARM2_Pos.u8[3] = mani_rx_buff[bufIndex][15];*/
 
                     StateMachine::add_function_to_state(ArmTask);
                     break;
                 }
                 case 0x04:{
                     TaskFlag = CLAW;
-                    mc_ctrl.ClawFlag = rx_buff[bufIndex][5];
+                    mc_ctrl.ClawFlag = mani_rx_buff[bufIndex][5];
                     StateMachine::add_function_to_state(ClawTask);
                     break;
                 }
                 case 0x05:{
                     TaskFlag = TRAY;
-                    mc_ctrl.TrayFlag = rx_buff[bufIndex][5];
+                    mc_ctrl.TrayFlag = mani_rx_buff[bufIndex][5];
                     StateMachine::add_function_to_state(TrayTask);
                     break;
                 }

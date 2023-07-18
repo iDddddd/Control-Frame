@@ -440,8 +440,3 @@ void IMU::IMU_Send() {
     HAL_UART_Transmit_DMA(&huart6, imu_send_data, sizeof(imu_send_data));
 
 }
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
-    if(huart->Instance == USART6){
-      
-    }
-}

@@ -211,7 +211,7 @@ int16_t FOUR_Motor_4010::IntensityCalc(uint32_t id) {
  * @brief Motor_4315类的构造函数
  */
 Motor_4315::Motor_4315(uint32_t _id, MOTOR_INIT_t *_init) : Motor(_init, this), RS485(_id) {
-
+    ID_Bind_Rx(RxMessage);
 }
 
 /**
@@ -245,15 +245,17 @@ void Motor_4315::RS485MessageGenerate() {
  * @brief 4315电机类的执行处理函数
  */
 void Motor_4315::Handle() {
+    nowAngle = (RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u) ) / 16384.0f * 360.0f;
 
     AngleCalc();
     if (stopFlag == 1) {
-        motor4315_angle[rs485_ID] = (zeroAngle * 16384.0f / 360.0f);
+        motor4315_angle[rs485_ID] = (int32_t )(zeroAngle * 16384.0f / 360.0f);
     } else {
-        motor4315_angle[rs485_ID] = (realAngle * 16384.0f / 360.0f);
+        motor4315_angle[rs485_ID] = (int32_t )(realAngle * 16384.0f / 360.0f);
     }
 
     RS485MessageGenerate();
+
 }
 
 /**

@@ -13,6 +13,7 @@
 #define can2 2
 
 #define MAX_MESSAGE_COUNT 16
+#define RX_SIZE 20
 /*结构体定义--------------------------------------------------------------*/
 
 typedef struct {
@@ -55,7 +56,7 @@ public:
 
 protected:
     uint8_t canType;//can类型
-    static MyMap<uint32_t, uint8_t *> dict;//canID与can回传消息的字典
+    static MyMap<uint32_t, uint8_t *> dict_CAN;//canID与can回传消息的字典
 
     void ID_Bind_Rx(uint8_t *RxMessage) const;//将canID与can回传消息绑定
 
@@ -68,17 +69,29 @@ public:
     uint32_t rs485_ID;
     static uint8_t rsmessage[4][11];
 
+    static uint8_t rs485_rx_buff[2][RX_SIZE];
+
     explicit RS485(uint32_t _id);
 
     ~RS485();
 
+    static void RS485Init();
     static void RS485PackageSend();
-
+    static void Rx_Handle();
     virtual void RS485MessageGenerate() = 0;
 
 protected:
+    static MyMap<uint32_t, uint8_t *> dict_RS485; //485ID与485回传消息的字典
+    void ID_Bind_Rx(uint8_t *RxMessage) const; //将485ID与485回传消息绑定
 
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern void USART1_IRQHandler(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif //RM_FRAME_C_COMMUTYPE_H
