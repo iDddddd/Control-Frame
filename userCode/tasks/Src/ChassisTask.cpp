@@ -8,27 +8,27 @@ constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = -0.3f,
-        .ki = -0.004f,
-        .kd = -0.0001f,
+        .kp = 0.3f,
+        .ki = 0.004f,
+        .kd = 0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
-        .kp = -0.3f,
-        .ki = -0.004f,
-        .kd = -0.0001f,
+        .kp = 0.01f,
+        .ki = 0.0f,
+        .kd = 0.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
-        .kp = -0.3f,
-        .ki = -0.004f,
-        .kd = -0.0001f,
+        .kp = 0.3f,
+        .ki = 0.004f,
+        .kd = 0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
@@ -80,9 +80,9 @@ COMMU_INIT_t chassisCommuInit4 = {
 //                              &chassisMotorInit1, &chassisMotorInit1, &chassisMotorInit3, &chassisMotorInit2);
 
 Motor_4010 CFR(&chassisCommuInit1, &chassisMotorInit1);
-Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit1);
+Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit2);
 Motor_4010 CBL(&chassisCommuInit3, &chassisMotorInit2);
-Motor_4010 CBR(&chassisCommuInit4, &chassisMotorInit3);
+Motor_4010 CBR(&chassisCommuInit4, &chassisMotorInit2);
 
 
 Motor_4315 RFR(MOTOR_ID_1, &swerveMotorInit);
@@ -237,9 +237,9 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 
     //控制底盘电机转速
   //  Classis_Motor.SetTargetSpeed(ClassisSpeed);
-    //CFR.SetTargetSpeed(ClassisSpeed[0]);
-    //CFL.SetTargetSpeed(ClassisSpeed[1]);
+    CFR.SetTargetSpeed(ClassisSpeed[0]);
+    CFL.SetTargetSpeed(ClassisSpeed[1]);
     CBL.SetTargetSpeed(ClassisSpeed[2]);
-    //CBR.SetTargetSpeed(ClassisSpeed[3]);
+    CBR.SetTargetSpeed(ClassisSpeed[3]);
 }
 

@@ -24,7 +24,7 @@
 class Motor_4010 : public Motor, public CAN {
 public:
     uint8_t RxMessage[8]{};
-    uint16_t motor4010_intensity{};
+    int16_t motor4010_intensity{};
     int32_t txPos{};
     uint16_t txSpeed{300};
     void CANMessageGenerate() override;
@@ -41,7 +41,7 @@ public:
 
 private:
     uint8_t id;
-    C6x0Rx_t feedback{};
+    MOTOR_FEEDBACK_t feedback{};
     //位置模式
     float targetAngle{};
     float targetSpeed{};
@@ -49,14 +49,13 @@ private:
     float realAngle{0};
     float thisAngle{};
     float lastRead{};
-    static uint16_t Intensity;
 
     void MotorStateUpdate();
 
-    uint16_t IntensityCalc();
+    int16_t IntensityCalc();
 };
 
-/*4310托盘电机类------------------------------------------------------------------*/
+/*4010托盘电机类------------------------------------------------------------------*/
 class Motor_4010_TRAY : public Motor, public CAN {
 public:
     uint8_t TxDir{};//0为顺时针，1为逆时针

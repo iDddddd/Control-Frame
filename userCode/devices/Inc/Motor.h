@@ -27,10 +27,10 @@ typedef enum {
 
 typedef struct {
     uint16_t angle;
-    uint16_t speed;
-    uint16_t moment;
+    int16_t speed;
+    int16_t moment;
     int8_t temp;
-} C6x0Rx_t;//电机反馈数据结构体
+} MOTOR_FEEDBACK_t;//电机反馈数据结构体
 
 typedef struct {
     PID_Regulator_t *speedPIDp;//速度环pid参数结构体指针
@@ -138,7 +138,7 @@ public:
 private:
     uint32_t canIDs[4]{};//电机ID
     PID speedPIDs[4];//速度环PID对象,若控位置还新建需一个角度环PID对象
-    C6x0Rx_t feedback[4]{};//电机反馈数据
+    MOTOR_FEEDBACK_t feedback[4]{};//电机反馈数据
     float targetSpeed[4]{};//目标速度
     MOTOR_STATE_t state[4]{};//电机状态,包含速度、角度、转矩、温度
 

@@ -6,7 +6,6 @@
 
 /*静态成员变量声明------------------------------------------------------------------*/
 
-//int16_t Motor_4010::Intensity;
 
 /*4010电机类------------------------------------------------------------------*/
 
@@ -54,7 +53,7 @@ void Motor_4010::CANMessageGenerate() {
 
 void Motor_4010::Handle() {
 
-    uint16_t intensity;
+    int16_t intensity;
 
     MotorStateUpdate();
     
@@ -111,15 +110,15 @@ void Motor_4010::MotorStateUpdate() {
 
 
 
-uint16_t Motor_4010::IntensityCalc() {
-    uint16_t intensity = 0;
+int16_t Motor_4010::IntensityCalc() {
+    int16_t intensity = 0;
     switch (ctrlType) {
         case DIRECT:
             intensity = (int16_t) targetAngle;
             break;
 
         case SPEED_Single:
-            intensity = speedPID.PIDCalc(targetSpeed, state.speed);
+            intensity = (int16_t) speedPID.PIDCalc(targetSpeed, state.speed);
             break;
 
         case POSITION_Double:
