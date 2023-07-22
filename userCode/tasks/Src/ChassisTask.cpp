@@ -8,7 +8,7 @@ constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = -0.6f,
+        .kp = -0.3f,
         .ki = -0.004f,
         .kd = -0.0001f,
         .componentKpMax = 2000,
@@ -17,18 +17,18 @@ PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
-        .kp = 0.6f,
-        .ki = 0.004f,
-        .kd = 0.0001f,
+        .kp = -0.3f,
+        .ki = -0.004f,
+        .kd = -0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
-        .kp = 0.6f,
-        .ki = 0.004f,
-        .kd = 0.0001f,
+        .kp = -0.3f,
+        .ki = -0.004f,
+        .kd = -0.0001f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
@@ -76,13 +76,20 @@ COMMU_INIT_t chassisCommuInit4 = {
 };
 
 //底盘电机实例化，之后只需调用SetTargetVelocity函数即可控制电机
-FOUR_Motor_4010 Classis_Motor(&chassisCommuInit1, &chassisCommuInit2, &chassisCommuInit3, &chassisCommuInit4,
-                              &chassisMotorInit1, &chassisMotorInit1, &chassisMotorInit3, &chassisMotorInit2);
+//FOUR_Motor_4010 Classis_Motor(&chassisCommuInit1, &chassisCommuInit2, &chassisCommuInit3, &chassisCommuInit4,
+//                              &chassisMotorInit1, &chassisMotorInit1, &chassisMotorInit3, &chassisMotorInit2);
 
-Motor_4315 RFL(MOTOR_ID_1, &swerveMotorInit);
-Motor_4315 RFR(MOTOR_ID_2, &swerveMotorInit);
-Motor_4315 RBR(MOTOR_ID_3, &swerveMotorInit);
-Motor_4315 RBL(MOTOR_ID_4, &swerveMotorInit);
+Motor_4010 CFR(&chassisCommuInit1, &chassisMotorInit1);
+Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit1);
+Motor_4010 CBL(&chassisCommuInit3, &chassisMotorInit2);
+Motor_4010 CBR(&chassisCommuInit4, &chassisMotorInit3);
+
+
+Motor_4315 RFR(MOTOR_ID_1, &swerveMotorInit);
+Motor_4315 RFL(MOTOR_ID_2, &swerveMotorInit);
+Motor_4315 RBL(MOTOR_ID_3, &swerveMotorInit);
+Motor_4315 RBR(MOTOR_ID_4, &swerveMotorInit);
+
 
 AutoMove autoMove;
 bool ChassisStopFlag = true;
@@ -157,7 +164,7 @@ void AutoChassisSet(float x, float y, float o) {
 void AutoChassisStop() {
     ChassisStopFlag = true;
 
-    Classis_Motor.Stop();
+    //Classis_Motor.Stop();
     autoMove.StopMove();
     /*RFL.Stop();
     RFR.Stop();
@@ -167,6 +174,10 @@ void AutoChassisStop() {
     RFR.SetTargetAngle(90);
     RBL.SetTargetAngle(90);
     RBR.SetTargetAngle(0);
+    CFR.Stop();
+    CFL.Stop();
+    CBL.Stop();
+    CBR.Stop();
 }
 
 /**
@@ -175,11 +186,15 @@ void AutoChassisStop() {
 void ChassisStop() {
     ChassisStopFlag = true;
 
-    Classis_Motor.Stop();
+    //Classis_Motor.Stop();
     RFL.Stop();
     RFR.Stop();
     RBL.Stop();
     RBR.Stop();
+    CFR.Stop();
+    CFL.Stop();
+    CBL.Stop();
+    CBR.Stop();
 }
 
 /**
@@ -215,12 +230,16 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBR.SetTargetAngle(RBRAngle);
 
     //计算四个轮子线速度，单位：度/s
-    ClassisSpeed[0] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
-    ClassisSpeed[1] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 360;//右前轮
-    ClassisSpeed[2] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
-    ClassisSpeed[3] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
+    ClassisSpeed[1] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
+    ClassisSpeed[0] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 360;//右前轮
+    ClassisSpeed[3] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
+    ClassisSpeed[2] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
 
     //控制底盘电机转速
   //  Classis_Motor.SetTargetSpeed(ClassisSpeed);
+    //CFR.SetTargetSpeed(ClassisSpeed[0]);
+    //CFL.SetTargetSpeed(ClassisSpeed[1]);
+    CBL.SetTargetSpeed(ClassisSpeed[2]);
+    //CBR.SetTargetSpeed(ClassisSpeed[3]);
 }
 

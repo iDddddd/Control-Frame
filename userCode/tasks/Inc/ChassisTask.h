@@ -8,7 +8,7 @@
 #include "main.h"
 #include "Motor.h"
 #include "AutoMove.h"
-
+#include "ARMMotor.h"
 
 #define WHEEL_DIAMETER             0.048f//4010直径 m
 #define REDUCTION_RATIO 19.0f

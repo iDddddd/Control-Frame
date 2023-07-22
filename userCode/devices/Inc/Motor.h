@@ -27,8 +27,8 @@ typedef enum {
 
 typedef struct {
     uint16_t angle;
-    int16_t speed;
-    int16_t moment;
+    uint16_t speed;
+    uint16_t moment;
     int8_t temp;
 } C6x0Rx_t;//电机反馈数据结构体
 

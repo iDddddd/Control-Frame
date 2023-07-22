@@ -22,6 +22,12 @@ void Motor_4010::SetTargetAngle(float _targetAngle) {
     txPos = _targetAngle*100;
 }
 
+void Motor_4010::SetTargetSpeed(float _targetSpeed) {
+    stopFlag = false;
+    targetSpeed = _targetSpeed;
+    //txSpeed = _targetSpeed;
+}
+
 
 void Motor_4010::CANMessageGenerate() {
 
@@ -29,14 +35,14 @@ void Motor_4010::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xA4;
+        canQueue.Data[canQueue.rear].message[0] = 0xA1;
         canQueue.Data[canQueue.rear].message[1] = 0x00;
-        canQueue.Data[canQueue.rear].message[2] = txSpeed;
-        canQueue.Data[canQueue.rear].message[3] = txSpeed >> 8u;
-        canQueue.Data[canQueue.rear].message[4] = txPos;
-        canQueue.Data[canQueue.rear].message[5] = txPos >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = txPos >> 16u;
-        canQueue.Data[canQueue.rear].message[7] = txPos >> 24u;
+        canQueue.Data[canQueue.rear].message[2] = 0x00;
+        canQueue.Data[canQueue.rear].message[3] = 0x00;
+        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity;
+        canQueue.Data[canQueue.rear].message[5] = motor4010_intensity >> 8u;
+        canQueue.Data[canQueue.rear].message[6] = 0x00;
+        canQueue.Data[canQueue.rear].message[7] = 0x00;
 
         canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
     }else{
@@ -47,18 +53,18 @@ void Motor_4010::CANMessageGenerate() {
 }
 
 void Motor_4010::Handle() {
-/*
-    int16_t intensity[8];
+
+    uint16_t intensity;
 
     MotorStateUpdate();
-    intensity[id] = IntensityCalc();
-    //Intensity = intensity[id];
+    
+    intensity = IntensityCalc();
     if (stopFlag) {
-        motor4010_intensity[id] = 0;
+        motor4010_intensity = 0;
     } else {
-        motor4010_intensity[id] = intensity[id];
+        motor4010_intensity = intensity;
     }
-*/
+
 
     CANMessageGenerate();
 }
@@ -103,15 +109,17 @@ void Motor_4010::MotorStateUpdate() {
 
 }
 
-int16_t Motor_4010::IntensityCalc() {
-    int16_t intensity = 0;
+
+
+uint16_t Motor_4010::IntensityCalc() {
+    uint16_t intensity = 0;
     switch (ctrlType) {
         case DIRECT:
             intensity = (int16_t) targetAngle;
             break;
 
         case SPEED_Single:
-            // intensity = speedPID.PIDCalc(targetSpeed, state.speed);
+            intensity = speedPID.PIDCalc(targetSpeed, state.speed);
             break;
 
         case POSITION_Double:
