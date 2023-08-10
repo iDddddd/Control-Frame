@@ -3,12 +3,29 @@
 //
 #include "ControlTask.h"
 
+static int flag = 0;
+void autoImpulse(){
+    if (flag>1000){
+        ChassisSetVelocity(1,0,0);
+        flag++;
+        if(flag>1000*2) flag=0;
+    }
+    else{
+        ChassisSetVelocity(0,0,0);
+        flag++;
+    }    
+}
 
 void CtrlHandle() {
+    
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
         ArmStop();
-    } else {//其他正常模式
+    } 
+    else if (RemoteControl::rcInfo.sRight == MID_POS){//右侧二档，脉冲模式
+        autoImpulse();
+    }
+    else {//其他正常模式
         switch (RemoteControl::rcInfo.sLeft) {
             case UP_POS://左侧一档{
                 if (RemoteControl::rcInfo.sRight == UP_POS) {

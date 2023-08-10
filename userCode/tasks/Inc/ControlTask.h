@@ -54,4 +54,6 @@ CTRL_ERROR_E CtrlStart(CTRL_CONTROL_T _ctrlControl);
 
 CTRL_ERROR_E CtrlHandle(CTRL_CONTROL_T _ctrlControl);
 
+void autoImpulse();
+
 #endif //RM_FRAME_C_CONTROLTASK_H

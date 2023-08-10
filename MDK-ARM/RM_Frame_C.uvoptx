@@ -164,7 +164,7 @@
           <Type>0</Type>
           <LineNumber>99</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134305850</Address>
+          <Address>134307394</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -174,22 +174,6 @@
           <Filename>..\userCode\devices\Src\ManiControl.cpp</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\RM_Frame_C\../userCode/devices/Src/ManiControl.cpp\99</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>216</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134319112</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\userCode\devices\Src\CommuType.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/CommuType.cpp\216</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -257,6 +241,46 @@
           <count>12</count>
           <WinNumber>1</WinNumber>
           <ItemText>rs485_rx_buff</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>RFR</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CFL</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CFR</ItemText>
+        </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>rcInfo</ItemText>
+        </Ww>
+        <Ww>
+          <count>17</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>FBVelocity</ItemText>
+        </Ww>
+        <Ww>
+          <count>18</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>LRVelocity</ItemText>
+        </Ww>
+        <Ww>
+          <count>19</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>RTVelocity</ItemText>
+        </Ww>
+        <Ww>
+          <count>20</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>imu</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

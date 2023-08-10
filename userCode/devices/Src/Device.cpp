@@ -8,7 +8,7 @@
 #include "ARMMotor.h"
 #include "Buzzer.h"
 #include "LED.h"
-
+#include "ControlTask.h"
 volatile float vccMoni = 0;
 volatile float vccBat = 0;
 
@@ -108,7 +108,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         bsp_ADC_vccMoni();
 
         static uint32_t cnt = 0;
+        static uint32_t cnt2 = 0;
         cnt++;
+        cnt2++;
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
@@ -122,6 +124,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
             cnt = 0;
         }
+        if (cnt2 > 1000){
+            //autoImpulse();
+            cnt2 = 0;
+        }
 
     }
     if (htim == &htim6) {//4ms
@@ -132,6 +138,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         IMU::imu.Handle();
         CtrlHandle();
     }
+    
 }
 
 volatile uint8_t key_raw_state = 1;//
@@ -165,7 +172,7 @@ int main() {
     /* USER CODE END 1 */
 
 
-    /* MCU Configuration--、、、、、、------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     HAL_Init();

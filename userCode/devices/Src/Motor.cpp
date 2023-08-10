@@ -35,7 +35,6 @@ Motor::~Motor() = default;
 void Motor::ErrorHandle() {}
 
 void Motor::MotorsHandle() {
-
     Motor_Object_t *current = head_;
     while (current) {
         current->motor_object->Handle();//调用每个电机的中断处理函数

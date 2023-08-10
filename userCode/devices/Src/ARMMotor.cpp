@@ -8,11 +8,10 @@
 
 
 /*4010电机类------------------------------------------------------------------*/
-
 Motor_4010::Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(commuInit), Motor(motorInit, this) {
     id = commuInit->_id - 0x145; //0x141-0x144被FOUR_Motor4010占用
     ID_Bind_Rx(RxMessage);
-
+    Stop();
 }
 
 void Motor_4010::SetTargetAngle(float _targetAngle) {
@@ -51,6 +50,10 @@ void Motor_4010::CANMessageGenerate() {
 
 }
 
+void Motor_4010::StopMoving() {
+    
+}
+
 void Motor_4010::Handle() {
 
     int16_t intensity;
@@ -74,10 +77,13 @@ void Motor_4010::MotorStateUpdate() {
     feedback.speed = (int16_t) (RxMessage[4] | (RxMessage[5] << 8u));
     feedback.moment = (int16_t) (RxMessage[2] | (RxMessage[3] << 8u));
     feedback.temp = (int8_t) RxMessage[1];
+    //feedback.speed /= (360/PI/0.048f);
+    
 
     switch (ctrlType) {
         case SPEED_Single: {
             state.speed = (float) (feedback.speed) / reductionRatio;
+            //state.speed /= (360/PI/0.048f);
         }
         case POSITION_Double: {
             state.speed = (float) (feedback.speed) / reductionRatio;
@@ -104,8 +110,10 @@ void Motor_4010::MotorStateUpdate() {
         case DIRECT:
 
             break;
-    }
 
+        
+    }
+    
 }
 
 

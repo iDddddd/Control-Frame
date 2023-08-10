@@ -27,6 +27,12 @@ public:
     int16_t motor4010_intensity{};
     int32_t txPos{};
     uint16_t txSpeed{300};
+    float targetSpeed{};
+    MOTOR_FEEDBACK_t feedback{};
+    MOTOR_STATE_t state{};
+    float vx, vy;
+    float target_vx, target_vy;
+
     void CANMessageGenerate() override;
 
     void Handle() override;
@@ -41,11 +47,9 @@ public:
 
 private:
     uint8_t id;
-    MOTOR_FEEDBACK_t feedback{};
     //位置模式
     float targetAngle{};
-    float targetSpeed{};
-    MOTOR_STATE_t state{};
+    
     float realAngle{0};
     float thisAngle{};
     float lastRead{};
@@ -53,6 +57,8 @@ private:
     void MotorStateUpdate();
 
     int16_t IntensityCalc();
+
+    void StopMoving();
 };
 
 /*4010托盘电机类------------------------------------------------------------------*/
