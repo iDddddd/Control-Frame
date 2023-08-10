@@ -104,7 +104,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                     break;
                 }
                 case 0x02:{
-                    TaskFlag = MOVE;
+                    TaskFlag = MOVE_DIS;
                     memcpy(&mc_ctrl.x_Dis, &mani_rx_buff[bufIndex][4], 4);
                     memcpy(&mc_ctrl.y_Dis, &mani_rx_buff[bufIndex][8], 4);
                     memcpy(&mc_ctrl.Theta, &mani_rx_buff[bufIndex][12], 4);
@@ -120,7 +120,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                     mc_ctrl.Theta.u8[1] = mani_rx_buff[bufIndex][13];
                     mc_ctrl.Theta.u8[2] = mani_rx_buff[bufIndex][14];
                     mc_ctrl.Theta.u8[3] = mani_rx_buff[bufIndex][15];*/
-                    StateMachine::add_function_to_state(MoveTask);
+                    StateMachine::add_function_to_state(Move_DisTask);
                     break;
                 }
                 case 0x03:{
@@ -155,6 +155,13 @@ void ManiControl::GetData(uint8_t bufIndex) {
                     mc_ctrl.TrayFlag = mani_rx_buff[bufIndex][5];
                     StateMachine::add_function_to_state(TrayTask);
                     break;
+                }
+                case 0x07: {
+                    TaskFlag = MOVE_VEL;
+                    memcpy(&mc_ctrl.x_Vel, &mani_rx_buff[bufIndex][4], 4);
+                    memcpy(&mc_ctrl.y_Vel, &mani_rx_buff[bufIndex][8], 4);
+                    memcpy(&mc_ctrl.w_Vel, &mani_rx_buff[bufIndex][12], 4);
+                    StateMachine::add_function_to_state(Move_VelTask);
                 }
             }
         }

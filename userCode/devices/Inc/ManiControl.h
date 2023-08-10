@@ -13,10 +13,12 @@
 /*枚举类型定义------------------------------------------------------------*/
 typedef enum {
     STOP = 1,
-    MOVE,
+    MOVE_DIS,
     ARM,
-    TRAY,
     CLAW,
+    TRAY,
+    MOVE_VEL,
+
 }TASK_FLAG_t;
 
 /*结构体定义--------------------------------------------------------------*/
@@ -32,6 +34,9 @@ typedef struct {
     f_u8_t x_Dis;
     f_u8_t y_Dis;
     f_u8_t Theta;
+    f_u8_t x_Vel;
+    f_u8_t y_Vel;
+    f_u8_t w_Vel;
     uint8_t TrayFlag;
     uint8_t ChassisStopFlag;
     uint8_t ClawFlag;

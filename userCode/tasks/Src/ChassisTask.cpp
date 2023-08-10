@@ -208,10 +208,16 @@ void AutoSetVelocity() {
 
 }
 
-void AutoChassisSet(float x, float y, float o) {
+void ChassisDistanceSet(float x, float y, float o) {
     autoMove.StartMove(x, y, o);
 }
 
+
+void ChassisVelocitySet(float x_vel, float y_vel, float w_vel) {
+    FBVelocity = x_vel;
+    LRVelocity = y_vel;
+    RTVelocity = w_vel;
+}
 /**
  * @brief 自动模式下执行急停模式的底盘任务处理
  */
