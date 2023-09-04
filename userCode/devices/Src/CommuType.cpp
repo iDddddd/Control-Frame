@@ -21,7 +21,7 @@ void CAN::CANInit() {
     HAL_CAN_Start(&hcan1);
     HAL_CAN_Start(&hcan2);
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
-    //   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
 
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
     HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
@@ -41,15 +41,13 @@ void CAN::CANInit() {
 
     HAL_CAN_ConfigFilter(&hcan1, &canFilterTypeDef);
     HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
+
+    CANPackageSend();
 }
 
 /**
  * @brief CAN类的构造函数
  */
-CAN::CAN() {
-    can_ID = 0x280;
-    canType = can1;
-}
 
 CAN::CAN(COMMU_INIT_t *_init) {
     can_ID = _init->_id;//CAN ID
@@ -88,6 +86,7 @@ void CAN::CANPackageSend() {
                     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
                // }
         }
+        memcpy(canQueue.Data[canQueue.front].message, 0 , sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
         canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
 }
@@ -110,14 +109,6 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
  */
 void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
     dict_CAN.insert(can_ID, RxMessage);//将对应电机的canID与RxMessage绑定
-}
-
-void CAN::FOURID_Bind_Rx(uint32_t *canIDs, uint8_t (*RxMessage)[8]) {
-    //将对应电机的canID与RxMessage绑定,多电机使用
-    dict_CAN.insert(canIDs[0], RxMessage[0]);
-    dict_CAN.insert(canIDs[1], RxMessage[1]);
-    dict_CAN.insert(canIDs[2], RxMessage[2]);
-    dict_CAN.insert(canIDs[3], RxMessage[3]);
 }
 
 
@@ -227,7 +218,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-  //  CAN::CANPackageSend();此句貌似无用
+    CAN::CANPackageSend();
 }
 
 void USART1_IRQHandler(){

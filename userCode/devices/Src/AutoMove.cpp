@@ -29,13 +29,9 @@ void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
     SendFlag = false;
     X.Calc(x_distance);
     Y.Calc(y_distance);
-    O.Calc(o_angle);
-    X.expectPos = 0;
-    Y.expectPos = 0;
+  //  O.Calc(o_angle);
     IMU::imu.position.displace[0] = 0;
     IMU::imu.position.displace[1] = 0;
-    X.FinishFlag = false;
-    Y.FinishFlag = false;
 }
 
 void AutoMove::StopMove() {
@@ -56,6 +52,8 @@ Move_X::Move_X() {
 
 void Move_X::Calc(float target) {
     stopFlag = false;
+    FinishFlag = false;
+    expectPos = 0;
     Para.d_max = target;
     Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
     Para.d2 = target - 2 * Para.d1;
@@ -87,11 +85,11 @@ float Move_X::Handle(float reference) {
             v_rel = Para.v_max;
         }
     }
-   // if (reference >= Para.d_max) {
-        if (expectPos >= Para.d_max) {
-        Stop();
-        FinishFlag = true;
-    }
+    if (reference >= Para.d_max - 0.05) {
+        //if (expectPos >= Para.d_max) {
+            Stop();
+            FinishFlag = true;
+        }
     return v_rel;
 }
 
@@ -111,6 +109,8 @@ Move_Y::Move_Y() {
 
 void Move_Y::Calc(float target) {
     stopFlag = false;
+    FinishFlag = false;
+    expectPos = 0;
     Para.d_max = target;
     Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
     Para.d2 = target - 2 * Para.d1;
@@ -142,8 +142,8 @@ float Move_Y::Handle(float reference) {
         if (v_rel > Para.v_max) {
             v_rel = Para.v_max;
         }
-        //if (reference >= Para.d_max) {
-            if (expectPos >= Para.d_max) {
+        if (reference >= Para.d_max - 0.05) {
+        //if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;
         }

@@ -20,117 +20,31 @@
 #define BLUE 1
 #define GREEN 2
 
-/*4010电机类------------------------------------------------------------------*/
-class Motor_4010 : public Motor, public CAN {
+
+/*步进电机类------------------------------------------------------------------*/
+class SteppingMotor : public Motor, public CAN {
 public:
-    uint8_t RxMessage[8]{};
-    int16_t motor4010_intensity{};
-    int32_t txPos{};
-    uint16_t txSpeed{300};
-    float targetSpeed{};
-    MOTOR_FEEDBACK_t feedback{};
-    MOTOR_STATE_t state{};
-    float vx, vy;
-    float target_vx, target_vy;
 
-    void CANMessageGenerate() override;
+    SteppingMotor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
 
-    void Handle() override;
-
-    void SetTargetAngle(float _targetAngle);
-
-    void SetTargetSpeed(float _targetSpeed);
-
-    Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-
-    ~Motor_4010();
-
-private:
-    uint8_t id;
-    //位置模式
-    float targetAngle{};
-    
-    float realAngle{0};
-    float thisAngle{};
-    float lastRead{};
-
-    void MotorStateUpdate();
-
-    int16_t IntensityCalc();
-
-    void StopMoving();
-};
-
-/*4010托盘电机类------------------------------------------------------------------*/
-class Motor_4010_TRAY : public Motor, public CAN {
-public:
-    uint8_t TxDir{};//0为顺时针，1为逆时针
-    uint16_t TxAngle{};
-    uint16_t TxSpeed{};
-
-    void CANMessageGenerate() override;
-
-    void Handle() override;
-
-    void SetTargetPos(uint8_t _targetAngle);
-
-    Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-
-    ~Motor_4010_TRAY();
-
-private:
-    uint8_t targetPos{};
-    uint8_t nowPos{};
-
-};
-
-/*4310电机类------------------------------------------------------------------*/
-class Motor_4310 : public Motor, public CAN {
-public:
-    uint8_t *Motor4310_Angle;
-    uint32_t sendSpeed{};
-
-    static void Init();
-
-    void CANMessageGenerate() override;
-
-    void Handle() override;
-
-    void SetTargetAngle(float _targetAngle);
-
-    void SetTargetSpeed(float _targetSpeed);
-
-    Motor_4310(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-
-    ~Motor_4310();
-
-private:
-    float targetAngle{0};
-    float targetSpeed{};
-
-};
-
-/*Emm42电机类------------------------------------------------------------------*/
-class Emm42Motor : public Motor, public CAN {
-public:
-    Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-
-    uint8_t NowPos = DOWN;
-    uint8_t TarPos = DOWN;
-    float NowSpeed = 0;
-    float TarSpeed = 0;
+    uint8_t RxMessage[6]{0};
+    uint8_t TxMessage[8]{0};
     bool SendFlag = false;
-    uint8_t Emm42Motor_Dir{};
-    uint32_t Emm42Motor_Pos{};
-    uint16_t Emm42Motor_Speed{};
-    ~Emm42Motor();
+    float NowPos = 0;
+    float TarPos = 0;
+    uint8_t Direction{};
+    float Position{};
+    uint16_t Speed{};
+    uint32_t Pulse{};
+
+    ~SteppingMotor();
 
     void CANMessageGenerate() override;
 
     void Handle() override;
+    void MoveTo();
+    void SetTargetPosition(float pos);
 
-    void SetTargetPosition(uint8_t pos);
-    void SetTargetSpeed(float _speed);
 private:
     float targetPosition{}; //单位mm
 
