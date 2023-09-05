@@ -806,6 +806,11 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\LED.cpp</FilePath>
             </File>
+            <File>
+              <FileName>ChassisMotor.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\userCode\devices\Src\ChassisMotor.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

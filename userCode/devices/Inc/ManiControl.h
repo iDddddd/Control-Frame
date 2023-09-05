@@ -24,19 +24,26 @@ typedef enum {
 /*结构体定义--------------------------------------------------------------*/
 //可根据需要创建需要的结构体
 typedef struct {
-    uint16_t speed;
-    uint16_t angle;
+    f_u8_t Joint1Pos;
+    f_u8_t Joint2Pos;
+    f_u8_t Joint3Pos;
+    f_u8_t Joint4Pos;
+    f_u8_t Joint5Pos;
 } ARM_col_t;
 typedef struct {
-    f_u8_t ARM1_Pos;
-    f_u8_t ARM2_Pos;
-    f_u8_t ARMZ_Pos;
     f_u8_t x_Dis;
     f_u8_t y_Dis;
     f_u8_t Theta;
+} ChassisDis_col_t;
+typedef struct {
     f_u8_t x_Vel;
     f_u8_t y_Vel;
     f_u8_t w_Vel;
+} ChassisVel_col_t;
+typedef struct {
+    ARM_col_t arm_col;
+    ChassisDis_col_t chassisDis_col;
+    ChassisVel_col_t chassisVel_col;
     uint8_t TrayFlag;
     uint8_t ChassisStopFlag;
     uint8_t ClawFlag;

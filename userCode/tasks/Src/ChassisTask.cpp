@@ -10,59 +10,42 @@ constexpr float M = 0.24f; //车身宽
 float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y = 0.0;
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = 0.45f,
-        .ki = 0.06f,
-        .kd = 8.0f,
+        .kp = 0.3f,
+        .ki = 0.006f,
+        .kd = 3.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
-        .kp = 0.1f,
-        .ki = 0.0f,
-        .kd = 0.0f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
-PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
-        .kp = 0.35f,
-        .ki = 0.02f,
-        .kd = 1.5f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
-PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体
-        .kp = 0.30f,
-        .ki = 0.02f,
+        .kp = 0.3f,
+        .ki = 0.006f,
         .kd = 3.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
-PID_Regulator_t pidRegulator0 = {//此为储存pid参数的结构体
-        .kp = 0.6f,
-        .ki = 0.0f,
-        .kd = 0.0f,
+PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
+        .kp = 0.3f,
+        .ki = 0.006f,
+        .kd = 3.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
-PID_Regulator_t pidRegulator7 = {//此为储存pid参数的结构体
-        .kp = 35.0f,
-        .ki = 1.4f,
-        .kd = 35.0f,
+PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体
+        .kp = 0.3f,
+        .ki = 0.006f,
+        .kd = 3.0f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
+
 MOTOR_INIT_t chassisMotorInit1 = {//底盘电机初始化结构体
         .speedPIDp = &pidRegulator1,
         .anglePIDp = nullptr,
@@ -89,27 +72,27 @@ MOTOR_INIT_t chassisMotorInit4 = {//底盘电机初始化结构体
 };
 
 MOTOR_INIT_t swerveMotorInit = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator7,
-        .anglePIDp = &pidRegulator0,
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
         .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 };
 
 MOTOR_INIT_t swerveMotorInit2 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator7,
-        .anglePIDp = &pidRegulator0,
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
         .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 };
 MOTOR_INIT_t swerveMotorInit3 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator7,
-        .anglePIDp = &pidRegulator0,
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
         .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 };
 MOTOR_INIT_t swerveMotorInit4 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator7,
-        .anglePIDp = &pidRegulator0,
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
         .ctrlType = DIRECT,
         .reductionRatio = 1.0f
 };
@@ -131,8 +114,6 @@ COMMU_INIT_t chassisCommuInit4 = {
 };
 
 //底盘电机实例化，之后只需调用SetTargetVelocity函数即可控制电机
-//FOUR_Motor_4010 Classis_Motor(&chassisCommuInit1, &chassisCommuInit2, &chassisCommuInit3, &chassisCommuInit4,
-//                              &chassisMotorInit1, &chassisMotorInit1, &chassisMotorInit3, &chassisMotorInit2);
 
 Motor_4010 CFR(&chassisCommuInit1, &chassisMotorInit1);
 Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit2);
@@ -205,7 +186,7 @@ void AutoSetVelocity() {
     autoMove.Handle();
     FBVelocity = autoMove.vx;
     LRVelocity = autoMove.vy;
-    RTVelocity = 0;
+    RTVelocity = autoMove.vo;
 
 }
 

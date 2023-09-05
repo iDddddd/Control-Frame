@@ -5,143 +5,103 @@
 #include "ArmTask.h"
 
 
-PID_Regulator_t pidRegulator5 = {//此为储存pid参数的结构体，四个底盘电机共用
-         .kp = 0.0f,
-        .ki = 0.0f,
-        .kd = 0.0f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000
-};
-PID_Regulator_t pidRegulator6 = {//此为储存pid参数的结构体，四个底盘电机共用
-       .kp = 0.0f,
-        .ki = 0.0f,
-        .kd = 0.0f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
-MOTOR_INIT_t trayMotorInit = {
+MOTOR_INIT_t Joint1MotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
-
+        .reductionRatio = 60.0f
 };
-
-COMMU_INIT_t trayCommuInit = {
-        ._id = 0x145,
-        .canType = can2
-
-};
-MOTOR_INIT_t arm1MotorInit = {
+MOTOR_INIT_t Joint2MotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
+        .reductionRatio = 30.0f
 };
-COMMU_INIT_t arm1CommuInit = {
-        ._id = 0x101,
-        .canType = can2
-
-};
-COMMU_INIT_t arm2CommuInit = {
-        ._id = 0x146,
-        .canType = can2
-
-};
-MOTOR_INIT_t arm2MotorInit = {
-        .speedPIDp = &pidRegulator5,
-        .anglePIDp = &pidRegulator6,
+MOTOR_INIT_t Joint3MotorInit = {
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
         .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
-
+        .reductionRatio = 30.0f
 };
-COMMU_INIT_t arm3CommuInit = {
+MOTOR_INIT_t Joint4MotorInit = {
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
+        .ctrlType = DIRECT,
+        .reductionRatio = 4.0f
+};MOTOR_INIT_t Joint5MotorInit = {
+        .speedPIDp = nullptr,
+        .anglePIDp = nullptr,
+        .ctrlType = DIRECT,
+        .reductionRatio = 4.0f
+};
+
+
+COMMU_INIT_t Joint1CommuInit = {
         ._id = 0x01,
         .canType = can2
 
 };
-MOTOR_INIT_t arm3MotorInit = {
-        .speedPIDp = nullptr,
-        .anglePIDp = nullptr,
-        .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
+COMMU_INIT_t Joint2CommuInit = {
+        ._id = 0x02,
+        .canType = can2
 
 };
-//Motor_4010_TRAY TrayMotor(&trayCommuInit, &trayMotorInit);
-Motor_4310 ArmMotor1(&arm1CommuInit, &arm1MotorInit);
-Motor_4010 ArmMotor2(&arm2CommuInit, &arm2MotorInit);
-Emm42Motor ArmMotorZ(&arm3CommuInit, &arm3MotorInit);
+COMMU_INIT_t Joint3CommuInit = {
+        ._id = 0x03,
+        .canType = can2
+
+};
+COMMU_INIT_t Joint4CommuInit = {
+        ._id = 0x04,
+        .canType = can2
+
+};
+COMMU_INIT_t Joint5CommuInit = {
+        ._id = 0x05,
+        .canType = can2
+
+};
+SteppingMotor Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
+SteppingMotor Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
+SteppingMotor Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
+SteppingMotor Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
+SteppingMotor Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
+
+
 bool ArmStopFlag = true;
-float Position, Angle;
-static float arm1Angle, arm2Angle,armZSpeed,armZPos;
+bool ArmMoveFlag = false;
+static float joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle;
+
 void ArmStop() {
     ArmStopFlag = true;
-    // TrayMotor.Stop();
-     ArmMotor1.Stop();
-      ArmMotor2.Stop();
-     ArmMotorZ.Stop();
+    Joint1Motor.Stop();
+    Joint2Motor.Stop();
+    Joint3Motor.Stop();
+    Joint4Motor.Stop();
+    Joint5Motor.Stop();
 }
 
-void ArmAngleCalc() {
-  //   TrayMotor.SetTargetAngle(Angle);
-        ArmMotor1.SetTargetAngle(-arm1Angle);
-       ArmMotor2.SetTargetAngle(-arm2Angle);
-    /*   if(armZPos > 0.7){
-           ArmMotorZ.SetTargetPosition(2);
-       }else if (armZPos < -0.7) {
-           ArmMotorZ.SetTargetPosition(0);
-       }*/
-}
-void AutoTraySet(uint8_t trayflag) {
-    //TrayMotor.SetTargetPos(trayflag);
-    CompleteTask();
-}
-
-void ArmSet(float Arm1Angle, float Arm2Angle,float ArmZPos) {
+void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos){
     ArmStopFlag = false;
+    Joint1Motor.SetTargetPosition(Joint1Pos);
+    Joint2Motor.SetTargetPosition(Joint2Pos);
+    Joint3Motor.SetTargetPosition(Joint3Pos);
+    Joint4Motor.SetTargetPosition(Joint4Pos);
+    Joint5Motor.SetTargetPosition(Joint5Pos);
+    ArmMoveFlag = true;
 
-    arm1Angle = Arm1Angle;
-    arm2Angle = Arm2Angle;
-    armZPos = ArmZPos;
-
-
-}
-
-void AutoArmSet(float armzPos,float arm1Pos,float arm2Pos){
-    arm2Pos = arm2Pos * 180 / PI;
-    if (arm1Pos > 1.2) {
-        arm1Pos = 1.2f;
-        bsp_BuzzerOn(500);
-    } else if (arm1Pos < -1.2f) {
-        arm1Pos = -1.2f;
-        bsp_BuzzerOn(500);
-    } else{
-        bsp_BuzzerOff();
-    }
-    if (arm2Pos > 150) {
-        arm2Pos = 150;
-        bsp_BuzzerOn(1000);
-    } else if (arm2Pos < -150) {
-        arm2Pos = -150;
-        bsp_BuzzerOn(1000);
-    } else{
-        bsp_BuzzerOff();
-    }
-    arm1Angle = arm1Pos;
-    arm2Angle = arm2Pos;
-    armZPos = armzPos;
-  //  ArmMotor1.SetTargetAngle(arm1Pos);
-   // ArmMotor2.SetTargetAngle(arm2Pos);
-   // ArmMotorZ.SetTargetPosition(0);
 }
 
 void ARMHandle() {
     if (!ArmStopFlag) {
-        ArmAngleCalc();
+        if(ArmMoveFlag){
+            Joint1Motor.MoveTo();
+            Joint2Motor.MoveTo();
+            Joint3Motor.MoveTo();
+            Joint4Motor.MoveTo();
+            Joint5Motor.MoveTo();
+            ArmMoveFlag = false;
+        }
     }
 }
 

@@ -2,394 +2,76 @@
 // Created by mac on 2022/12/14.
 //
 
-#include "ARMMotor.h"
+#include "ArmMotor.h"
 
 /*静态成员变量声明------------------------------------------------------------------*/
 
 
-/*4010电机类------------------------------------------------------------------*/
-Motor_4010::Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(commuInit), Motor(motorInit, this) {
-    id = commuInit->_id - 0x145; //0x141-0x144被FOUR_Motor4010占用
-    ID_Bind_Rx(RxMessage);
-    Stop();
-}
-
-void Motor_4010::SetTargetAngle(float _targetAngle) {
-    stopFlag = false;
-    targetAngle = _targetAngle;
-    txPos = _targetAngle*100;
-}
-
-void Motor_4010::SetTargetSpeed(float _targetSpeed) {
-    stopFlag = false;
-    targetSpeed = _targetSpeed;
-    //txSpeed = _targetSpeed;
-}
-
-
-void Motor_4010::CANMessageGenerate() {
-
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
-
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xA1;
-        canQueue.Data[canQueue.rear].message[1] = 0x00;
-        canQueue.Data[canQueue.rear].message[2] = 0x00;
-        canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity;
-        canQueue.Data[canQueue.rear].message[5] = motor4010_intensity >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = 0x00;
-        canQueue.Data[canQueue.rear].message[7] = 0x00;
-
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    }else{
-        canQueue.rear = 0;
-        canQueue.front = 0;
-    }
-
-}
-
-void Motor_4010::StopMoving() {
-    
-}
-
-void Motor_4010::Handle() {
-
-    int16_t intensity;
-
-    MotorStateUpdate();
-    
-    intensity = IntensityCalc();
-    if (stopFlag) {
-        motor4010_intensity = 0;
-    } else {
-        motor4010_intensity = intensity;
-    }
-
-
-    CANMessageGenerate();
-}
-
-void Motor_4010::MotorStateUpdate() {
-
-    feedback.angle = RxMessage[6] | (RxMessage[7] << 8u);
-    feedback.speed = (int16_t) (RxMessage[4] | (RxMessage[5] << 8u));
-    feedback.moment = (int16_t) (RxMessage[2] | (RxMessage[3] << 8u));
-    feedback.temp = (int8_t) RxMessage[1];
-    //feedback.speed /= (360/PI/0.048f);
-    
-
-    switch (ctrlType) {
-        case SPEED_Single: {
-            state.speed = (float) (feedback.speed) / reductionRatio;
-            //state.speed /= (360/PI/0.048f);
-        }
-        case POSITION_Double: {
-            state.speed = (float) (feedback.speed) / reductionRatio;
-            state.moment = feedback.moment;
-            state.temperature = feedback.temp;
-            state.angle = (float) (feedback.angle) * 360.0f / 16384.0f;
-
-            thisAngle = feedback.angle;
-            if (thisAngle <= lastRead) {
-                if (lastRead - thisAngle > 8000)
-                    realAngle += (thisAngle + 16384.0f - lastRead) * 360.0f / 16384.0f / reductionRatio;
-                else
-                    realAngle -= (lastRead - thisAngle) * 360.0f / 16384.0f / reductionRatio;
-            } else {
-                if (thisAngle - lastRead > 8000)
-                    realAngle -= (lastRead + 16384.0f - thisAngle) * 360.0f / 16384.0f / reductionRatio;
-                else
-                    realAngle += (thisAngle - lastRead) * 360.0f / 16384.0f / reductionRatio;
-            }
-            state.angle = realAngle;
-            lastRead = feedback.angle;
-            break;
-        }
-        case DIRECT:
-
-            break;
-
-        
-    }
-    
-}
-
-
-
-int16_t Motor_4010::IntensityCalc() {
-    int16_t intensity = 0;
-    switch (ctrlType) {
-        case DIRECT:
-            intensity = (int16_t) targetAngle;
-            break;
-
-        case SPEED_Single:
-            intensity = (int16_t) speedPID.PIDCalc(targetSpeed, state.speed);
-            break;
-
-        case POSITION_Double:
-            float _targetSpeed = anglePID.PIDCalc(targetAngle, state.angle);
-            intensity = (int16_t) speedPID.PIDCalc(_targetSpeed, state.speed);
-            break;
-    }
-    return intensity;
-}
-
-Motor_4010::~Motor_4010() = default;
-
-/*4310电机类------------------------------------------------------------------*/
-Motor_4310::Motor_4310(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(commuInit), Motor(motorInit, this) {
-
-}
-
-Motor_4310::~Motor_4310() = default;
-
-void Motor_4310::Init() {
-    CAN_TxHeaderTypeDef txHeaderTypeDef;
-    uint32_t box;
-    uint8_t InitMessage[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
-
-    txHeaderTypeDef.StdId = 0x101;
-    txHeaderTypeDef.DLC = 0x08;
-    txHeaderTypeDef.IDE = CAN_ID_STD;
-    txHeaderTypeDef.RTR = CAN_RTR_DATA;
-    txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-
-    HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, InitMessage, &box);
-}
-
-void Motor_4310::SetTargetAngle(float _targetAngle) {
-    stopFlag = false;
-    targetAngle = _targetAngle;
-}
-
-void Motor_4310::SetTargetSpeed(float _targetSpeed) {
-    stopFlag = false;
-    targetSpeed = _targetSpeed;
-}
-
-void Motor_4310::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
-
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = *Motor4310_Angle;
-        canQueue.Data[canQueue.rear].message[1] = *(Motor4310_Angle + 1);
-        canQueue.Data[canQueue.rear].message[2] = *(Motor4310_Angle + 2);
-        canQueue.Data[canQueue.rear].message[3] = *(Motor4310_Angle + 3);
-        canQueue.Data[canQueue.rear].message[4] = 0x00;
-        canQueue.Data[canQueue.rear].message[5] = 0x00;
-        canQueue.Data[canQueue.rear].message[6] = 0x00;
-        canQueue.Data[canQueue.rear].message[7] = 0x40;
-
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    }else{
-        canQueue.rear = 0;
-        canQueue.front = 0;
-    }
-}
-
-void Motor_4310::Handle() {
-
-    if (stopFlag) {
-        Motor4310_Angle = 0;
-    } else {
-        Motor4310_Angle = (uint8_t *) &targetAngle;
-    }
-    CANMessageGenerate();
-
-}
 
 /*Emm42电机类------------------------------------------------------------------*/
-Emm42Motor::Emm42Motor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : Motor(motorInit, this),
-                                                                           CAN(commuInit) {
+SteppingMotor::SteppingMotor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) :
+        Motor(motorInit, this), CAN(commuInit) {
 }
 
 
-void Emm42Motor::CANMessageGenerate() {
+void SteppingMotor::CANMessageGenerate() {
     if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xFD;
-        canQueue.Data[canQueue.rear].message[1] = Emm42Motor_Dir;
-        canQueue.Data[canQueue.rear].message[2] = 0xFF;
-        canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = Emm42Motor_Pos >> 16u;
-        canQueue.Data[canQueue.rear].message[5] = Emm42Motor_Pos >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = Emm42Motor_Pos;
-        canQueue.Data[canQueue.rear].message[7] = 0x6B;
+        canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
+        canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
+        canQueue.Data[canQueue.rear].message[2] = TxMessage[2];
+        canQueue.Data[canQueue.rear].message[3] = TxMessage[3];
+        canQueue.Data[canQueue.rear].message[4] = TxMessage[4];
+        canQueue.Data[canQueue.rear].message[5] = TxMessage[5];
+        canQueue.Data[canQueue.rear].message[6] = TxMessage[6];
+        canQueue.Data[canQueue.rear].message[7] = TxMessage[7];
 
         canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    }else{
+    } else {
         canQueue.rear = 0;
         canQueue.front = 0;
     }
 }
 
-void Emm42Motor::Handle() {
-//速度模式
-  /*    if(stopFlag) {
-          Emm42Motor_Speed = 0;
-      }else{
-          Emm42Motor_Speed = TarSpeed;
-      }
-      if(SendFlag) {
-          CANMessageGenerate();
-      }*/
+void SteppingMotor::Handle() {
+    TxMessage[0] = 0x36;
+    TxMessage[0] = 0x6B;
 
-//位置模式
-    /*if (stopFlag) {
-        Emm42Motor_Pos = 0;
-        CANMessageGenerate();
-    } else {
-        if (NowPos == UP && TarPos == DOWN) {
-            Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF,最大为4FF
-            Emm42Motor_Pos = 3200*3;
-            CANMessageGenerate();
-            NowPos = DOWN;
-        } else if (NowPos == UP && TarPos == MID) {
-            Emm42Motor_Dir = 0x02;//0表示往下
-            Emm42Motor_Pos = 1600*3;
-            CANMessageGenerate();
-            NowPos = MID;
-        } else if (NowPos == DOWN && TarPos == UP) {
-            Emm42Motor_Dir = 0x12;//1表示往上
-            Emm42Motor_Pos = 3200*3;
-            CANMessageGenerate();
-            NowPos = UP;
-        } else if (NowPos == DOWN && TarPos == MID) {
-            Emm42Motor_Dir = 0x12;//1表示往上
-            Emm42Motor_Pos = 1600*3;
-            CANMessageGenerate();
-            NowPos = MID;
-        } else if (NowPos == MID && TarPos == UP) {
-            Emm42Motor_Dir = 0x12;//1表示往上
-            Emm42Motor_Pos = 1600*3;
-            CANMessageGenerate();
-            NowPos = UP;
-        } else if (NowPos == MID && TarPos == DOWN) {
-            Emm42Motor_Dir = 0x02;//1表示往上
-            Emm42Motor_Pos = 1600*3;
-            CANMessageGenerate();
-            NowPos = DOWN;
-        }
-    }*/
+    NowPos = (float ) (RxMessage[1] << 24u | RxMessage[2] << 16u | RxMessage[3] << 8u | RxMessage[4]) * 360.0f /
+             65536.0f / reductionRatio;
+
+    CANMessageGenerate();
+}
+
+void SteppingMotor::MoveTo() {
+
     if (stopFlag) {
-        Emm42Motor_Pos = 0;
-        CANMessageGenerate();
+        Pulse = 0;
+
     } else {
-        if (NowPos == UP && TarPos == DOWN) {
-            Emm42Motor_Dir = 0x02;//0表示往下，2为速度值，其后还有0xFF,最大为4FF
-            Emm42Motor_Pos = 3200 * 26;
-            CANMessageGenerate();
-            NowPos = DOWN;
-        } else if (NowPos == DOWN && TarPos == UP) {
-            Emm42Motor_Dir = 0x12;//0表示往下
-            Emm42Motor_Pos = 3200 * 26;
-            CANMessageGenerate();
-            NowPos = UP;
+        if (TarPos >= Position) {
+            Direction = 0x11;
+        } else {
+            Direction = 0x01;
         }
+        Pulse = (uint32_t) (abs(TarPos - Position) / 2.0f / PI * 200 * 16 * reductionRatio);
     }
+    TxMessage[0] = 0xFD;
+    TxMessage[1] = Direction;
+    TxMessage[2] = 0xFF;
+    TxMessage[3] = 0x00;
+    TxMessage[4] = Pulse >> 16u;
+    TxMessage[5] = Pulse >> 8u;
+    TxMessage[6] = Pulse;
+    TxMessage[7] = 0x6B;
+    CANMessageGenerate();
 }
 
-void Emm42Motor::SetTargetPosition(uint8_t pos) {
-   stopFlag = false;
-   TarPos = pos;
-}
-
-void Emm42Motor::SetTargetSpeed(float _speed) {
-   stopFlag = false;
-   if(_speed > 0.3){
-       Emm42Motor_Dir = 0x01;
-       TarSpeed = 31;
-   } else if(_speed < -0.3){
-       Emm42Motor_Dir = 0x00;
-       TarSpeed = 30;
-   }else{
-       Emm42Motor_Dir = 0x00;
-       TarSpeed = 0;
-   }
-   if(TarSpeed == NowSpeed){
-       SendFlag = false;
-   }else{
-       SendFlag = true;
-       NowSpeed = TarSpeed;
-   }
-
-}
-
-
-
-
-Emm42Motor::~Emm42Motor() = default;
-
-/*4310托盘电机类------------------------------------------------------------------*/
-Motor_4010_TRAY::Motor_4010_TRAY(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(commuInit),
-                                                                                     Motor(motorInit, this) {
-
-}
-
-void Motor_4010_TRAY::SetTargetPos(uint8_t _targetAngle) {
+void SteppingMotor::SetTargetPosition(float pos) {
     stopFlag = false;
-    targetPos = _targetAngle;
+    TarPos = pos;
 }
 
-void Motor_4010_TRAY::Handle() {
-    if (stopFlag) {
-        TxSpeed = 0;
-    } else {
-        TxSpeed = 300;
-        if (targetPos == RED) {
-            TxAngle = 2000;
-            if (nowPos == GREEN) {
-                TxDir = 0;
-            } else if (nowPos == BLUE) {
-                TxDir = 1;
-            }
-            nowPos = RED;
-        } else if (targetPos == BLUE) {
-            TxAngle = 14000;
-            if (nowPos == RED) {
-                TxDir = 0;
-            } else if (nowPos == GREEN) {
-                TxDir = 1;
-            }
-            nowPos = BLUE;
-        } else if (targetPos == GREEN) {
-            TxAngle = 26000;
-            if (nowPos == RED) {
-                TxDir = 1;
-            } else if (nowPos == BLUE) {
-                TxDir = 0;
-            }
-            nowPos = GREEN;
-        }
-        CANMessageGenerate();
-    }
-}
-
-void Motor_4010_TRAY::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
-
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = 0xA6;
-        canQueue.Data[canQueue.rear].message[1] = TxDir;
-        canQueue.Data[canQueue.rear].message[2] = TxSpeed;
-        canQueue.Data[canQueue.rear].message[3] = TxSpeed >> 8u;
-        canQueue.Data[canQueue.rear].message[4] = TxAngle;
-        canQueue.Data[canQueue.rear].message[5] = TxAngle >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = 0;
-        canQueue.Data[canQueue.rear].message[7] = 0;
-
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    }else{
-        canQueue.rear = 0;
-        canQueue.front = 0;
-    }
-}
-
-Motor_4010_TRAY::~Motor_4010_TRAY() = default;
+SteppingMotor::~SteppingMotor() = default;

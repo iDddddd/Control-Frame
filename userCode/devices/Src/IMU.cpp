@@ -318,9 +318,9 @@ void IMU::offset() {
 void IMU::data_adjust(float accel[3], float _accel[3]) {
     //  accel[0] = C1 * _accel[0] + C2 * _accel[1] + C3 * _accel[2] + Cx - rawData.accel_offset[0];
     //  accel[1] = C4 * _accel[0] + C5 * _accel[1] + C6 * _accel[2] + Cy - rawData.accel_offset[1];
-    accel[0] = _accel[0] - rawData.accel_offset[0];
-    accel[1] = _accel[1] - rawData.accel_offset[1];
-    accel[2] = _accel[2];
+    accel[0] = -(_accel[0] - rawData.accel_offset[0]);
+    accel[1] = -(_accel[1] - rawData.accel_offset[1]);
+    accel[2] = -_accel[2];
 }
 
 void IMU::velocityVerify() {

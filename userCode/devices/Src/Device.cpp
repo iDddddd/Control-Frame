@@ -5,7 +5,7 @@
 #include "RemoteControl.h"
 #include "Motor.h"
 #include "IMU.h"
-#include "ARMMotor.h"
+#include "ArmMotor.h"
 #include "Buzzer.h"
 #include "LED.h"
 #include "ControlTask.h"
@@ -109,9 +109,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         bsp_ADC_vccMoni();
 
         static uint32_t cnt = 0;
-        static uint32_t cnt2 = 0;
+      //  static uint32_t cnt2 = 0;
         cnt++;
-        cnt2++;
+       // cnt2++;
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
@@ -121,7 +121,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         KalmanFilter();//目前卡尔曼滤波有问题
         ARMHandle();
         Motor::MotorsHandle();//电机数据处理
-        CAN::CANPackageSend();//CAN发送
 
         /**只需关注该部分代码**/
 
@@ -129,10 +128,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
             cnt = 0;
         }
-        if (cnt2 > 1000){
+  /*      if (cnt2 > 1000){
             //autoImpulse();
             cnt2 = 0;
-        }
+        }*/
 
     }
     if (htim == &htim6) {//4ms
@@ -237,7 +236,6 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim6);//4ms
     HAL_TIM_Base_Start_IT(&htim7);//1ms
     CAN::CANInit();//CAN初始化
-    Motor_4310::Init();//电机初始化(大部分电机不需初始化）
     IMU::imu.Init();//IMU初始化
   //  bsp_BuzzerOn(1000);
     init_Flag = 1;

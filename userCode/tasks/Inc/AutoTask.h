@@ -22,8 +22,8 @@ void Move_VelTask();
 extern void AutoChassisStop();//Realized in ChassisTask
 extern void ChassisDistanceSet(float x, float y, float o);//Realized in ChassisTask
 extern void ChassisVelocitySet(float x_vel, float y_vel, float w_vel);//Realized in ChassisTask
-extern void AutoArmSet(float armzPos,float arm1Pos,float arm2Pos);//Realized in ArmTask
-extern void AutoTraySet(uint8_t trayflag);//Realized in ArmTask
+extern void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos);
+//extern void AutoTraySet(uint8_t trayflag);//Realized in ArmTask
 extern void AutoClawSet(uint8_t clawflag);//Realized in ServoTask
 
 #endif //RM_FRAME_C_AUTOTASK_H
