@@ -3,10 +3,11 @@
 //
 #include "ChassisTask.h"
 #include "IMU.h"
-
+#include "KF.h"
 constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
+float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y = 0.0;
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
         .kp = 0.45f,
@@ -303,7 +304,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[2] = sqrt(A * A + D * D);//左后轮
     ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
-/*修正角度    
+/*修正角度*/    
     if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
         ClassisSpeed[0] = -ClassisSpeed[0];
         RFRAngle = (RFRAngle > 0) ? (RFRAngle - 180) : (RFRAngle + 180);
@@ -319,7 +320,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     if(abs(int(RBRAngle - RBR.nowAngle) % 360) >= 90) {
         ClassisSpeed[3] = -ClassisSpeed[3];
         RBRAngle = (RBRAngle > 0) ? (RBRAngle - 180) : (RBRAngle + 180);
-    }*/
+    }
 
 
     //设置底盘电机角度
@@ -335,14 +336,14 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     CBR.SetTargetSpeed(ClassisSpeed[3]);
 
     //注：编码器的速度以及遥控器输入的控制速度均为°/s，用m/s时可能需要改pid参数
-    CFR.vx = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
-    CFR.vy = CFR.state.speed * cos(RFR.nowAngle/180*PI);
-    CFL.vx = CFL.state.speed * sin(RFL.nowAngle/180*PI);
-    CFL.vy = CFL.state.speed * cos(RFL.nowAngle/180*PI);
-    CBL.vx = CBL.state.speed * sin(RBL.nowAngle/180*PI);
-    CBL.vy = CBL.state.speed * cos(RBL.nowAngle/180*PI);
-    CBR.vx = CBR.state.speed * sin(RBR.nowAngle/180*PI);
-    CBR.vy = CBR.state.speed * cos(RBR.nowAngle/180*PI);
+    CFR.vx = v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
+    CFR.vy = v1y = CFR.state.speed * cos(RFR.nowAngle/180*PI);
+    CFL.vx = v2x = CFL.state.speed * sin(RFL.nowAngle/180*PI);
+    CFL.vy = v2y = CFL.state.speed * cos(RFL.nowAngle/180*PI);
+    CBL.vx = v3x = CBL.state.speed * sin(RBL.nowAngle/180*PI);
+    CBL.vy = v3y = CBL.state.speed * cos(RBL.nowAngle/180*PI);
+    CBR.vx = v4x = CBR.state.speed * sin(RBR.nowAngle/180*PI);
+    CBR.vy = v4y = CBR.state.speed * cos(RBR.nowAngle/180*PI);
     CFR.target_vx = CFR.targetSpeed * sin(RFRAngle/180*PI);
     CFR.target_vy = CFR.targetSpeed * cos(RFRAngle/180*PI);
     CFL.target_vx = CFL.targetSpeed * sin(RFLAngle/180*PI);
@@ -351,5 +352,6 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     CBL.target_vy = CBL.targetSpeed * cos(RBLAngle/180*PI);
     CBR.target_vx = CBR.targetSpeed * sin(RBRAngle/180*PI);
     CBR.target_vy = CBR.targetSpeed * cos(RBRAngle/180*PI);
+
 }
 

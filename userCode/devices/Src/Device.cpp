@@ -9,6 +9,7 @@
 #include "Buzzer.h"
 #include "LED.h"
 #include "ControlTask.h"
+#include "KF.h"
 volatile float vccMoni = 0;
 volatile float vccBat = 0;
 
@@ -114,6 +115,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
+        IMU::imu.Handle();
+        convert8_3();//8估3
+        get_encoder_mileage();//底盘里程更新
+        KalmanFilter();//目前卡尔曼滤波有问题
         ARMHandle();
         Motor::MotorsHandle();//电机数据处理
         CAN::CANPackageSend();//CAN发送
@@ -135,7 +140,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     }
     if (htim == &htim7) {
-        IMU::imu.Handle();
+        
+
         CtrlHandle();
     }
     

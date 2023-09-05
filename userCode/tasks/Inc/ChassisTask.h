@@ -10,7 +10,7 @@
 #include "AutoMove.h"
 #include "ARMMotor.h"
 
-#define WHEEL_DIAMETER             0.052f//4010直径 m
+#define WHEEL_DIAMETER             0.051f//4010直径 m
 #define REDUCTION_RATIO 19.0f
 #define TRACK_WIDTH            0.40f //轮距
 #define WHEEL_BASE             0.38f //轴距
