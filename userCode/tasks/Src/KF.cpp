@@ -46,7 +46,7 @@ void convert8_3() {
     //速度修正
     encoder_v3.data[0][0] = encoder_v3.data[0][0] * WHEEL_DIAMETER * PI / 360;
     encoder_v3.data[1][0] = encoder_v3.data[1][0] * WHEEL_DIAMETER * PI / 360;
-    encoder_v3.data[2][0] = encoder_v3.data[2][0] * WHEEL_DIAMETER * PI / 360;//我也不知道为什么是360；理论上应该是180的
+    encoder_v3.data[2][0] = encoder_v3.data[2][0] * WHEEL_DIAMETER * PI / 360;
     //观测量更新
     z.data[0][0] = encoder_v3.data[0][0];
     z.data[1][0] = encoder_v3.data[1][0];

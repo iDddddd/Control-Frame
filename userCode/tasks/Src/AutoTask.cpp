@@ -28,6 +28,6 @@ void TrayTask(){
     StateMachine::remove_function_from_state(TrayTask);
 }
 void ClawTask(){
-    AutoClawSet(ManiControl::mc_ctrl.ClawFlag);
+    ClawSet(ManiControl::mc_ctrl.ClawFlag);
     StateMachine::remove_function_from_state(ClawTask);
 }

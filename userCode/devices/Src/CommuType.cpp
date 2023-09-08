@@ -42,7 +42,6 @@ void CAN::CANInit() {
     HAL_CAN_ConfigFilter(&hcan1, &canFilterTypeDef);
     HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
 
-    CANPackageSend();
 }
 
 /**
@@ -86,7 +85,7 @@ void CAN::CANPackageSend() {
                     HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
                // }
         }
-        memcpy(canQueue.Data[canQueue.front].message, 0 , sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
+        memset(canQueue.Data[canQueue.front].message, 0 , sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
         canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
 }
@@ -218,7 +217,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-    CAN::CANPackageSend();
+    //CAN::CANPackageSend();
 }
 
 void USART1_IRQHandler(){

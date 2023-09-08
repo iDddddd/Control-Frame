@@ -115,12 +115,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
-        IMU::imu.Handle();
-        convert8_3();//8估3
-        get_encoder_mileage();//底盘里程更新
-        KalmanFilter();//目前卡尔曼滤波有问题
+
         ARMHandle();
         Motor::MotorsHandle();//电机数据处理
+        CAN::CANPackageSend();
 
         /**只需关注该部分代码**/
 
@@ -128,7 +126,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
             cnt = 0;
         }
-  /*      if (cnt2 > 1000){
+  /*if (cnt2 > 1000){
             //autoImpulse();
             cnt2 = 0;
         }*/
@@ -139,14 +137,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     }
     if (htim == &htim7) {
-        
-
+        IMU::imu.Handle();
+        convert8_3();//8估3
+        get_encoder_mileage();//底盘里程更新
+        KalmanFilter();//目前卡尔曼滤波有问题
         CtrlHandle();
     }
     
 }
 
-volatile uint8_t key_raw_state = 1;//
+volatile uint8_t key_raw_state = 1;
 uint32_t key_last_stamp;
 
 

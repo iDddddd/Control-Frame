@@ -79,8 +79,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define OLED_BUTTON_Pin GPIO_PIN_1
-#define OLED_BUTTON_GPIO_Port GPIOF
+#define DIR_Pin GPIO_PIN_0
+#define DIR_GPIO_Port GPIOF
+#define STEP_Pin GPIO_PIN_1
+#define STEP_GPIO_Port GPIOF
 #define IST8310_RSTN_Pin GPIO_PIN_6
 #define IST8310_RSTN_GPIO_Port GPIOG
 #define LED_R_Pin GPIO_PIN_12

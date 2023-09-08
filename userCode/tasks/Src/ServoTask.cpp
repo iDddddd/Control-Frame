@@ -5,47 +5,4 @@
 #include "ServoTask.h"
 
 
-SERVO_INIT_T ArmServo = {
-        .servoID = SERVO_ID_1,
-        .firstAngle = 900,
-        .angleLimit_Min = 0,
-        .angleLimit_Max = 2200,
-};
-
-SERVO_INIT_T TrayServo = {
-        .servoID = SERVO_ID_2,
-        .firstAngle = 930,
-        .angleLimit_Min = 800,
-        .angleLimit_Max = 2200,
-};
-
-Servo armServo(&ArmServo);
-Servo trayServo(&TrayServo);
-/*void AutoTraySet(uint8_t trayflag){
-    if(trayflag == 1){
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,
-                              930);
-    }else{
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,
-                              900);
-    }
-    uint8_t flag = 0x01;
-    HAL_UART_Transmit_IT(&huart6,&flag,1);
-}*/
-bool clawFlag = false;
-void AutoClawSet(uint8_t clawflag){
-    if(clawflag == 1 && !clawFlag){
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                              1750);
-        clawFlag = true;
-        CompleteTask();
-    }else if(clawflag == 0 && clawFlag){
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                              1200);
-        clawFlag = false;
-        CompleteTask();
-    }
-
-}
-
 
