@@ -11,42 +11,70 @@
 #include "Motor.h"
 #include "CommuType.h"
 
-#define DOWN  0
-#define MID  1
-#define UP  2
 
-
-#define RED  0
-#define BLUE 1
-#define GREEN 2
-
-
-/*步进电机类------------------------------------------------------------------*/
-class SteppingMotor : public Motor, public CAN {
+/*步进电机V4类------------------------------------------------------------------*/
+class SteppingMotor_v4 : public Motor, public CAN {
 public:
+    uint8_t RxMessage[8]{0};
 
-    SteppingMotor(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
-
-    uint8_t RxMessage[6]{0};
-    uint8_t TxMessage[8]{0};
-    bool SendFlag = false;
     float NowPos = 0;
     float TarPos = 0;
-    uint8_t Direction{};
-    float Position{};
-    uint16_t Speed{};
-    uint32_t Pulse{};
 
-    ~SteppingMotor();
+    SteppingMotor_v4(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
 
-    void CANMessageGenerate() override;
+    ~SteppingMotor_v4();
 
     void Handle() override;
+
     void MoveTo();
+
     void SetTargetPosition(float pos);
 
 private:
-    float targetPosition{}; //单位mm
+    uint8_t Direction{};
+    float Position{};
+    uint16_t Speed{1500};
+    uint32_t Pulse{0};
+
+    bool SendFlag = false;
+    uint8_t TxMessage[8]{0};
+    uint8_t TxMessageDLC{};
+
+    int32_t nowPos = 0;
+
+    void CANMessageGenerate() override;
+};
+
+/*步进电机V5类------------------------------------------------------------------*/
+class SteppingMotor_v5 : public Motor, public CAN {
+public:
+    uint8_t RxMessage[8]{0};
+
+    float NowPos = 0;
+    float TarPos = 0;
+
+    SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+
+    void Handle() override;
+
+    void MoveTo();
+
+    void SetTargetPosition(float tarpos);
+
+    ~SteppingMotor_v5();
+
+private:
+    uint8_t Direction{};
+    uint16_t Speed{1500};
+    uint32_t Pulse{};
+
+    bool SendFlag = false;
+    uint8_t TxMessage[16]{0};
+    uint8_t TxMessageDLC{};
+
+    int32_t nowPos = 0;
+
+    void CANMessageGenerate() override;
 
 };
 

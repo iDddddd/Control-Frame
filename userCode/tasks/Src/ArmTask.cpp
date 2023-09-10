@@ -27,34 +27,34 @@ MOTOR_INIT_t Joint4MotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         .ctrlType = DIRECT,
-        .reductionRatio = 4.0f
+        .reductionRatio = 20.0f
 };
 MOTOR_INIT_t Joint5MotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         .ctrlType = DIRECT,
-        .reductionRatio = 4.0f
+        .reductionRatio = 20.0f
 };
 MOTOR_INIT_t ClawMotorInit = {
         .speedPIDp = nullptr,
         .anglePIDp = nullptr,
         .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
+        .reductionRatio = 20.0f
 };
 
 
 COMMU_INIT_t Joint1CommuInit = {
-        ._id = 0x01,
+        ._id = 0x0100,
         .canType = can2
 
 };
 COMMU_INIT_t Joint2CommuInit = {
-        ._id = 0x02,
+        ._id = 0x0200,
         .canType = can2
 
 };
 COMMU_INIT_t Joint3CommuInit = {
-        ._id = 0x03,
+        ._id = 0x0300,
         .canType = can2
 
 };
@@ -68,11 +68,11 @@ COMMU_INIT_t Joint5CommuInit = {
         .canType = can2
 
 };
-SteppingMotor Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
-SteppingMotor Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
-SteppingMotor Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
-SteppingMotor Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
-SteppingMotor Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
+SteppingMotor_v5 Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
+SteppingMotor_v5 Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
+SteppingMotor_v5 Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
+SteppingMotor_v4 Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
+SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
 StepperMotor ClawMotor(&ClawMotorInit);
 
 bool ArmStopFlag = true;
@@ -89,7 +89,7 @@ void ArmStop() {
     ClawMotor.Stop();
 }
 
-void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos){
+void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos) {
     ArmStopFlag = false;
     Joint1Motor.SetTargetPosition(Joint1Pos);
     Joint2Motor.SetTargetPosition(Joint2Pos);
@@ -100,18 +100,17 @@ void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, 
 
 }
 
-void ClawSet(uint8_t clawflag){
-    if(clawflag == 1){
+void ClawSet(uint8_t clawflag) {
+    if (clawflag == 1) {
         ClawMotor.Grab(true);
-    }
-    else if(clawflag == 0){
+    } else if (clawflag == 0) {
         ClawMotor.Grab(false);
     }
 }
 
 void ARMHandle() {
     if (!ArmStopFlag) {
-        if(ArmMoveFlag){
+        if (ArmMoveFlag) {
             Joint1Motor.MoveTo();
             Joint2Motor.MoveTo();
             Joint3Motor.MoveTo();

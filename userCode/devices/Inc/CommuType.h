@@ -12,7 +12,7 @@
 #define can1 1
 #define can2 2
 
-#define MAX_MESSAGE_COUNT 16
+#define MAX_MESSAGE_COUNT 20
 #define RX_SIZE 20
 /*结构体定义--------------------------------------------------------------*/
 
@@ -22,8 +22,9 @@ typedef struct {
 } COMMU_INIT_t;
 typedef struct {
     uint32_t ID;
+    uint8_t DLC;
     uint8_t canType;
-    uint8_t message[8];
+    uint8_t message[16];
 }DATA_t;
 typedef struct {
     DATA_t Data[MAX_MESSAGE_COUNT];
@@ -40,6 +41,7 @@ class CAN {
 public:
     uint32_t can_ID;//CAN ID
     static TX_QUEUE_t canQueue;//CAN发送队列
+
     static void CANInit();//CAN初始化函数,需在main函数中调用，无需过多关注
 
     explicit CAN(COMMU_INIT_t *_init);//默认构造函数，用于设置canID和canType
@@ -48,7 +50,7 @@ public:
 
     static void CANPackageSend();//can消息包发送任务
 
-    static void Rx_Handle(CAN_HandleTypeDef *hcan);//can中断处理函数，用于电机返回数据的接受
+    static void Rx_Handle(CAN_HandleTypeDef *hcan);
 
     virtual void CANMessageGenerate() = 0;//can消息包生成函数,需在每个电机类中实现
 

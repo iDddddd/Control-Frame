@@ -23,7 +23,7 @@ Motor_4315::~Motor_4315() = default;
  * @brief 4315电机消息包获取任务
  */
 void Motor_4315::RS485MessageGenerate() {
-    int motorIndex = rs485_ID;
+    uint32_t motorIndex = rs485_ID;
 
     rsmessage[motorIndex][0] = 0x3E;//协议头
     rsmessage[motorIndex][1] = 0x00;//包序号
@@ -45,7 +45,7 @@ void Motor_4315::RS485MessageGenerate() {
  * @brief 4315电机类的执行处理函数
  */
 void Motor_4315::Handle() {
-    nowAngle = (RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u) ) / 16384.0f * 360.0f;
+    nowAngle = (float )(RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u) ) / 16384.0f * 360.0f;
 
     AngleCalc();
     if (stopFlag == 1) {
