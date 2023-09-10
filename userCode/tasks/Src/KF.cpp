@@ -4,7 +4,6 @@ float prev_encoder_theta = 0.0;
 float encoder_theta = 0.0;
 float encoder_x = 0.0;
 float encoder_y = 0.0;//编码器里程估计值
-
 extern float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y;//单轮数据
 
 float T83[24] = { 0.25,0,0.25,0,0.25,0,0.25,0,
@@ -25,6 +24,7 @@ const Matrix trans8_3(T83, 3, 8);
 const Matrix F(F55, 5, 5);
 Matrix z(3, 1);//观测量，初始化为全0
 Matrix state(5, 1);//状态量，初始化为全0，分别为：x、y、vx、vy、theta
+Matrix IMUstate(5,1);
 Matrix P(I55, 5, 5);
 Matrix K(5, 3);
 const Matrix Q(I55, 5, 5);
@@ -46,7 +46,7 @@ void convert8_3() {
     //速度修正
     encoder_v3.data[0][0] = encoder_v3.data[0][0] * WHEEL_DIAMETER * PI / 360;
     encoder_v3.data[1][0] = encoder_v3.data[1][0] * WHEEL_DIAMETER * PI / 360;
-    encoder_v3.data[2][0] = encoder_v3.data[2][0] * WHEEL_DIAMETER * PI / 360;
+    encoder_v3.data[2][0] = encoder_v3.data[2][0] * WHEEL_DIAMETER * PI / 360;//我也不知道为什么是360；理论上应该是180的
     //观测量更新
     z.data[0][0] = encoder_v3.data[0][0];
     z.data[1][0] = encoder_v3.data[1][0];
@@ -64,8 +64,29 @@ void get_encoder_mileage(){
 
 void KalmanFilter() {
     //IMU数据读入
-    float u3[3] = { IMU::imu.position._accel[0],IMU::imu.position._accel[0],IMU::imu.attitude.yaw_v };
+    float u3[3] = { IMU::imu.position._accel[0],IMU::imu.position._accel[1],IMU::imu.attitude.yaw_v };
     Matrix u(u3, 3, 1);
+    //滤波，如果加速度太小，则视为加速度计的漂移
+    if (abs(u3[0]) <= 0.0055) {
+        IMUstate.data[2][0] = 0.0;
+        state.data[2][0] = 0.0;
+        u3[0] = 0.0;
+    }
+    if (abs(u3[1]) <= 0.0055) {
+        IMUstate.data[3][0] = 0.0;
+        state.data[3][0] = 0.0;
+        u3[1] = 0.0;
+    }
+    //纯IMU预测
+    float IMUyaw = IMUstate.data[4][0];
+    float IMU_B53[15] = { dT * dT * cos(IMUyaw) / 2,dT * dT * sin(IMUyaw) / 2,0,
+        -dT * dT * sin(IMUyaw) / 2,dT * dT * cos(IMUyaw) / 2,0,
+        dT * cos(IMUyaw),dT * sin(IMUyaw),0,
+        -dT * sin(IMUyaw),dT * cos(IMUyaw),0,
+        0,0,dT };
+    Matrix IMU_B(IMU_B53,5,3);
+    IMUstate = F * IMUstate + IMU_B * u * 0.5;
+    
     //预测
     float theta = state.data[4][0];
     float B53[15] = { dT * dT * cos(theta) / 2,dT * dT * sin(theta) / 2,0,
@@ -74,7 +95,7 @@ void KalmanFilter() {
         -dT * sin(theta),dT * cos(theta),0,
         0,0,dT };
     Matrix B(B53, 5, 3);
-    state = F * state + B * (u + prev_u) * 0.5;
+    state = F * state + B * u * 0.5;
     //预测P
     P = F * P * F.transpose() + Q;
 
