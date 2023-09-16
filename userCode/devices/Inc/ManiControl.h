@@ -64,7 +64,7 @@ void CompleteTask();//完成任务反馈函数,一般为向上位机发送数据
 uint8_t LRC_calc(uint8_t *data, uint8_t len);//LRC校验函数
 
 
-//以下为直接调用UART6中断函数，在实际使用中发现会跳过DMA中断处理函数，导致DMA数据发送中断，目前不建议使用，若无DMA发送需求可使用，降低单片机功耗
+//以下为直接调用UART6中断函数
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -14,6 +14,7 @@
 
 #define MAX_MESSAGE_COUNT 20
 #define RX_SIZE 20
+#define MOTOR_RX_SIZE 15u
 /*结构体定义--------------------------------------------------------------*/
 
 typedef struct {

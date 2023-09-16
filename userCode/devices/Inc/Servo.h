@@ -7,12 +7,12 @@
 
 #include "Device.h"
 
-
-
-/*结构体定义--------------------------------------------------------------*/
 /*
+
+*//*结构体定义--------------------------------------------------------------*//*
+*//*
  * 舵机初始化结构体
- */
+ *//*
 typedef struct {
     uint32_t servoID;
     float firstAngle, angleLimit_Min, angleLimit_Max;//only valid for POSITION_180 servo
@@ -23,7 +23,7 @@ typedef struct {
     uint32_t timChannel;
 } SERVO_HANDLE_T;
 
-/*类型定义----------------------------------------------------------------*/
+*//*类型定义----------------------------------------------------------------*//*
 class Servo : public Device {
     static uint32_t servo_IDs;
 
@@ -45,7 +45,7 @@ public:
     void Handle() override;
 
     void SetTargetAngle(float _targetAngle);
-};
+};*/
 /*结构体成员取值定义组------------------------------------------------------*/
 
 /*

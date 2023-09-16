@@ -119,6 +119,7 @@ void SteppingMotor_v5::CANMessageGenerate() {;
 }
 
 void SteppingMotor_v5::Handle() {
+/*
     TxMessage[0] = 0x36;
     TxMessage[1] = 0x6B;
     TxMessageDLC = 0x02;
@@ -128,8 +129,36 @@ void SteppingMotor_v5::Handle() {
         nowPos = -nowPos;
     }
     NowPos = ((float) nowPos * 2.0f * PI) / 65536.0f / reductionRatio;
+*/
+    if (SendFlag) {
+        if (stopFlag) {
+            Pulse = 0;
+        } else {
 
-    CANMessageGenerate();
+            if (TarPos >= 0) {
+                Direction = 0x01;
+            } else {
+                Direction = 0x00;
+            }
+            Pulse = (uint32_t) (abs(TarPos) / 2.0f / PI * 200.0f * 16.0f * reductionRatio);
+            TxMessageDLC = 0x0D;
+            TxMessage[0] = 0xFD;
+            TxMessage[1] = Direction;
+            TxMessage[2] = 0x05;
+            TxMessage[3] = 0xDC;
+            TxMessage[4] = 0xC8;
+            TxMessage[5] = Pulse >> 24u;
+            TxMessage[6] = Pulse >> 16u;
+            TxMessage[7] = Pulse >> 8u;
+            TxMessage[8] = 0xFD;
+            TxMessage[9] = Pulse;
+            TxMessage[10] = 0x01;
+            TxMessage[11] = 0x00;
+            TxMessage[12] = 0x6B;
+            CANMessageGenerate();
+            SendFlag = false;
+        }
+    }
 }
 
 void SteppingMotor_v5::MoveTo() {
@@ -163,6 +192,7 @@ void SteppingMotor_v5::MoveTo() {
 
 void SteppingMotor_v5::SetTargetPosition(float tarpos) {
     stopFlag = false;
+    SendFlag = true;
     TarPos = tarpos;
 }
 

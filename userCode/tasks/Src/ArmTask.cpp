@@ -71,8 +71,8 @@ COMMU_INIT_t Joint5CommuInit = {
 SteppingMotor_v5 Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
 SteppingMotor_v5 Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
 SteppingMotor_v5 Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
-SteppingMotor_v4 Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
-SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
+//SteppingMotor_v4 Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
+//SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
 StepperMotor ClawMotor(&ClawMotorInit);
 
 bool ArmStopFlag = true;
@@ -84,8 +84,8 @@ void ArmStop() {
     Joint1Motor.Stop();
     Joint2Motor.Stop();
     Joint3Motor.Stop();
-    Joint4Motor.Stop();
-    Joint5Motor.Stop();
+   // Joint4Motor.Stop();
+   // Joint5Motor.Stop();
     ClawMotor.Stop();
 }
 
@@ -94,8 +94,8 @@ void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, 
     Joint1Motor.SetTargetPosition(Joint1Pos);
     Joint2Motor.SetTargetPosition(Joint2Pos);
     Joint3Motor.SetTargetPosition(Joint3Pos);
-    Joint4Motor.SetTargetPosition(Joint4Pos);
-    Joint5Motor.SetTargetPosition(Joint5Pos);
+   // Joint4Motor.SetTargetPosition(Joint4Pos);
+   // Joint5Motor.SetTargetPosition(Joint5Pos);
     ArmMoveFlag = true;
 
 }
@@ -114,8 +114,8 @@ void ARMHandle() {
             Joint1Motor.MoveTo();
             Joint2Motor.MoveTo();
             Joint3Motor.MoveTo();
-            Joint4Motor.MoveTo();
-            Joint5Motor.MoveTo();
+          //  Joint4Motor.MoveTo();
+         //   Joint5Motor.MoveTo();
             ArmMoveFlag = false;
         }
     }

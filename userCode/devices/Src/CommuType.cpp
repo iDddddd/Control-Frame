@@ -148,7 +148,7 @@ RS485::~RS485() = default;
 void RS485::RS485PackageSend() {
     static uint8_t rsmotorIndex = 0;
     rsmotorIndex %= 4;
-    HAL_UART_Transmit_DMA(&huart1, rsmessage[rsmotorIndex], 11);
+    HAL_UART_Transmit_IT(&huart1, rsmessage[rsmotorIndex], 11);
 
     rsmotorIndex++;
 }
@@ -204,12 +204,14 @@ void RS485::Rx_Handle() {
             __HAL_DMA_ENABLE(&hdma_usart1_rx);
 
             //将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
-            memcpy(dict_RS485[rs485_rx_buff[0][2] - 0x01], rs485_rx_buff[0], rx_len);
+            if (rx_len == MOTOR_RX_SIZE) {
+                memcpy(dict_RS485[rs485_rx_buff[0][2] - 0x01], rs485_rx_buff[0], rx_len);
+            }
         } else {
             /* Current memory buffer used is Memory 1 */
             //失效DMA
             __HAL_DMA_DISABLE(&hdma_usart1_rx);
-
+0
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
             rx_len = RX_SIZE - hdma_usart1_rx.Instance->NDTR;
 
@@ -221,7 +223,9 @@ void RS485::Rx_Handle() {
 
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart1_rx);
-            memcpy(dict_RS485[rs485_rx_buff[1][2] - 0x01], rs485_rx_buff[1], rx_len);
+            if (rx_len == MOTOR_RX_SIZE) {
+                memcpy(dict_RS485[rs485_rx_buff[1][2] - 0x01], rs485_rx_buff[1], rx_len);
+            }
         }
     }
 }
@@ -236,14 +240,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-      CAN::CANPackageSend();
+     // CAN::CANPackageSend();
 }
+/*
 void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) {
       CAN::CANPackageSend();
 }
 void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan) {
       CAN::CANPackageSend();
-}
+}*/
 void USART1_IRQHandler() {
 
     RS485::Rx_Handle();

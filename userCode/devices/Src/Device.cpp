@@ -115,11 +115,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
-
-       // ARMHandle();
         Motor::MotorsHandle();//电机数据处理
+       // ARMHandle();
+
        // if(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)>0||HAL_CAN_GetTxMailboxesFreeLevel(&hcan2)>0) {
-            CAN::CANPackageSend();
+       CAN::CANPackageSend();
         //}
 
         /**只需关注该部分代码**/
@@ -127,6 +127,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         if (cnt > 20) {
             if (vccBat < 10)HAL_IWDG_Refresh(&hiwdg);
             cnt = 0;
+
         }
   /*if (cnt2 > 1000){
             //autoImpulse();
@@ -199,7 +200,6 @@ int main() {
     MX_GPIO_Init();
     MX_DMA_Init();
     MX_TIM5_Init();
-    MX_TIM1_Init();
     MX_TIM4_Init();
     MX_TIM6_Init();
     MX_TIM7_Init();
@@ -224,11 +224,6 @@ int main() {
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
 
-    HAL_TIM_Base_Start_IT(&htim1);//舵机
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                          1750);//初始化爪子
     //TODO adc校准？
     RemoteControl::init();//遥控器通讯初始化，使用UART3串口
     ManiControl::Init();//上位机通讯初始化，使用UART6串口

@@ -152,7 +152,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
 
 void CompleteTask() {
     uint8_t tx_message[1] = {0x01};
-    HAL_UART_Transmit(&huart6, tx_message, 1, 3);
+    HAL_UART_Transmit_IT(&huart6, tx_message, 1);
 }
 
 uint8_t LRC_calc(uint8_t *data, uint8_t len) {
@@ -166,6 +166,7 @@ uint8_t LRC_calc(uint8_t *data, uint8_t len) {
 void USART6_IRQHandler() {
 
     ManiControl::IT_Handle();
-    //   HAL_UART_IRQHandler(&huart6);
+
+    HAL_UART_IRQHandler(&huart6);
 }
 
