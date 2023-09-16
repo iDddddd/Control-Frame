@@ -8,6 +8,7 @@
 #include "IMU.h"
 #include "Device.h"
 #include "ManiControl.h"
+#include "KF.h"
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {

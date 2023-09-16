@@ -313,6 +313,9 @@ void IMU::offset() {
     rawData.accel_offset[0] /= 1000;
     rawData.accel_offset[1] /= 1000;
     rawData.accel_offset[2] /= 1000;
+    
+    
+    
 }
 
 void IMU::data_adjust(float accel[3], float _accel[3]) {

@@ -2,6 +2,7 @@
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "cstring": "cpp",
-        "tim.h": "c"
+        "tim.h": "c",
+        "cmath": "cpp"
     }
 }

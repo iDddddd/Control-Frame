@@ -61,7 +61,7 @@ void get_encoder_mileage(){
     encoder_y += (-encoder_v3.data[0][0] * sin(encoder_theta) + encoder_v3.data[1][0] * cos(encoder_theta) - prev_encoder_v3.data[0][0] * sin(prev_encoder_theta) + prev_encoder_v3.data[1][0] * cos(prev_encoder_theta)) / 2 * dT;
 }
 
-
+/**/
 void KalmanFilter() {
     //IMU数据读入
     float u3[3] = { IMU::imu.position._accel[0],IMU::imu.position._accel[1],IMU::imu.attitude.yaw_v };
@@ -85,7 +85,7 @@ void KalmanFilter() {
         -dT * sin(IMUyaw),dT * cos(IMUyaw),0,
         0,0,dT };
     Matrix IMU_B(IMU_B53,5,3);
-    IMUstate = F * IMUstate + IMU_B * u * 0.5;
+    IMUstate = F * IMUstate + IMU_B * u;
     
     //预测
     float theta = state.data[4][0];
@@ -95,7 +95,7 @@ void KalmanFilter() {
         -dT * sin(theta),dT * cos(theta),0,
         0,0,dT };
     Matrix B(B53, 5, 3);
-    state = F * state + B * u * 0.5;
+    state = F * state + B * u;
     //预测P
     P = F * P * F.transpose() + Q;
 
@@ -119,4 +119,58 @@ void KalmanFilter() {
 void set_mileage_zero() {
     encoder_theta = prev_encoder_theta = 0.0;
     encoder_x = encoder_y = 0.0;
+}
+
+
+void KalmanFilter2() {
+    //IMU数据读入
+    float u3[3] = { IMU::imu.position._accel[0],IMU::imu.position._accel[1],IMU::imu.attitude.yaw };
+    Matrix u(u3, 3, 1);
+    //滤波，如果加速度太小，则视为加速度计的漂移
+    if (abs(u3[0]) <= 0.0055) {
+        IMUstate.data[2][0] = 0.0;
+        state.data[2][0] = 0.0;
+        u3[0] = 0.0;
+    }
+    if (abs(u3[1]) <= 0.0055) {
+        IMUstate.data[3][0] = 0.0;
+        state.data[3][0] = 0.0;
+        u3[1] = 0.0;
+    }
+    //纯IMU预测
+    float IMUyaw = IMUstate.data[4][0];
+    float IMU_B53[15] = { dT * dT * cos(IMUyaw) / 2,dT * dT * sin(IMUyaw) / 2,0,
+        -dT * dT * sin(IMUyaw) / 2,dT * dT * cos(IMUyaw) / 2,0,
+        dT * cos(IMUyaw),dT * sin(IMUyaw),0,
+        -dT * sin(IMUyaw),dT * cos(IMUyaw),0,
+        0,0,1 };
+    Matrix IMU_B(IMU_B53,5,3);
+    IMUstate = F * IMUstate + IMU_B * u;
+    
+    //预测
+    float theta = state.data[4][0];
+    float B53[15] = { dT * dT * cos(theta) / 2,dT * dT * sin(theta) / 2,0,
+        -dT * dT * sin(theta) / 2,dT * dT * cos(theta) / 2,0,
+        dT * cos(theta),dT * sin(theta),0,
+        -dT * sin(theta),dT * cos(theta),0,
+        0,0,1 };
+    Matrix B(B53, 5, 3);
+    state = F * state + B * u;
+    //预测P
+    P = F * P * F.transpose() + Q;
+
+
+    //更新
+    float H35[15] = { 0,0,cos(theta),sin(theta),0,
+        0,0,-sin(theta),cos(theta),0,
+        0,0,0,0,1 };
+    Matrix H(H35, 3, 5);
+    //卡尔曼增益
+    K = P * H.transpose() * (H * P * H.transpose() + R).inverse();
+    //获取状态最优估计
+    state = state + K * (z - H * state);
+    //更新协方差矩阵
+    P = (I - K * H) * P;
+
+    prev_u = u;
 }

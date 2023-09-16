@@ -7,13 +7,18 @@
 Move_X X;
 Move_Y Y;
 Spin O;
-
+float tem_vx,tem_vy;
+extern float encoder_theta;
 
 void AutoMove::Handle() {
     if (!StopFlag) {
         vx = X.Handle(IMU::imu.position.displace[1]);
         vy = Y.Handle(IMU::imu.position.displace[0]);
         vo = O.Handle(IMU::imu.attitude.yaw);
+        tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
+        tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
+        vx = tem_vx;
+        vy = tem_vy;
     } else {
         AutoChassisStop();
     }
