@@ -8,13 +8,16 @@ Move_X X;
 Move_Y Y;
 Spin O;
 float tem_vx,tem_vy;
-extern float encoder_theta;
+extern float encoder_x, encoder_y, encoder_theta;
 
 void AutoMove::Handle() {
     if (!StopFlag) {
-        vx = X.Handle(IMU::imu.position.displace[1]);
-        vy = Y.Handle(IMU::imu.position.displace[0]);
-        vo = O.Handle(IMU::imu.attitude.yaw);
+        // vx = X.Handle(IMU::imu.position.displace[1]);
+        // vy = Y.Handle(IMU::imu.position.displace[0]);
+        // vo = O.Handle(IMU::imu.attitude.yaw);
+        vx = X.Handle(encoder_x);
+        vy = Y.Handle(encoder_y);
+        vo = O.Handle(encoder_theta);
         tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
         tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
         vx = tem_vx;
@@ -24,7 +27,7 @@ void AutoMove::Handle() {
     }
     if (X.FinishFlag && Y.FinishFlag && !SendFlag) {
         StopMove();
-        CompleteTask();
+        CompleteTask();//?
         SendFlag = true;
     }//完成后发送
 }
@@ -44,6 +47,7 @@ void AutoMove::StopMove() {
     X.Stop();
     Y.Stop();
     O.Stop();
+    WheelsSpeedCalc(0, 0, 0);//强行把底盘速度置0，不然编码器速度不会归零，目前不太清楚为什么
 }
 
 
@@ -56,6 +60,8 @@ Move_X::Move_X() {
 }
 
 void Move_X::Calc(float target) {
+    Para.a = 1.5;
+    Para.v_max = 2;
     stopFlag = false;
     FinishFlag = false;
     expectPos = 0;
@@ -113,6 +119,8 @@ Move_Y::Move_Y() {
 }
 
 void Move_Y::Calc(float target) {
+    Para.a = 1.5;
+    Para.v_max = 2;
     stopFlag = false;
     FinishFlag = false;
     expectPos = 0;

@@ -38,18 +38,20 @@ void CtrlHandle() {
                 break;
             case MID_POS://左侧二档
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-                    HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
-                   // ChassisDistanceSet(0, 0, PI / 2);
+                    // HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
+                    //                     RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
+                    ChassisDistanceSet(1, 0, 0);
+                    
                 } else if (RemoteControl::rcInfo.sRight == MID_POS) {
-                    HeadkeepSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
+                    ChassisDistanceSet(0, 1, 0);
                 }
+               
                 break;
             case DOWN_POS:
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-
+                    AutoSetVelocity();
                 }
+                
                 break;
             default:
                 break;

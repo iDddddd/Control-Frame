@@ -184,8 +184,8 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
 void AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
-    FBVelocity = autoMove.vx;
-    LRVelocity = autoMove.vy;
+    FBVelocity = autoMove.vy;
+    LRVelocity = autoMove.vx;
     RTVelocity = autoMove.vo;
 
 }
@@ -196,8 +196,8 @@ void ChassisDistanceSet(float x, float y, float o) {
 
 
 void ChassisVelocitySet(float x_vel, float y_vel, float w_vel) {
-    FBVelocity = x_vel;
-    LRVelocity = y_vel;
+    FBVelocity = y_vel;
+    LRVelocity = x_vel;
     RTVelocity = w_vel;
 }
 /**
@@ -213,8 +213,8 @@ void AutoChassisStop() {
     RBL.Stop();
     RBR.Stop();*/
     RFL.SetTargetAngle(0);
-    RFR.SetTargetAngle(90);
-    RBL.SetTargetAngle(90);
+    RFR.SetTargetAngle(0);
+    RBL.SetTargetAngle(0);
     RBR.SetTargetAngle(0);
     CFR.Stop();
     CFL.Stop();
@@ -285,7 +285,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[2] = sqrt(A * A + D * D);//左后轮
     ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
-/*修正角度  
+/*修正角度*/  
     if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
         ClassisSpeed[0] = -ClassisSpeed[0];
         RFRAngle = (RFRAngle > 0) ? (RFRAngle - 180) : (RFRAngle + 180);
@@ -301,7 +301,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     if(abs(int(RBRAngle - RBR.nowAngle) % 360) >= 90) {
         ClassisSpeed[3] = -ClassisSpeed[3];
         RBRAngle = (RBRAngle > 0) ? (RBRAngle - 180) : (RBRAngle + 180);
-    }*/  
+    }  
 
 
     //设置底盘电机角度

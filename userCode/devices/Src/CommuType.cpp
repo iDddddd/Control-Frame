@@ -211,7 +211,7 @@ void RS485::Rx_Handle() {
             /* Current memory buffer used is Memory 1 */
             //失效DMA
             __HAL_DMA_DISABLE(&hdma_usart1_rx);
-0
+
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
             rx_len = RX_SIZE - hdma_usart1_rx.Instance->NDTR;
 
