@@ -4,6 +4,9 @@
 
 #include "ArmTask.h"
 
+#include <cmath>
+
+float ArmTask::Angle[4]{0};
 
 MOTOR_INIT_t Joint1MotorInit = {
         .speedPIDp = nullptr,
@@ -79,7 +82,7 @@ bool ArmStopFlag = true;
 bool ArmMoveFlag = false;
 static float joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle;
 
-void ArmStop() {
+void ArmTask::ArmStop() {
     ArmStopFlag = true;
     Joint1Motor.Stop();
     Joint2Motor.Stop();
@@ -89,7 +92,7 @@ void ArmStop() {
     ClawMotor.Stop();
 }
 
-void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos) {
+void ArmJointSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos) {
     ArmStopFlag = false;
     Joint1Motor.SetTargetPosition(Joint1Pos);
     Joint2Motor.SetTargetPosition(Joint2Pos);
@@ -108,19 +111,24 @@ void ClawSet(uint8_t clawflag) {
     }
 }
 
-void ARMHandle() {
-    if (!ArmStopFlag) {
-        if (ArmMoveFlag) {
-            Joint1Motor.MoveTo();
-            Joint2Motor.MoveTo();
-            Joint3Motor.MoveTo();
-          //  Joint4Motor.MoveTo();
-         //   Joint5Motor.MoveTo();
-            ArmMoveFlag = false;
-        }
-    }
+void ArmPositionSet(float x, float y, float z){
+    ArmTask::ArmCalc(x,y,z);
+    ArmJointSet(ArmTask::Angle[0], ArmTask::Angle[1], ArmTask::Angle[2], 0, 0);
 }
+void ArmTask::ArmCalc(float x,float y,float z){
+    float d1 = sqrtf(x*x+y*y);
+    float d2 = sqrtf(d1*d1+(z+l4)*(z+l4));
+    float angle1 = acosf((l3*l3-l2*l2-d2*d2)/(-2*l2*d2));
+    float angle2 = acosf((d2*d2-l2*l2-l3*l3)/(-2*l2*l3));
+    float angle3 = PI - angle1 - angle2;
+    float angle4 = atan2f(z+l4,d1);
+    float angle5 = PI/2 - angle4;
 
+    Angle[0] = atan2f(x,y);
+    Angle[1] = PI/2 - angle1 - angle4;
+    Angle[2] = PI/2 - angle2;
+    Angle[3] = PI/2 - angle3 - angle5;
+}
 
 
 

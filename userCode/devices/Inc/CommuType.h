@@ -25,7 +25,7 @@ typedef struct {
     uint32_t ID;
     uint8_t DLC;
     uint8_t canType;
-    uint8_t message[16];
+    uint8_t message[8];
 }DATA_t;
 typedef struct {
     DATA_t Data[MAX_MESSAGE_COUNT];

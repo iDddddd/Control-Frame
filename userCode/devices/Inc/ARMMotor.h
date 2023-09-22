@@ -26,7 +26,6 @@ public:
 
     void Handle() override;
 
-    void MoveTo();
 
     void SetTargetPosition(float pos);
 
@@ -57,8 +56,6 @@ public:
 
     void Handle() override;
 
-    void MoveTo();
-
     void SetTargetPosition(float tarpos);
 
     ~SteppingMotor_v5();
@@ -69,7 +66,7 @@ private:
     uint32_t Pulse{};
 
     bool SendFlag = false;
-    uint8_t TxMessage[16]{0};
+    uint8_t TxMessage[8]{0};
     uint8_t TxMessageDLC{};
 
     int32_t nowPos = 0;

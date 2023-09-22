@@ -38,44 +38,35 @@ void SteppingMotor_v4::CANMessageGenerate() {
 }
 
 void SteppingMotor_v4::Handle() {
-    TxMessage[0] = 0x36;
-    TxMessage[1] = 0x6B;
-    TxMessageDLC = 0x02;
-
-    nowPos = (int32_t) (RxMessage[1] << 24u | RxMessage[2] << 16u | RxMessage[3] << 8u | RxMessage[4]);
-    NowPos = ((float) nowPos * 2.0f * PI) / 65536.0f / reductionRatio;
-
-    CANMessageGenerate();
-}
-
-void SteppingMotor_v4::MoveTo() {
-
-    if (stopFlag) {
-        Pulse = 0;
-    } else {
-        if (TarPos >= Position) {
-            Direction = 0x11;
+    if(SendFlag) {
+        if (stopFlag) {
+            Pulse = 0;
         } else {
-            Direction = 0x01;
+            if (TarPos >= Position) {
+                Direction = 0x11;
+            } else {
+                Direction = 0x01;
+            }
+            Pulse = (uint32_t) (abs(TarPos - Position) / 2.0f / PI * 200 * 16 * reductionRatio);
+            Position = TarPos;
         }
-        Pulse = (uint32_t) (abs(TarPos - Position) / 2.0f / PI * 200 * 16 * reductionRatio);
-        Position = TarPos;
-    }
-    TxMessageDLC = 0x08;
-    TxMessage[0] = 0xFD;
-    TxMessage[1] = Direction;
-    TxMessage[2] = 0xFF;
-    TxMessage[3] = 0x00;
-    TxMessage[4] = Pulse >> 16u;
-    TxMessage[5] = Pulse >> 8u;
-    TxMessage[6] = Pulse;
-    TxMessage[7] = 0x6B;
+        TxMessageDLC = 0x08;
+        TxMessage[0] = 0xFD;
+        TxMessage[1] = Direction;
+        TxMessage[2] = 0xFF;
+        TxMessage[3] = 0x00;
+        TxMessage[4] = Pulse >> 16u;
+        TxMessage[5] = Pulse >> 8u;
+        TxMessage[6] = Pulse;
+        TxMessage[7] = 0x6B;
 
-    CANMessageGenerate();
+        CANMessageGenerate();
+    }
 }
 
 void SteppingMotor_v4::SetTargetPosition(float pos) {
     stopFlag = false;
+    SendFlag = true;
     TarPos = pos;
 }
 
@@ -105,11 +96,6 @@ void SteppingMotor_v5::CANMessageGenerate() {;
         canQueue.Data[canQueue.rear].message[5] = TxMessage[5];
         canQueue.Data[canQueue.rear].message[6] = TxMessage[6];
         canQueue.Data[canQueue.rear].message[7] = TxMessage[7];
-        canQueue.Data[canQueue.rear].message[8] = TxMessage[8];
-        canQueue.Data[canQueue.rear].message[9] = TxMessage[9];
-        canQueue.Data[canQueue.rear].message[10] = TxMessage[10];
-        canQueue.Data[canQueue.rear].message[11] = TxMessage[11];
-        canQueue.Data[canQueue.rear].message[12] = TxMessage[12];
 
         canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
     } else {
@@ -136,12 +122,12 @@ void SteppingMotor_v5::Handle() {
         } else {
 
             if (TarPos >= 0) {
-                Direction = 0x01;
-            } else {
                 Direction = 0x00;
+            } else {
+                Direction = 0x01;
             }
             Pulse = (uint32_t) (abs(TarPos) / 2.0f / PI * 200.0f * 16.0f * reductionRatio);
-            TxMessageDLC = 0x0D;
+            TxMessageDLC = 0x08;
             TxMessage[0] = 0xFD;
             TxMessage[1] = Direction;
             TxMessage[2] = 0x05;
@@ -150,44 +136,20 @@ void SteppingMotor_v5::Handle() {
             TxMessage[5] = Pulse >> 24u;
             TxMessage[6] = Pulse >> 16u;
             TxMessage[7] = Pulse >> 8u;
-            TxMessage[8] = 0xFD;
-            TxMessage[9] = Pulse;
-            TxMessage[10] = 0x01;
-            TxMessage[11] = 0x00;
-            TxMessage[12] = 0x6B;
+            CANMessageGenerate();
+            TxMessageDLC = 0x05;
+            TxMessage[0] = 0xFD;
+            TxMessage[1] = Pulse;
+            TxMessage[2] = 0x01;
+            TxMessage[3] = 0x00;
+            TxMessage[4] = 0x6B;
+            TxMessage[5] = 0x00;
+            TxMessage[6] = 0x00;
+            TxMessage[7] = 0x00;
             CANMessageGenerate();
             SendFlag = false;
         }
     }
-}
-
-void SteppingMotor_v5::MoveTo() {
-    if (stopFlag) {
-        Pulse = 0;
-    } else {
-        if (TarPos >= 0) {
-            Direction = 0x01;
-        } else {
-            Direction = 0x00;
-        }
-        Pulse = (uint32_t) (abs(TarPos) / 2.0f / PI * 200.0f * 16.0f * reductionRatio);
-    }
-    TxMessageDLC = 0x0D;
-    TxMessage[0] = 0xFD;
-    TxMessage[1] = Direction;
-    TxMessage[2] = 0x05;
-    TxMessage[3] = 0xDC;
-    TxMessage[4] = 0xC8;
-    TxMessage[5] = Pulse >> 24u;
-    TxMessage[6] = Pulse >> 16u;
-    TxMessage[7] = Pulse >> 8u;
-    TxMessage[8] = 0xFD;
-    TxMessage[9] = Pulse;
-    TxMessage[10] = 0x01;
-    TxMessage[11] = 0x00;
-    TxMessage[12] = 0x6B;
-
-    CANMessageGenerate();
 }
 
 void SteppingMotor_v5::SetTargetPosition(float tarpos) {

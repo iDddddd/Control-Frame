@@ -119,7 +119,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
        // ARMHandle();
 
        // if(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)>0||HAL_CAN_GetTxMailboxesFreeLevel(&hcan2)>0) {
-       CAN::CANPackageSend();
+        CAN::CANPackageSend();
         //}
 
         /**只需关注该部分代码**/
@@ -214,7 +214,7 @@ int main() {
     MX_I2C3_Init();
     MX_SPI1_Init();
     MX_SPI2_Init();
-    MX_IWDG_Init();//看门狗,若不使用遥控器需注释改行，否则程序不运行
+   // MX_IWDG_Init();//看门狗,若不使用遥控器需注释改行，否则程序不运行
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
 

@@ -13,6 +13,18 @@
 #include "Buzzer.h"
 #include "StepperMotor.h"
 
-void ArmStop();
+#define l2 152.8f
+#define l3 130.46f
+#define l4 133.36f
+
+class ArmTask {
+public:
+    static void ArmStop();
+    static void ArmCalc(float x,float y,float z);
+
+
+    static float Angle[4];
+
+};
 
 #endif //RM_FRAME_C_ARMTASK_H

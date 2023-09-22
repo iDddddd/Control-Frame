@@ -155,7 +155,7 @@ void Motor_4010::Handle() {
     }
 
 
-    CANMessageGenerate();
+   // CANMessageGenerate();
 }
 
 void Motor_4010::MotorStateUpdate() {
