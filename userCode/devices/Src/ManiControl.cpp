@@ -99,7 +99,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
             case 0x01: {
                 TaskFlag = STOP;
                 mc_ctrl.ChassisStopFlag = mani_rx_buff[bufIndex][4];
-                StateMachine::add_function_to_state(ChassisStopTask);
+                AutoChassisStop();
                 break;
             }
             case 0x02: {
@@ -108,7 +108,8 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisDis_col.y_Dis, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisDis_col.Theta, &mani_rx_buff[bufIndex][12], 4);
 
-                StateMachine::add_function_to_state(Move_DisTask);
+                ChassisDistanceSet(mc_ctrl.chassisDis_col.x_Dis.f, mc_ctrl.chassisDis_col.y_Dis.f,
+                                   mc_ctrl.chassisDis_col.Theta.f);
                 break;
             }
             case 0x03: {
@@ -119,21 +120,22 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.arm_col.Joint4Pos, &mani_rx_buff[bufIndex][16], 4);
                 memcpy(&mc_ctrl.arm_col.Joint5Pos, &mani_rx_buff[bufIndex][20], 4);
 
-                StateMachine::add_function_to_state(ArmTask);
+                ArmSet(mc_ctrl.arm_col.Joint1Pos.f, mc_ctrl.arm_col.Joint2Pos.f, mc_ctrl.arm_col.Joint3Pos.f,
+                       mc_ctrl.arm_col.Joint4Pos.f, mc_ctrl.arm_col.Joint5Pos.f);
                 break;
             }
             case 0x04: {
                 TaskFlag = CLAW;
                 mc_ctrl.ClawFlag = mani_rx_buff[bufIndex][5];
 
-                StateMachine::add_function_to_state(ClawTask);
+                ClawSet(mc_ctrl.ClawFlag);
                 break;
             }
             case 0x05: {
                 TaskFlag = TRAY;
                 mc_ctrl.TrayFlag = mani_rx_buff[bufIndex][5];
 
-                StateMachine::add_function_to_state(TrayTask);
+              //  AutoTraySet(mc_ctrl.TrayFlag);
                 break;
             }
             case 0x07: {
@@ -142,7 +144,8 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisVel_col.y_Vel, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisVel_col.w_Vel, &mani_rx_buff[bufIndex][12], 4);
 
-                StateMachine::add_function_to_state(Move_VelTask);
+                ChassisVelocitySet(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
+                                   mc_ctrl.chassisVel_col.w_Vel.f);
                 break;
             }
         }

@@ -286,7 +286,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
 /*修正角度*/  
-    if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
+/*    if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
         ClassisSpeed[0] = -ClassisSpeed[0];
         RFRAngle = (RFRAngle > 0) ? (RFRAngle - 180) : (RFRAngle + 180);
     }
@@ -301,7 +301,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     if(abs(int(RBRAngle - RBR.nowAngle) % 360) >= 90) {
         ClassisSpeed[3] = -ClassisSpeed[3];
         RBRAngle = (RBRAngle > 0) ? (RBRAngle - 180) : (RBRAngle + 180);
-    }  
+    }  */
 
 
     //设置底盘电机角度

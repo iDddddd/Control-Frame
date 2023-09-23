@@ -32,7 +32,6 @@ void CtrlHandle() {
                                        RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
                     Headmemory();
                 }else if (RemoteControl::rcInfo.sRight == MID_POS){
-                    StateMachine::stateHandle();
                     AutoSetVelocity();
                 }
                 break;
