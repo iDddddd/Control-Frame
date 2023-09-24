@@ -119,7 +119,7 @@ void Motor_4010::CANMessageGenerate() {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
         canQueue.Data[canQueue.rear].canType = canType;
-				canQueue.Data[canQueue.rear].DLC = 0x08;
+        canQueue.Data[canQueue.rear].DLC = 0x08;
         canQueue.Data[canQueue.rear].message[0] = 0xA1;
         canQueue.Data[canQueue.rear].message[1] = 0x00;
         canQueue.Data[canQueue.rear].message[2] = 0x00;

@@ -42,13 +42,13 @@ void SteppingMotor_v4::Handle() {
         if (stopFlag) {
             Pulse = 0;
         } else {
-            if (TarPos >= Position) {
-                Direction = 0x11;
-            } else {
+            if (TarPos >= NowPos) {
                 Direction = 0x01;
+            } else {
+                Direction = 0x11;
             }
-            Pulse = (uint32_t) (abs(TarPos - Position) / 2.0f / PI * 200 * 16 * reductionRatio);
-            Position = TarPos;
+            Pulse = (uint32_t) (abs(TarPos - NowPos) / 2.0f / PI * 200 * 16 * reductionRatio);
+            NowPos = TarPos;
         }
         TxMessageDLC = 0x08;
         TxMessage[0] = 0xFD;
@@ -61,6 +61,7 @@ void SteppingMotor_v4::Handle() {
         TxMessage[7] = 0x6B;
 
         CANMessageGenerate();
+        SendFlag = false;
     }
 }
 
@@ -78,6 +79,7 @@ SteppingMotor_v4::~SteppingMotor_v4() = default;
 SteppingMotor_v5::SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) :
         Motor(motorInit, this), CAN(commuInit) {
     ID_Bind_Rx(RxMessage);
+
 }
 
 SteppingMotor_v5::~SteppingMotor_v5() = default;
@@ -105,17 +107,6 @@ void SteppingMotor_v5::CANMessageGenerate() {;
 }
 
 void SteppingMotor_v5::Handle() {
-/*
-    TxMessage[0] = 0x36;
-    TxMessage[1] = 0x6B;
-    TxMessageDLC = 0x02;
-
-    nowPos = (int32_t) (RxMessage[2] << 24u | RxMessage[3] << 16u | RxMessage[4] << 8u | RxMessage[5]);
-    if (RxMessage[1] == 0x01) {
-        nowPos = -nowPos;
-    }
-    NowPos = ((float) nowPos * 2.0f * PI) / 65536.0f / reductionRatio;
-*/
     if (SendFlag) {
         if (stopFlag) {
             Pulse = 0;
@@ -137,6 +128,7 @@ void SteppingMotor_v5::Handle() {
             TxMessage[6] = Pulse >> 16u;
             TxMessage[7] = Pulse >> 8u;
             CANMessageGenerate();
+            can_ID += 1;
             TxMessageDLC = 0x05;
             TxMessage[0] = 0xFD;
             TxMessage[1] = Pulse;
@@ -147,8 +139,9 @@ void SteppingMotor_v5::Handle() {
             TxMessage[6] = 0x00;
             TxMessage[7] = 0x00;
             CANMessageGenerate();
-            SendFlag = false;
+            can_ID -= 1;
         }
+        SendFlag = false;
     }
 }
 

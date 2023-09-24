@@ -12,7 +12,7 @@
 #define can1 1
 #define can2 2
 
-#define MAX_MESSAGE_COUNT 20
+#define MAX_MESSAGE_COUNT 10
 #define RX_SIZE 20
 #define MOTOR_RX_SIZE 15u
 /*结构体定义--------------------------------------------------------------*/

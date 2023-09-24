@@ -78,7 +78,7 @@ void CAN::CANPackageSend() {
             HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
         } else if (canQueue.Data[canQueue.front].canType == can2) {
 
-            txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
+            txHeaderTypeDef.ExtId =canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
             txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
             txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
@@ -87,10 +87,9 @@ void CAN::CANPackageSend() {
             HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
 
         }
-
+        memset(canQueue.Data[canQueue.front].message, 0, sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
+        canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
-    memset(canQueue.Data[canQueue.front].message, 0, sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
-    canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
 }
 
 /**

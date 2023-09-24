@@ -75,7 +75,7 @@ SteppingMotor_v5 Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
 SteppingMotor_v5 Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
 SteppingMotor_v5 Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
 //SteppingMotor_v4 Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
-//SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
+SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
 StepperMotor ClawMotor(&ClawMotorInit);
 
 bool ArmStopFlag = true;
@@ -88,7 +88,7 @@ void ArmTask::ArmStop() {
     Joint2Motor.Stop();
     Joint3Motor.Stop();
    // Joint4Motor.Stop();
-   // Joint5Motor.Stop();
+    Joint5Motor.Stop();
     ClawMotor.Stop();
 }
 
@@ -98,7 +98,7 @@ void ArmJointSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4
     Joint2Motor.SetTargetPosition(Joint2Pos);
     Joint3Motor.SetTargetPosition(Joint3Pos);
    // Joint4Motor.SetTargetPosition(Joint4Pos);
-   // Joint5Motor.SetTargetPosition(Joint5Pos);
+    Joint5Motor.SetTargetPosition(Joint5Pos);
     ArmMoveFlag = true;
 
 }
@@ -113,7 +113,7 @@ void ClawSet(uint8_t clawflag) {
 
 void ArmPositionSet(float x, float y, float z){
     ArmTask::ArmCalc(x,y,z);
-    ArmJointSet(ArmTask::Angle[0], ArmTask::Angle[1], ArmTask::Angle[2], 0, 0);
+    ArmJointSet(ArmTask::Angle[0], ArmTask::Angle[1], ArmTask::Angle[2], 0, ArmTask::Angle[3]);
 }
 void ArmTask::ArmCalc(float x,float y,float z){
     float d1 = sqrtf(x*x+y*y);
