@@ -62,6 +62,7 @@ void ManiControl::IT_Handle() {
             if (LRC_calc(mani_rx_buff[0], rx_len - 1) == mani_rx_buff[0][rx_len - 1] && (mani_rx_buff[0][0] == 0x7A)) {
                 GetData(0);
             }
+            memset(mani_rx_buff[0], 0, BUFF_SIZE);
             /**只需关注该部分代码**/
         } else {
             /* Current memory buffer used is Memory 1 */
@@ -83,6 +84,7 @@ void ManiControl::IT_Handle() {
             if (LRC_calc(mani_rx_buff[1], rx_len - 1) == mani_rx_buff[1][rx_len - 1] && (mani_rx_buff[1][0] == 0x7A)) {
                 GetData(1);
             }
+            memset(mani_rx_buff[1], 0, BUFF_SIZE);
             /**只需关注该部分代码**/
         }
     }

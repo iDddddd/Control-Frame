@@ -60,18 +60,21 @@ Move_X::Move_X() {
 }
 
 void Move_X::Calc(float target) {
-    Para.a = 1.5;
-    Para.v_max = 2;
-    stopFlag = false;
-    FinishFlag = false;
-    expectPos = 0;
-    Para.d_max = target;
-    Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
-    Para.d2 = target - 2 * Para.d1;
-    if (Para.d2 < 0) {
-        Para.d1 = target / 2;
-        Para.d2 = 0;
-        Para.v_max = sqrt(2 * Para.a * Para.d1);
+    if(target == 0) FinishFlag = true;
+    else {
+        Para.a = 1.5;
+        Para.v_max = 2;
+        stopFlag = false;
+        FinishFlag = false;
+        expectPos = 0;
+        Para.d_max = target;
+        Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
+        Para.d2 = target - 2 * Para.d1;
+        if (Para.d2 < 0) {
+            Para.d1 = target / 2;
+            Para.d2 = 0;
+            Para.v_max = sqrt(2 * Para.a * Para.d1);
+        }
     }
 }
 
@@ -119,20 +122,22 @@ Move_Y::Move_Y() {
 }
 
 void Move_Y::Calc(float target) {
-    Para.a = 1.5;
-    Para.v_max = 2;
-    stopFlag = false;
-    FinishFlag = false;
-    expectPos = 0;
-    Para.d_max = target;
-    Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
-    Para.d2 = target - 2 * Para.d1;
-    if (Para.d2 < 0) {
-        Para.d1 = target / 2;
-        Para.d2 = 0;
-        Para.v_max = sqrt(2 * Para.a * Para.d1);
+    if(target == 0) FinishFlag = true;
+    else {
+        Para.a = 1.5;
+        Para.v_max = 2;
+        stopFlag = false;
+        FinishFlag = false;
+        expectPos = 0;
+        Para.d_max = target;
+        Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
+        Para.d2 = target - 2 * Para.d1;
+        if (Para.d2 < 0) {
+            Para.d1 = target / 2;
+            Para.d2 = 0;
+            Para.v_max = sqrt(2 * Para.a * Para.d1);
+        }
     }
-
 }
 
 float Move_Y::Handle(float reference) {
