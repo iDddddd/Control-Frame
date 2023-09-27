@@ -6,7 +6,6 @@
 #include "Motor.h"
 #include "IMU.h"
 #include "ArmMotor.h"
-#include "Buzzer.h"
 #include "LED.h"
 #include "ControlTask.h"
 #include "KF.h"
@@ -115,7 +114,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         /**只需关注该部分代码**/
         ChassisHandle();//底盘数据处理
-        Motor::MotorsHandle();//电机数据处理
+
        // ARMHandle();
 
        // if(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)>0||HAL_CAN_GetTxMailboxesFreeLevel(&hcan2)>0) {
@@ -135,7 +134,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         }*/
 
     }
-    if (htim == &htim6) {//4ms
+    if (htim == &htim5) {//4ms
         RS485::RS485PackageSend();
 
     }
@@ -145,6 +144,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         get_encoder_mileage();//底盘里程更新
         KalmanFilter();//目前卡尔曼滤波有问题
         CtrlHandle();
+        Motor::MotorsHandle();//电机数据处理
     }
     
 }
@@ -200,8 +200,6 @@ int main() {
     MX_GPIO_Init();
     MX_DMA_Init();
     MX_TIM5_Init();
-    MX_TIM4_Init();
-    MX_TIM6_Init();
     MX_TIM7_Init();
     MX_TIM10_Init();
     MX_ADC1_Init();
@@ -218,7 +216,7 @@ int main() {
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
 
-    HAL_TIM_Base_Start_IT(&htim5);//该定时器作PWM输出
+    HAL_TIM_Base_Start_IT(&htim5);//该定时器作PWM输出，同时中断4ms
 
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
@@ -230,7 +228,6 @@ int main() {
     RS485::RS485Init();//RS485通讯初始化，使用UART1串口
     bsp_flash_read(&flashData);
     HAL_TIM_Base_Start_IT(&htim10);//1ms
-    HAL_TIM_Base_Start_IT(&htim6);//4ms
     HAL_TIM_Base_Start_IT(&htim7);//1ms
     CAN::CANInit();//CAN初始化
     IMU::imu.Init();//IMU初始化
