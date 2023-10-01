@@ -189,18 +189,34 @@ Spin::Spin() {
 }
 
 void Spin::Calc(float target) {
-    Para.a = 1;
-    Para.v_max = 0.5;
-    stopFlag = false;
-    //Para.d_max = target-IMU::imu.attitude.yaw;
-    Para.d_max = target;
-    Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
-    Para.d2 = target - 2 * Para.d1;
-    if (Para.d2 < 0) {
-        Para.d1 = target / 2;
-        Para.d2 = 0;
-        Para.v_max = sqrt(2 * Para.a * Para.d1);
+    if (target >= 0){
+        Para.a = 1;
+        Para.v_max = 0.5;
+        stopFlag = false;
+        //Para.d_max = target-IMU::imu.attitude.yaw;
+        Para.d_max = target;
+        Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
+        Para.d2 = target - 2 * Para.d1;
+        if (Para.d2 < 0) {
+            Para.d1 = target / 2;
+            Para.d2 = 0;
+            Para.v_max = sqrt(2 * Para.a * Para.d1);
+        }
     }
+    else{
+        Para.a = -1;
+        Para.v_max = -0.5;
+        stopFlag = false;
+        Para.d_max = target;
+        Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
+        Para.d2 = target - 2 * Para.d1;
+        if(Para.d2 > 0){
+            Para.d1 = target / 2;
+            Para.d2 = 0;
+            Para.v_max = -sqrt(-2 * Para.a * Para.d1);
+        }
+    }
+    
 }
 
 float Spin::Handle(const float reference) {
@@ -231,7 +247,7 @@ float Spin::Handle(const float reference) {
             v_rel = Para.v_max;
         }*/
     }
-    if (reference >= Para.d_max - 0.01) {
+    if ((abs(reference - Para.d_max) < 0.23 && reference >= 0) || (abs(reference - Para.d_max) < 0.255 && reference < 0)) {//修正角度偏差；在转角在90~180时，似乎这个修正项是合理的
         //if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;

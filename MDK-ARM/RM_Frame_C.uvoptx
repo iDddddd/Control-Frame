@@ -375,6 +375,21 @@
           <WinNumber>1</WinNumber>
           <ItemText>CFR</ItemText>
         </Ww>
+        <Ww>
+          <count>43</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CFL</ItemText>
+        </Ww>
+        <Ww>
+          <count>44</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CBL</ItemText>
+        </Ww>
+        <Ww>
+          <count>45</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CBR</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
