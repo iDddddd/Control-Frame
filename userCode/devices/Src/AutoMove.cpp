@@ -18,6 +18,8 @@ void AutoMove::Handle() {
         vx = X.Handle(encoder_x);
         vy = Y.Handle(encoder_y);
         vo = O.Handle(encoder_theta);
+        //vo = 0;//测试用，完了记得删
+        /**/
         tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
         tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
         vx = tem_vx;
@@ -25,7 +27,7 @@ void AutoMove::Handle() {
     } else {
         AutoChassisStop();
     }
-    if (X.FinishFlag && Y.FinishFlag && !SendFlag) {
+    if (X.FinishFlag && Y.FinishFlag && O.FinishFlag && !SendFlag) {
         StopMove();
         CompleteTask();//?
         SendFlag = true;
@@ -37,7 +39,10 @@ void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
     SendFlag = false;
     X.Calc(x_distance);
     Y.Calc(y_distance);
-  //  O.Calc(o_angle);
+    O.Calc(o_angle);
+    // encoder_theta = 0;
+    // encoder_x = 0;
+    // encoder_y = 0;
     IMU::imu.position.displace[0] = 0;
     IMU::imu.position.displace[1] = 0;
 }
@@ -159,13 +164,13 @@ float Move_Y::Handle(float reference) {
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
         if (v_rel > Para.v_max) {
             v_rel = Para.v_max;
-        }
-        if (reference >= Para.d_max - 0.05) {
+        }       
+    }
+    if (reference >= Para.d_max - 0.05) {
         //if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;
         }
-    }
     return v_rel;
 }
 
@@ -184,8 +189,11 @@ Spin::Spin() {
 }
 
 void Spin::Calc(float target) {
+    Para.a = 1;
+    Para.v_max = 0.5;
     stopFlag = false;
-    Para.d_max = target-IMU::imu.attitude.yaw;
+    //Para.d_max = target-IMU::imu.attitude.yaw;
+    Para.d_max = target;
     Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
     Para.d2 = target - 2 * Para.d1;
     if (Para.d2 < 0) {
@@ -210,14 +218,24 @@ float Spin::Handle(const float reference) {
         } else if (expectPos > Para.d1 && expectPos < (Para.d1 + Para.d2)) {
             expectPos += Para.v * 0.001f;
         }
-    if(abs(expectPos-reference) < 0.01){
-        return 0;
-    }
-        v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
+
+        v_rel = Para.v + pid.PIDCalc(expectPos, reference, 0.5);
         if (v_rel > Para.v_max) {
             v_rel = Para.v_max;
         }
+        /*if(abs(expectPos-reference) < 0.01){
+            return 0;
+        }
+        v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
+        if (v_rel > Para.v_max) {
+            v_rel = Para.v_max;
+        }*/
     }
+    if (reference >= Para.d_max - 0.01) {
+        //if (expectPos >= Para.d_max) {
+            Stop();
+            FinishFlag = true;
+        }
     return v_rel;
 }
 

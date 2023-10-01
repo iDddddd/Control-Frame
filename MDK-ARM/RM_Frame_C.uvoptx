@@ -213,162 +213,167 @@
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>RFL</ItemText>
+          <ItemText>rs485_rx_buff</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rs485_rx_buff</ItemText>
+          <ItemText>rcInfo</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>RFR</ItemText>
+          <ItemText>FBVelocity</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CFL</ItemText>
+          <ItemText>LRVelocity</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CFR</ItemText>
+          <ItemText>RTVelocity</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rcInfo</ItemText>
+          <ItemText>imu</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>FBVelocity</ItemText>
+          <ItemText>ManiControl</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>LRVelocity</ItemText>
+          <ItemText>mani_rx_buff</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>RTVelocity</ItemText>
+          <ItemText>mc_ctrl</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>1</WinNumber>
-          <ItemText>imu</ItemText>
+          <ItemText>encoder_y</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ManiControl</ItemText>
+          <ItemText>encoder_x</ItemText>
         </Ww>
         <Ww>
           <count>21</count>
           <WinNumber>1</WinNumber>
-          <ItemText>mani_rx_buff</ItemText>
+          <ItemText>encoder_theta</ItemText>
         </Ww>
         <Ww>
           <count>22</count>
           <WinNumber>1</WinNumber>
-          <ItemText>mc_ctrl</ItemText>
+          <ItemText>encoder_v3.data[0]</ItemText>
         </Ww>
         <Ww>
           <count>23</count>
           <WinNumber>1</WinNumber>
-          <ItemText>encoder_y</ItemText>
+          <ItemText>encoder_v3.data[1]</ItemText>
         </Ww>
         <Ww>
           <count>24</count>
           <WinNumber>1</WinNumber>
-          <ItemText>encoder_x</ItemText>
+          <ItemText>encoder_v3.data[2]</ItemText>
         </Ww>
         <Ww>
           <count>25</count>
           <WinNumber>1</WinNumber>
-          <ItemText>encoder_theta</ItemText>
+          <ItemText>v1x</ItemText>
         </Ww>
         <Ww>
           <count>26</count>
           <WinNumber>1</WinNumber>
-          <ItemText>encoder_v3.data[0]</ItemText>
+          <ItemText>v1y</ItemText>
         </Ww>
         <Ww>
           <count>27</count>
           <WinNumber>1</WinNumber>
-          <ItemText>encoder_v3.data[1]</ItemText>
+          <ItemText>v2x</ItemText>
         </Ww>
         <Ww>
           <count>28</count>
           <WinNumber>1</WinNumber>
-          <ItemText>encoder_v3.data[2]</ItemText>
+          <ItemText>v2y</ItemText>
         </Ww>
         <Ww>
           <count>29</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v1x</ItemText>
+          <ItemText>v3x</ItemText>
         </Ww>
         <Ww>
           <count>30</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v1y</ItemText>
+          <ItemText>v3y</ItemText>
         </Ww>
         <Ww>
           <count>31</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v2x</ItemText>
+          <ItemText>v4x</ItemText>
         </Ww>
         <Ww>
           <count>32</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v2y</ItemText>
+          <ItemText>v4y</ItemText>
         </Ww>
         <Ww>
           <count>33</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v3x</ItemText>
+          <ItemText>state.data[0]</ItemText>
         </Ww>
         <Ww>
           <count>34</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v3y</ItemText>
+          <ItemText>state.data[1]</ItemText>
         </Ww>
         <Ww>
           <count>35</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v4x</ItemText>
+          <ItemText>state.data[2]</ItemText>
         </Ww>
         <Ww>
           <count>36</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v4y</ItemText>
+          <ItemText>state.data[3]</ItemText>
         </Ww>
         <Ww>
           <count>37</count>
           <WinNumber>1</WinNumber>
-          <ItemText>state.data[0]</ItemText>
+          <ItemText>state.data[4]</ItemText>
         </Ww>
         <Ww>
           <count>38</count>
           <WinNumber>1</WinNumber>
-          <ItemText>state.data[1]</ItemText>
+          <ItemText>RFR</ItemText>
         </Ww>
         <Ww>
           <count>39</count>
           <WinNumber>1</WinNumber>
-          <ItemText>state.data[2]</ItemText>
+          <ItemText>RFL</ItemText>
         </Ww>
         <Ww>
           <count>40</count>
           <WinNumber>1</WinNumber>
-          <ItemText>state.data[3]</ItemText>
+          <ItemText>RBL</ItemText>
         </Ww>
         <Ww>
           <count>41</count>
           <WinNumber>1</WinNumber>
-          <ItemText>state.data[4]</ItemText>
+          <ItemText>RBR</ItemText>
+        </Ww>
+        <Ww>
+          <count>42</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CFR</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -416,6 +421,11 @@
           <count>8</count>
           <WinNumber>2</WinNumber>
           <ItemText>RBL</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>O</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>
@@ -480,7 +490,7 @@
 
   <Group>
     <GroupName>Application/MDK-ARM</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

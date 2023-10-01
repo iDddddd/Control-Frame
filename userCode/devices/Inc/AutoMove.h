@@ -75,6 +75,8 @@ public:
     float v_rel{0};
     EASY_PID pid;
 
+    bool FinishFlag{false};//好像MoveX和MoveY里面都有，所以干脆这里也加上得了
+
     Spin();
 
     ~Spin() = default;

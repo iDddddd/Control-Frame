@@ -3,6 +3,8 @@
     "files.associations": {
         "cstring": "cpp",
         "tim.h": "c",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "array": "cpp",
+        "string": "cpp"
     }
 }

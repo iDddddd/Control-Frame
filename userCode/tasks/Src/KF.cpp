@@ -5,6 +5,9 @@ float encoder_theta = 0.0;
 float encoder_x = 0.0;
 float encoder_y = 0.0;//编码器里程估计值
 extern float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y;//单轮数据
+float encoder_vx = 0.0;
+float encoder_vy = 0.0;
+float encoder_w = 0.0;
 
 float T83[24] = { 0.25,0,0.25,0,0.25,0,0.25,0,
 	0,0.25,0,0.25,0,0.25,0,0.25,
@@ -51,6 +54,10 @@ void convert8_3() {
     z.data[0][0] = encoder_v3.data[0][0];
     z.data[1][0] = encoder_v3.data[1][0];
     z.data[2][0] += encoder_v3.data[2][0] * dT;
+
+    encoder_vx = encoder_v3.data[0][0];
+    encoder_vy = encoder_v3.data[1][0];
+    encoder_w = encoder_v3.data[2][0];
 }
 
 

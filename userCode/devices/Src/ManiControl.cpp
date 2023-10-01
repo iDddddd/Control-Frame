@@ -86,6 +86,7 @@ void ManiControl::IT_Handle() {
             }
             memset(mani_rx_buff[1], 0, BUFF_SIZE);
             /**只需关注该部分代码**/
+            memset(mani_rx_buff[1],0,BUFF_SIZE);
         }
     }
 }
@@ -156,8 +157,8 @@ void ManiControl::GetData(uint8_t bufIndex) {
 
 
 void CompleteTask() {
-    uint8_t tx_message[1] = {0x01};
-    HAL_UART_Transmit_IT(&huart6, tx_message, 1);
+    static uint8_t tx_message[6] = {0x7A,0x00,0x00,0x00,0x00,0x01};
+    HAL_UART_Transmit_IT(&huart6, tx_message, 6);
 }
 
 uint8_t LRC_calc(uint8_t *data, uint8_t len) {

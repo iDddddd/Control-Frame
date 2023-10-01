@@ -10,36 +10,36 @@ constexpr float M = 0.24f; //车身宽
 float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y = 0.0;
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = 0.1f,
-        .ki = 0.007f,
-        .kd = 4.5f,
+        .kp = 0.36f,
+        .ki = 0.006f,
+        .kd = 0.3f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000
 };
 PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
-        .kp = 0.1f,
+        .kp = 0.45f,
         .ki = 0.006f,
-        .kd = 3.0f,
+        .kd = 0.5f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
-        .kp = 0.1f,
-        .ki = 0.006f,
-        .kd = 4.0f,
+        .kp = 0.35f,
+        .ki = 0.002f,
+        .kd = 0.3f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
         .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
 };
 PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体
-        .kp = 0.1f,
+        .kp = 0.41f,
         .ki = 0.006f,
-        .kd = 3.0f,
+        .kd = 0.4f,
         .componentKpMax = 2000,
         .componentKiMax = 0,
         .componentKdMax = 0,
@@ -213,8 +213,10 @@ void AutoChassisStop() {
     RBL.Stop();
     RBR.Stop();*/
     RFL.SetTargetAngle(0);
-    RFR.SetTargetAngle(0);
-    RBL.SetTargetAngle(0);
+    RFR.SetTargetAngle(90);
+    RBL.SetTargetAngle(90);//让车辆能及时刹住
+    //RFR.SetTargetAngle(0);
+    //RBL.SetTargetAngle(0);
     RBR.SetTargetAngle(0);
     CFR.Stop();
     CFL.Stop();
@@ -285,8 +287,9 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[2] = sqrt(A * A + D * D);//左后轮
     ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
-/*修正角度*/  
-/*    if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
+/*修正角度*/   
+/*
+    if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
         ClassisSpeed[0] = -ClassisSpeed[0];
         RFRAngle = (RFRAngle > 0) ? (RFRAngle - 180) : (RFRAngle + 180);
     }
@@ -301,8 +304,7 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     if(abs(int(RBRAngle - RBR.nowAngle) % 360) >= 90) {
         ClassisSpeed[3] = -ClassisSpeed[3];
         RBRAngle = (RBRAngle > 0) ? (RBRAngle - 180) : (RBRAngle + 180);
-    }  */
-
+    }*/  
 
     //设置底盘电机角度
     RFL.SetTargetAngle(RFLAngle);
