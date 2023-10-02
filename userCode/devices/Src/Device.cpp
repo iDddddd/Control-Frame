@@ -6,7 +6,6 @@
 #include "Motor.h"
 #include "IMU.h"
 #include "ArmMotor.h"
-#include "Buzzer.h"
 #include "LED.h"
 #include "ControlTask.h"
 #include "KF.h"
@@ -200,10 +199,10 @@ int main() {
     MX_GPIO_Init();
     MX_DMA_Init();
     MX_TIM5_Init();
-    MX_TIM4_Init();
     MX_TIM6_Init();
     MX_TIM7_Init();
     MX_TIM10_Init();
+    MX_TIM12_Init();
     MX_ADC1_Init();
     MX_ADC3_Init();
     MX_USART1_UART_Init();
@@ -213,7 +212,6 @@ int main() {
     MX_CAN2_Init();
     MX_I2C3_Init();
     MX_SPI1_Init();
-    MX_SPI2_Init();
    // MX_IWDG_Init();//看门狗,若不使用遥控器需注释改行，否则程序不运行
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
@@ -223,6 +221,7 @@ int main() {
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
+
 
     //TODO adc校准？
     RemoteControl::init();//遥控器通讯初始化，使用UART3串口

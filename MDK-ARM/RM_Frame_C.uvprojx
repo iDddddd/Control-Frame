@@ -777,11 +777,6 @@
               <FilePath>..\userCode\devices\Src\CommuType.cpp</FilePath>
             </File>
             <File>
-              <FileName>Buzzer.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\userCode\devices\Src\Buzzer.cpp</FilePath>
-            </File>
-            <File>
               <FileName>ARMMotor.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\userCode\devices\Src\ARMMotor.cpp</FilePath>

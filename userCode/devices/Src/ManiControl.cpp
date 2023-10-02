@@ -126,14 +126,14 @@ void ManiControl::GetData(uint8_t bufIndex) {
             }
             case 0x04: {
                 TaskFlag = CLAW;
-                mc_ctrl.ClawFlag = mani_rx_buff[bufIndex][5];
+                mc_ctrl.ClawFlag = mani_rx_buff[bufIndex][4];
 
                 ClawSet(mc_ctrl.ClawFlag);
                 break;
             }
             case 0x05: {
                 TaskFlag = TRAY;
-                mc_ctrl.TrayFlag = mani_rx_buff[bufIndex][5];
+                mc_ctrl.TrayFlag = mani_rx_buff[bufIndex][4];
 
                 //AutoTraySet(mc_ctrl.TrayFlag);
                 break;
