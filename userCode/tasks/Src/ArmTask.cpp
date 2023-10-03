@@ -42,35 +42,9 @@ MOTOR_INIT_t ClawMotorInit = {
         .reductionRatio = 20.0f
 };
 
-
-COMMU_INIT_t Joint1CommuInit = {
-        ._id = 0x0100,
-        .canType = can2
-
-};
-COMMU_INIT_t Joint2CommuInit = {
-        ._id = 0x0200,
-        .canType = can2
-
-};
-COMMU_INIT_t Joint3CommuInit = {
-        ._id = 0x0300,
-        .canType = can2
-
-};
-COMMU_INIT_t Joint4CommuInit = {
-        ._id = 0x04,
-        .canType = can2
-
-};
-COMMU_INIT_t Joint5CommuInit = {
-        ._id = 0x05,
-        .canType = can2
-
-};
-SteppingMotor_v5 Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
-SteppingMotor_v5 Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
-SteppingMotor_v5 Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
+SteppingMotor_v5 Joint1Motor(CAN2_ID(0x100), &Joint1MotorInit);
+SteppingMotor_v5 Joint2Motor(CAN2_ID(0x100), &Joint2MotorInit);
+SteppingMotor_v5 Joint3Motor(CAN2_ID(0x100), &Joint3MotorInit);
 //SteppingMotor_v4 Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
 //SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
 StepperMotor ClawMotor(&ClawMotorInit);

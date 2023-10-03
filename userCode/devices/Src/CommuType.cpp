@@ -14,6 +14,7 @@ TX_QUEUE_t CAN::canQueue = {
 uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
 
 /*CAN类------------------------------------------------------------------*/
+
 /**
  * @brief CAN通信的初始化，主要是CAN通信的相关配置
  */
@@ -48,9 +49,8 @@ void CAN::CANInit() {
  * @brief CAN类的构造函数
  */
 
-CAN::CAN(COMMU_INIT_t *_init) {
-    can_ID = _init->_id;//CAN ID
-    canType = _init->canType;//CAN类型
+CAN::CAN(uint32_t id) {
+    ID = id;//CAN ID
 }
 
 /**
@@ -68,7 +68,7 @@ void CAN::CANPackageSend() {
         CAN_TxHeaderTypeDef txHeaderTypeDef;
         uint32_t box = 0;//邮箱号
 
-        if (canQueue.Data[canQueue.front].canType == can1) {
+        if (!(canQueue.Data[canQueue.front].ID & CAN2_MASK)) {
             txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
             txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_STD;//标准帧
@@ -76,10 +76,10 @@ void CAN::CANPackageSend() {
             txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
             HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-        } else if (canQueue.Data[canQueue.front].canType == can2) {
+        } else if (canQueue.Data[canQueue.front].ID & CAN2_MASK) {
 
             if (canQueue.Data[canQueue.front].DLC <= 0x08) {
-                txHeaderTypeDef.ExtId = canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
+                txHeaderTypeDef.ExtId = canQueue.Data[canQueue.front].ID ^ CAN2_MASK;//从消息包中取出对应的ID
                 txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
                 txHeaderTypeDef.IDE = CAN_ID_EXT;//扩展帧
                 txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
@@ -115,8 +115,10 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     CAN_RxHeaderTypeDef rx_header;
 
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);//获取接收到的数据,完成后调用CAN中断处理函数，再次进入此函数等待接收
-    memcpy(dict_CAN[rx_header.StdId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 
+    uint32_t mapID = rx_header.StdId;
+    if(hcan == &hcan2) mapID |= 1u << 30;
+    memcpy(dict_CAN[mapID], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 }
 
 /**
@@ -124,12 +126,13 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
  * @param RxMessage
  */
 void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
-    dict_CAN.insert(can_ID, RxMessage);//将对应电机的canID与RxMessage绑定
+    dict_CAN.insert(ID, RxMessage);//将对应电机的canID与RxMessage绑定
 }
 
 
 
 /*RS485类------------------------------------------------------------------*/
+
 /**
  * @brief RS485类的构造函数
  */

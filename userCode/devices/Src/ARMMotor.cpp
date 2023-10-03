@@ -9,8 +9,8 @@
 
 
 /*步进电机V4类------------------------------------------------------------------*/
-SteppingMotor_v4::SteppingMotor_v4(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) :
-        Motor(motorInit, this), CAN(commuInit) {
+SteppingMotor_v4::SteppingMotor_v4(uint32_t id, MOTOR_INIT_t *motorInit) :
+        Motor(motorInit, this), CAN(id) {
     ID_Bind_Rx(RxMessage);
 }
 
@@ -18,9 +18,8 @@ SteppingMotor_v4::SteppingMotor_v4(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorI
 void SteppingMotor_v4::CANMessageGenerate() {
     if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
+        canQueue.Data[canQueue.rear].ID = ID;
         canQueue.Data[canQueue.rear].DLC = TxMessageDLC;
-        canQueue.Data[canQueue.rear].canType = canType;
         canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
         canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
         canQueue.Data[canQueue.rear].message[2] = TxMessage[2];
@@ -84,8 +83,8 @@ SteppingMotor_v4::~SteppingMotor_v4() = default;
 
 /*步进电机V5类------------------------------------------------------------------*/
 
-SteppingMotor_v5::SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) :
-        Motor(motorInit, this), CAN(commuInit) {
+SteppingMotor_v5::SteppingMotor_v5(uint32_t id, MOTOR_INIT_t *motorInit) :
+        Motor(motorInit, this), CAN(id) {
     ID_Bind_Rx(RxMessage);
 }
 
@@ -94,9 +93,8 @@ SteppingMotor_v5::~SteppingMotor_v5() = default;
 void SteppingMotor_v5::CANMessageGenerate() {;
     if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
+        canQueue.Data[canQueue.rear].ID = ID;
         canQueue.Data[canQueue.rear].DLC = TxMessageDLC;
-        canQueue.Data[canQueue.rear].canType = canType;
         canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
         canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
         canQueue.Data[canQueue.rear].message[2] = TxMessage[2];

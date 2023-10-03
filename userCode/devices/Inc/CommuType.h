@@ -8,24 +8,21 @@
 #include "Device.h"
 #include "Map.h"
 
-
-#define can1 1
-#define can2 2
-
 #define MAX_MESSAGE_COUNT 20
 #define RX_SIZE 20
 #define MOTOR_RX_SIZE 15u
-/*结构体定义--------------------------------------------------------------*/
 
-typedef struct {
-    uint32_t _id;//canID
-    uint8_t canType;
-} COMMU_INIT_t;
+constexpr uint32_t CAN2_MASK = 1u << 30;
+#define CAN1_ID(_id) (_id)
+#define CAN2_ID(_id) (_id + CAN2_MASK)
+
+#define RS485_ID(_id) (_id)
+
+/*结构体定义--------------------------------------------------------------*/
 
 typedef struct {
     uint32_t ID;
     uint8_t DLC;
-    uint8_t canType;
     uint8_t message[16];
 }DATA_t;
 
@@ -42,12 +39,12 @@ typedef struct {
  */
 class CAN {
 public:
-    uint32_t can_ID;//CAN ID
+    uint32_t ID;//CAN ID
     static TX_QUEUE_t canQueue;//CAN发送队列
 
     static void CANInit();//CAN初始化函数,需在main函数中调用，无需过多关注
 
-    explicit CAN(COMMU_INIT_t *_init);//默认构造函数，用于设置canID和canType
+    explicit CAN(uint32_t id);//默认构造函数，用于设置canID和canType
 
     ~CAN();
 
@@ -58,11 +55,8 @@ public:
     virtual void CANMessageGenerate() = 0;//can消息包生成函数,需在每个电机类中实现
 
 protected:
-    uint8_t canType;//can类型
     static MyMap<uint32_t, uint8_t *> dict_CAN;//canID与can回传消息的字典
-
     void ID_Bind_Rx(uint8_t *RxMessage) const;//将canID与can回传消息绑定
-
 };
 
 /*RS485类------------------------------------------------------------------*/

@@ -29,18 +29,13 @@ MOTOR_INIT_t swerveMotorInit = {//底盘电机初始化结构体
         .reductionRatio = 1.0f
 };
 
-COMMU_INIT_t chassisCommuInit1 = {0x141, can1};
-COMMU_INIT_t chassisCommuInit2 = {0x142, can1};
-COMMU_INIT_t chassisCommuInit3 = {0x143, can1};
-COMMU_INIT_t chassisCommuInit4 = {0x144, can1};
-
 Chassis chassis;
 
 Chassis::Chassis() : modules{ \
-    Swerve_Module_t({{&chassisCommuInit1, &chassisMotorInit}, {0, &swerveMotorInit}, 0, 180, TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
-    Swerve_Module_t({{&chassisCommuInit2, &chassisMotorInit}, {1, &swerveMotorInit}, 0, 0, -TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
-    Swerve_Module_t({{&chassisCommuInit3, &chassisMotorInit}, {2, &swerveMotorInit}, 180, 180, -TRACK_WIDTH / 2, -WHEEL_BASE / 2}), \
-    Swerve_Module_t({{&chassisCommuInit4, &chassisMotorInit}, {3, &swerveMotorInit}, 180,  0, TRACK_WIDTH / 2, -WHEEL_BASE / 2}),
+    Swerve_Module_t({{CAN1_ID(0x141), &chassisMotorInit}, {RS485_ID(0x00), &swerveMotorInit}, 0, 180, TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
+    Swerve_Module_t({{CAN1_ID(0x142), &chassisMotorInit}, {RS485_ID(0x01), &swerveMotorInit}, 0, 0, -TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
+    Swerve_Module_t({{CAN1_ID(0x143), &chassisMotorInit}, {RS485_ID(0x02), &swerveMotorInit}, 180, 180, -TRACK_WIDTH / 2, -WHEEL_BASE / 2}), \
+    Swerve_Module_t({{CAN1_ID(0x144), &chassisMotorInit}, {RS485_ID(0x03), &swerveMotorInit}, 180,  0, TRACK_WIDTH / 2, -WHEEL_BASE / 2}),
     } {
 
 }

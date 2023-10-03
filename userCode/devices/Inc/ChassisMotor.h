@@ -52,24 +52,20 @@ public:
 
     void SetTargetSpeed(float _targetSpeed);
 
-    Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+    Motor_4010(uint32_t id, MOTOR_INIT_t *motorInit);
 
     ~Motor_4010();
 
 private:
-    uint8_t id;
     //位置模式
     float targetAngle{};
-
-    float realAngle{0};
+    float realAngle{};
     float thisAngle{};
     float lastRead{};
 
     void MotorStateUpdate();
 
     int16_t IntensityCalc();
-
-    void StopMoving();
 };
 
 

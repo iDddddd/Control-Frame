@@ -83,22 +83,6 @@ private:
 
 };
 
-
-/*结构体成员取值定义组------------------------------------------------------*/
-
-/**
- * @defgroup motor_IDs
- * @brief 电机ID前八个对应C型开发板can1上1到8的ID，9到16对应C型开发板can2上的1到8
- */
-#define MOTOR_ID_1 0
-#define MOTOR_ID_2 1
-#define MOTOR_ID_3 2
-#define MOTOR_ID_4 3
-#define MOTOR_ID_5 4
-#define MOTOR_ID_6 5
-#define MOTOR_ID_7 6
-#define MOTOR_ID_8 7
-
 /*外部变量声明-------------------------------------------------------------*/
 /*外部函数声明-------------------------------------------------------------*/
 

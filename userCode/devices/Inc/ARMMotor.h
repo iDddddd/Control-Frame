@@ -20,7 +20,7 @@ public:
     float NowPos = 0;
     float TarPos = 0;
 
-    SteppingMotor_v4(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+    SteppingMotor_v4(uint32_t id, MOTOR_INIT_t *motorInit);
 
     ~SteppingMotor_v4();
 
@@ -53,7 +53,7 @@ public:
     float NowPos = 0;
     float TarPos = 0;
 
-    SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
+    SteppingMotor_v5(uint32_t id, MOTOR_INIT_t *motorInit);
 
     void Handle() override;
 
