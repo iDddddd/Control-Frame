@@ -37,6 +37,7 @@ typedef struct {
     Motor_4315 swerve;
     float orient, zeroOffset;
     float posx, posy;
+    float vx, vy;
 } Swerve_Module_t;
 
 class Chassis {
@@ -60,6 +61,7 @@ private:
     const Swerve_Module_t* BR = modules + 3;*/
 
     void ForwardKinematics();
+    void BackwardKinematics();
 };
 
 

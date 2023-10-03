@@ -71,3 +71,25 @@ void Chassis::ForwardKinematics() {
         module.swerve.SetTargetAngle(atan2(vy, vx) * 180 / PI + module.orient - module.zeroOffset);
     }
 }
+
+void Chassis::BackwardKinematics(){
+    float sum_posx, sum_posy, sum_posL2 = 0;
+    for(int i = 0; i < MODULE_NUM; i++){
+        sum_posx += modules[i].posx;
+        sum_posy += modules[i].posy;
+        sum_posL2 += modules[i].posx * modules[i].posx + modules[i].posy * modules[i].posy;
+    }
+    float a = sum_posy, b = -sum_posx, c = sum_posL2;
+    unsigned int n = MODULE_NUM;
+    float rev[9] = {(n*c-b*b)/n/(n*c-a*a-b*b), a*b/n/(n*c-a*a-b*b), -a/(n*c-a*a-b*b),
+                        a*b/n/(n*c-a*a-b*b), (n*c-a*a)/n/(n*c-a*a-b*b), -b/(n*c-a*a-b*b),
+                        -a/(n*c-a*a-b*b), -b/(n*c-a*a-b*b), n/(n*c-a*a-b*b)};//ATA的逆矩阵
+    estimation.vx = 0;
+    estimation.vy = 0;
+    estimation.w = 0;
+    for(int i = 0; i < MODULE_NUM; i++){
+        estimation.vx += ((rev[0] + rev[2] * modules[i].posy) * modules[i].vx + (rev[1] - rev[2] * modules[i].posx) * modules[i].vy);
+        estimation.vy += ((rev[3] + rev[5] * modules[i].posy) * modules[i].vx + (rev[4] - rev[5] * modules[i].posx) * modules[i].vy);
+        estimation.w += ((rev[6] + rev[8] * modules[i].posy) * modules[i].vx + (rev[7] - rev[8] * modules[i].posx) * modules[i].vy);
+    }
+}
