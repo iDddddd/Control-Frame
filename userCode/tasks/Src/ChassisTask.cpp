@@ -319,22 +319,21 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     CBR.SetTargetSpeed(ClassisSpeed[3]);
 
     //注：编码器的速度以及遥控器输入的控制速度均为°/s，用m/s时可能需要改pid参数
-    CFR.vx = v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
-    CFR.vy = v1y = CFR.state.speed * cos(RFR.nowAngle/180*PI);
-    CFL.vx = v2x = CFL.state.speed * sin(RFL.nowAngle/180*PI);
-    CFL.vy = v2y = CFL.state.speed * cos(RFL.nowAngle/180*PI);
-    CBL.vx = v3x = CBL.state.speed * sin(RBL.nowAngle/180*PI);
-    CBL.vy = v3y = CBL.state.speed * cos(RBL.nowAngle/180*PI);
-    CBR.vx = v4x = CBR.state.speed * sin(RBR.nowAngle/180*PI);
-    CBR.vy = v4y = CBR.state.speed * cos(RBR.nowAngle/180*PI);
-    CFR.target_vx = CFR.targetSpeed * sin(RFRAngle/180*PI);
-    CFR.target_vy = CFR.targetSpeed * cos(RFRAngle/180*PI);
-    CFL.target_vx = CFL.targetSpeed * sin(RFLAngle/180*PI);
-    CFL.target_vy = CFL.targetSpeed * cos(RFLAngle/180*PI);
-    CBL.target_vx = CBL.targetSpeed * sin(RBLAngle/180*PI);
-    CBL.target_vy = CBL.targetSpeed * cos(RBLAngle/180*PI);
-    CBR.target_vx = CBR.targetSpeed * sin(RBRAngle/180*PI);
-    CBR.target_vy = CBR.targetSpeed * cos(RBRAngle/180*PI);
-
+    v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
+    v1y = CFR.state.speed * cos(RFR.nowAngle/180*PI);
+    v2x = CFL.state.speed * sin(RFL.nowAngle/180*PI);
+    v2y = CFL.state.speed * cos(RFL.nowAngle/180*PI);
+    v3x = CBL.state.speed * sin(RBL.nowAngle/180*PI);
+    v3y = CBL.state.speed * cos(RBL.nowAngle/180*PI);
+    v4x = CBR.state.speed * sin(RBR.nowAngle/180*PI);
+    v4y = CBR.state.speed * cos(RBR.nowAngle/180*PI);
+/*    CFR.targetSpeed * sin(RFRAngle/180*PI);
+    CFR.targetSpeed * cos(RFRAngle/180*PI);
+    CFL.targetSpeed * sin(RFLAngle/180*PI);
+    CFL.targetSpeed * cos(RFLAngle/180*PI);
+    CBL.targetSpeed * sin(RBLAngle/180*PI);
+    CBL.targetSpeed * cos(RBLAngle/180*PI);
+    CBR.targetSpeed * sin(RBRAngle/180*PI);
+    CBR.targetSpeed * cos(RBRAngle/180*PI);*/
 }
 

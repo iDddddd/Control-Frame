@@ -103,13 +103,11 @@ Motor_4010::Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(c
 void Motor_4010::SetTargetAngle(float _targetAngle) {
     stopFlag = false;
     targetAngle = _targetAngle;
-    txPos = _targetAngle*100;
 }
 
 void Motor_4010::SetTargetSpeed(float _targetSpeed) {
     stopFlag = false;
     targetSpeed = _targetSpeed;
-    //txSpeed = _targetSpeed;
 }
 
 

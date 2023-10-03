@@ -30,7 +30,7 @@ private:
     float realAngle{0};
     float lastAngle{0};
     void AngleCalc();
-    uint16_t CRC16Calc(uint8_t *data, uint16_t length);
+    static uint16_t CRC16Calc(uint8_t *data, uint16_t length);
 
 };
 
@@ -40,13 +40,9 @@ class Motor_4010 : public Motor, public CAN {
 public:
     uint8_t RxMessage[8]{};
     int16_t motor4010_intensity{};
-    int32_t txPos{};
-    uint16_t txSpeed{300};
     float targetSpeed{};
     MOTOR_FEEDBACK_t feedback{};
     MOTOR_STATE_t state{};
-    float vx{}, vy{};
-    float target_vx{}, target_vy{};
 
     void CANMessageGenerate() override;
 
