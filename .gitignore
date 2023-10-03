@@ -1,12 +1,17 @@
 # Keil
 /MDK-ARM/RM_Frame_C
 /MDK-ARM/DebugConfig
-MDK-ARM/JLinkLog.txt
+MDK-ARM/JLink*
+MDK-ARM/*.scvd
 RM_Frame_C.uvguix.*
 
 # CLion
 /cmake-build*
 /.idea
+
+# VSCode
+/.vscode
+/build
 
 # Others
 *.crf
