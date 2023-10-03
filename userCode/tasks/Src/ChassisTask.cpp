@@ -7,7 +7,7 @@
 constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
-float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y = 0.0;
+
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
         .kp = 0.36f,
@@ -113,31 +113,29 @@ COMMU_INIT_t chassisCommuInit4 = {
         .canType = can1
 };
 
-//底盘电机实例化，之后只需调用SetTargetVelocity函数即可控制电机
 
-Motor_4010 CFR(&chassisCommuInit1, &chassisMotorInit1);
-Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit2);
-Motor_4010 CBL(&chassisCommuInit3, &chassisMotorInit3);
-Motor_4010 CBR(&chassisCommuInit4, &chassisMotorInit4);
-
-
-Motor_4315 RFR(MOTOR_ID_1, &swerveMotorInit);
-Motor_4315 RFL(MOTOR_ID_2, &swerveMotorInit);
-Motor_4315 RBL(MOTOR_ID_3, &swerveMotorInit);
-Motor_4315 RBR(MOTOR_ID_4, &swerveMotorInit);
-
+// 底盘对象实例化
+Chassis chassis(chassisCommuInit1, chassisMotorInit1, chassisCommuInit2, chassisMotorInit2, chassisCommuInit3, chassisMotorInit3, chassisCommuInit4, chassisMotorInit4, MOTOR_ID_1, swerveMotorInit, MOTOR_ID_2, swerveMotorInit, MOTOR_ID_3, swerveMotorInit, MOTOR_ID_4, swerveMotorInit);
 
 AutoMove autoMove;
-bool ChassisStopFlag = true;
-float FBVelocity, LRVelocity, RTVelocity;
-float ZeroYaw;
 
+// StateEstimator stateEstimator;
+
+
+/*函数成员实现--------------------------------------------------*/
+//构造函数
+Chassis::Chassis(COMMU_INIT_t c1, MOTOR_INIT_t m1, COMMU_INIT_t c2, MOTOR_INIT_t m2, COMMU_INIT_t c3, MOTOR_INIT_t m3, COMMU_INIT_t c4, MOTOR_INIT_t m4, int ID1, MOTOR_INIT_t r1, int ID2, MOTOR_INIT_t r2, int ID3, MOTOR_INIT_t r3, int ID4, MOTOR_INIT_t r4):CFR(&c1, &m1), CFL(&c2, &m2), CBL(&c3, &m3), CBR(&c4, &m4), RFR(ID1, &r1), RFL(ID2, &r2), RBL(ID3, &r3), RBR(ID4, &r4){};
+
+float* Chassis::get_v8(){
+    return v8;
+}
 
 /**
  * @brief 底盘任务的处理函数，定时执行
  * @callergraph void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) in Device.cpp
  */
-void ChassisHandle() {
+void Chassis::ChassisHandle() {
+    // stateEstimator.UpdateState(v8);
     if (!ChassisStopFlag) {
         WheelsSpeedCalc(FBVelocity, LRVelocity, RTVelocity);
     }
@@ -149,7 +147,7 @@ void ChassisHandle() {
  * @param _lrV 底盘左右方向速度
  * @param _rtV 底盘旋转速度
  */
-void ChassisSetVelocity(float _fbV, float _lrV, float _rtV) {
+void Chassis::ChassisSetVelocity(float _fbV, float _lrV, float _rtV) {
     ChassisStopFlag = false;
     FBVelocity = _fbV;
     LRVelocity = _lrV;
@@ -160,18 +158,18 @@ void ChassisSetVelocity(float _fbV, float _lrV, float _rtV) {
  * @brief 无头模式速度设定
  *
  */
-void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV) {
+void Chassis::HeadlessSetVelocity(float _fbV, float _lrV, float _rtV) {
     ChassisStopFlag = false;
     FBVelocity = _fbV * cos(IMU::imu.attitude.yaw) - _lrV * sin(IMU::imu.attitude.yaw);
     LRVelocity = _fbV * sin(IMU::imu.attitude.yaw) + _lrV * cos(IMU::imu.attitude.yaw);
     RTVelocity = _rtV;
 }
 
-void Headmemory() {
+void Chassis::Headmemory() {
     ZeroYaw = IMU::imu.attitude.yaw;
 }
 
-void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
+void Chassis::HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
     ChassisStopFlag = false;
     FBVelocity = _fbV * cos((IMU::imu.attitude.yaw - ZeroYaw)) - _lrV * sin((IMU::imu.attitude.yaw - ZeroYaw));
     LRVelocity = _fbV * sin((IMU::imu.attitude.yaw - ZeroYaw)) + _lrV * cos((IMU::imu.attitude.yaw - ZeroYaw));
@@ -181,7 +179,7 @@ void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
 /**
  * @brief 自动移动设定速度
  */
-void AutoSetVelocity() {
+void Chassis::AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
     FBVelocity = autoMove.vy;
@@ -190,12 +188,12 @@ void AutoSetVelocity() {
 
 }
 
-void ChassisDistanceSet(float x, float y, float o) {
+void Chassis::ChassisDistanceSet(float x, float y, float o) {
     autoMove.StartMove(x, y, o);
 }
 
 
-void ChassisVelocitySet(float x_vel, float y_vel, float w_vel) {
+void Chassis::ChassisVelocitySet(float x_vel, float y_vel, float w_vel) {
     FBVelocity = y_vel;
     LRVelocity = x_vel;
     RTVelocity = w_vel;
@@ -203,20 +201,18 @@ void ChassisVelocitySet(float x_vel, float y_vel, float w_vel) {
 /**
  * @brief 自动模式下执行急停模式的底盘任务处理
  */
-void AutoChassisStop() {
+void Chassis::AutoChassisStop() {
     ChassisStopFlag = true;
 
     //Classis_Motor.Stop();
     autoMove.StopMove();
-    /*RFL.Stop();
-    RFR.Stop();
-    RBL.Stop();
-    RBR.Stop();*/
+    /*chassis.RFL.Stop();
+    chassis.RFR.Stop();
+    chassis.RBL.Stop();
+    chassis.RBR.Stop();*/
     RFL.SetTargetAngle(0);
     RFR.SetTargetAngle(90);
     RBL.SetTargetAngle(90);//让车辆能及时刹住
-    //RFR.SetTargetAngle(0);
-    //RBL.SetTargetAngle(0);
     RBR.SetTargetAngle(0);
     CFR.Stop();
     CFL.Stop();
@@ -227,7 +223,7 @@ void AutoChassisStop() {
 /**
  * @brief 执行急停模式的底盘任务处理
  */
-void ChassisStop() {
+void Chassis::ChassisStop() {
     ChassisStopFlag = true;
 
     //Classis_Motor.Stop();
@@ -247,7 +243,7 @@ void ChassisStop() {
  * @param lrVelocity
  * @param rtVelocity
  */
-void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
+void Chassis::WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float ClassisSpeed[4];
     float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
    // rtVelocity *= -2.0f * PI;
@@ -266,11 +262,6 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RFLAngle = atan2(B, D) * 180 / PI; 
     RBLAngle = atan2(A, D) * 180 / PI;
     RBRAngle = atan2(A, C) * 180 / PI;
-//     if (RFRAngle < 0) RFRAngle += 360;
-//     if (RFLAngle < 0) RFLAngle += 360;
-//     if (RBLAngle < 0) RBLAngle += 360;
-//     if (RBRAngle < 0) RBRAngle += 360;
-
 
 
     //计算四个轮子线速度，单位：度/s
@@ -279,31 +270,24 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[1] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
     ClassisSpeed[2] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
     ClassisSpeed[3] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
-    
-   //计算四个轮子线速度，单位：m/s
-   /*
-    ClassisSpeed[0] = -sqrt(B * B + C * C);//右前轮
-    ClassisSpeed[1] = sqrt(B * B + D * D);//左前轮
-    ClassisSpeed[2] = sqrt(A * A + D * D);//左后轮
-    ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
 /*修正角度*/   
 /*
-    if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
+    if(abs(int(chassis.RFRAngle - chassis.RFR.nowAngle) % 360) >= 90) {
         ClassisSpeed[0] = -ClassisSpeed[0];
-        RFRAngle = (RFRAngle > 0) ? (RFRAngle - 180) : (RFRAngle + 180);
+        chassis.RFRAngle = (chassis.RFRAngle > 0) ? (chassis.RFRAngle - 180) : (chassis.RFRAngle + 180);
     }
-    if(abs(int(RFLAngle - RFL.nowAngle) % 360) >= 90) {
+    if(abs(int(chassis.RFLAngle - chassis.RFL.nowAngle) % 360) >= 90) {
         ClassisSpeed[1] = -ClassisSpeed[1];
-        RFLAngle = (RFLAngle > 0) ? (RFLAngle - 180) : (RFLAngle + 180);
+        chassis.RFLAngle = (chassis.RFLAngle > 0) ? (chassis.RFLAngle - 180) : (chassis.RFLAngle + 180);
     }
-    if(abs(int(RBLAngle - RBL.nowAngle) % 360) >= 90) {
+    if(abs(int(chassis.RBLAngle - chassis.RBL.nowAngle) % 360) >= 90) {
         ClassisSpeed[2] = -ClassisSpeed[2];
-        RBLAngle = (RBLAngle > 0) ? (RBLAngle - 180) : (RBLAngle + 180);
+        chassis.RBLAngle = (chassis.RBLAngle > 0) ? (chassis.RBLAngle - 180) : (chassis.RBLAngle + 180);
     }
-    if(abs(int(RBRAngle - RBR.nowAngle) % 360) >= 90) {
+    if(abs(int(chassis.RBRAngle - chassis.RBR.nowAngle) % 360) >= 90) {
         ClassisSpeed[3] = -ClassisSpeed[3];
-        RBRAngle = (RBRAngle > 0) ? (RBRAngle - 180) : (RBRAngle + 180);
+        chassis.RBRAngle = (chassis.RBRAngle > 0) ? (chassis.RBRAngle - 180) : (chassis.RBRAngle + 180);
     }*/  
 
     //设置底盘电机角度
@@ -319,22 +303,22 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     CBR.SetTargetSpeed(ClassisSpeed[3]);
 
     //注：编码器的速度以及遥控器输入的控制速度均为°/s，用m/s时可能需要改pid参数
-    CFR.vx = v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
-    CFR.vy = v1y = CFR.state.speed * cos(RFR.nowAngle/180*PI);
-    CFL.vx = v2x = CFL.state.speed * sin(RFL.nowAngle/180*PI);
-    CFL.vy = v2y = CFL.state.speed * cos(RFL.nowAngle/180*PI);
-    CBL.vx = v3x = CBL.state.speed * sin(RBL.nowAngle/180*PI);
-    CBL.vy = v3y = CBL.state.speed * cos(RBL.nowAngle/180*PI);
-    CBR.vx = v4x = CBR.state.speed * sin(RBR.nowAngle/180*PI);
-    CBR.vy = v4y = CBR.state.speed * cos(RBR.nowAngle/180*PI);
-    CFR.target_vx = CFR.targetSpeed * sin(RFRAngle/180*PI);
-    CFR.target_vy = CFR.targetSpeed * cos(RFRAngle/180*PI);
-    CFL.target_vx = CFL.targetSpeed * sin(RFLAngle/180*PI);
-    CFL.target_vy = CFL.targetSpeed * cos(RFLAngle/180*PI);
-    CBL.target_vx = CBL.targetSpeed * sin(RBLAngle/180*PI);
-    CBL.target_vy = CBL.targetSpeed * cos(RBLAngle/180*PI);
-    CBR.target_vx = CBR.targetSpeed * sin(RBRAngle/180*PI);
-    CBR.target_vy = CBR.targetSpeed * cos(RBRAngle/180*PI);
+    v8[0] = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
+    v8[1] = CFR.state.speed * cos(RFR.nowAngle/180*PI);
+    v8[2] = CFL.state.speed * sin(RFL.nowAngle/180*PI);
+    v8[3] = CFL.state.speed * cos(RFL.nowAngle/180*PI);
+    v8[4] = CBL.state.speed * sin(RBL.nowAngle/180*PI);
+    v8[5] = CBL.state.speed * cos(RBL.nowAngle/180*PI);
+    v8[6] = CBR.state.speed * sin(RBR.nowAngle/180*PI);
+    v8[7] = CBR.state.speed * cos(RBR.nowAngle/180*PI);
+    // CFR.target_vx = CFR.targetSpeed * sin(RFRAngle/180*PI);
+    // CFR.target_vy = CFR.targetSpeed * cos(RFRAngle/180*PI);
+    // CFL.target_vx = CFL.targetSpeed * sin(RFLAngle/180*PI);
+    // CFL.target_vy = CFL.targetSpeed * cos(RFLAngle/180*PI);
+    // CBL.target_vx = CBL.targetSpeed * sin(RBLAngle/180*PI);
+    // CBL.target_vy = CBL.targetSpeed * cos(RBLAngle/180*PI);
+    // CBR.target_vx = CBR.targetSpeed * sin(RBRAngle/180*PI);
+    // CBR.target_vy = CBR.targetSpeed * cos(RBRAngle/180*PI);
 
 }
 

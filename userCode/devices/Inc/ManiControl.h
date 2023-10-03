@@ -5,6 +5,7 @@
 #ifndef RM_FRAME_C_MANICONTROL_H
 #define RM_FRAME_C_MANICONTROL_H
 #include "Device.h"
+//#include "ChassisTask.h"
 
 #define BUFF_SIZE 40u
 #define CONTROL_LENGTH 0x10
@@ -63,9 +64,10 @@ void CompleteTask();//完成任务反馈函数,一般为向上位机发送数据
 uint8_t LRC_calc(uint8_t *data, uint8_t len);//LRC校验函数
 
 /*外部函数声明-------------------------------------------------------------*/
-extern void AutoChassisStop();//Realized in ChassisTask
-extern void ChassisDistanceSet(float x, float y, float o);//Realized in ChassisTask
-extern void ChassisVelocitySet(float x_vel, float y_vel, float w_vel);//Realized in ChassisTask
+
+// extern void AutoChassisStop();//Realized in ChassisTask
+// extern void ChassisDistanceSet(float x, float y, float o);//Realized in ChassisTask
+// extern void ChassisVelocitySet(float x_vel, float y_vel, float w_vel);//Realized in ChassisTask
 extern void ArmSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos);
 //extern void AutoTraySet(uint8_t trayflag);//Realized in ArmTask
 extern void ClawSet(uint8_t clawflag);//Realized in ArmTask

@@ -1,17 +1,18 @@
 #include "KF.h"
-//±äÁ¿¶¨Òå
+
+
 float prev_encoder_theta = 0.0;
 float encoder_theta = 0.0;
 float encoder_x = 0.0;
-float encoder_y = 0.0;//±àÂëÆ÷Àï³Ì¹À¼ÆÖµ
-extern float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y;//µ¥ÂÖÊı¾İ
+float encoder_y = 0.0;
+float* v8 = nullptr;
 float encoder_vx = 0.0;
 float encoder_vy = 0.0;
 float encoder_w = 0.0;
 
 float T83[24] = { 0.25,0,0.25,0,0.25,0,0.25,0,
 	0,0.25,0,0.25,0,0.25,0,0.25,
-	1.0417,-1.0417,1.0417,1.0417,-1.0417,1.0417,-1.0417,-1.0417 };//8¹À3¾ØÕó
+	1.0417,-1.0417,1.0417,1.0417,-1.0417,1.0417,-1.0417,-1.0417 };//8ä¼°3çŸ©é˜µ
 
 float F55[25] = { 1,0,dT,0,0,  0,1,0,dT,0,  0,0,1,0,0,  0,0,0,1,0,  0,0,0,0,1 };
 
@@ -19,14 +20,14 @@ float I55[25] = { 1,0,0,0,0,  0,1,0,0,0,  0,0,1,0,0,  0,0,0,1,0,  0,0,0,0,1 };
 float I33[9] = { 1,0,0,  0,1,0,  0,0,1 };
 
 
-//½¨Á¢¾ØÕó
+
 Matrix encoder_v3(3, 1);
 Matrix prev_encoder_v3(3, 1);
 Matrix prev_u(3,1);
 const Matrix trans8_3(T83, 3, 8);
 const Matrix F(F55, 5, 5);
-Matrix z(3, 1);//¹Û²âÁ¿£¬³õÊ¼»¯ÎªÈ«0
-Matrix state(5, 1);//×´Ì¬Á¿£¬³õÊ¼»¯ÎªÈ«0£¬·Ö±ğÎª£ºx¡¢y¡¢vx¡¢vy¡¢theta
+Matrix z(3, 1);//è§‚æµ‹é‡
+Matrix state(5, 1);//çŠ¶æ€é‡ï¼šx,y,vx,vy,theta
 Matrix IMUstate(5,1);
 Matrix P(I55, 5, 5);
 Matrix K(5, 3);
@@ -34,23 +35,23 @@ const Matrix Q(I55, 5, 5);
 const Matrix R(I33, 3, 3);
 const Matrix I(I55, 5, 5);
 
-//º¯Êı¶¨Òå
+//8ä¼°3
 void convert8_3() {
-    //¸üĞÂprev
+    //æ›´æ–°prev
     prev_encoder_v3 = encoder_v3;
 
-    //±àÂëÆ÷Êı¾İ¶ÁÈë
-    float v8[8] = { -v1x, -v1y, v2x, v2y, v3x, v3y, -v4x, -v4y };//´Ë´¦Íê³ÉÈ¡·´
+    //åŸå§‹å€¼
+    v8 = chassis.get_v8();//å»ºç«‹è¾“å…¥å‘é‡
     Matrix V8(v8, 8, 1);
 
-    //8¹À3
+    //8ä¼°3
     encoder_v3 = trans8_3 * V8;
     
-    //ËÙ¶ÈĞŞÕı
+    //å•ä½ä¿®æ­£
     encoder_v3.data[0][0] = encoder_v3.data[0][0] * WHEEL_DIAMETER * PI / 360;
     encoder_v3.data[1][0] = encoder_v3.data[1][0] * WHEEL_DIAMETER * PI / 360;
-    encoder_v3.data[2][0] = encoder_v3.data[2][0] * WHEEL_DIAMETER * PI / 360;//ÎÒÒ²²»ÖªµÀÎªÊ²Ã´ÊÇ360£»ÀíÂÛÉÏÓ¦¸ÃÊÇ180µÄ
-    //¹Û²âÁ¿¸üĞÂ
+    encoder_v3.data[2][0] = encoder_v3.data[2][0] * WHEEL_DIAMETER * PI / 360;
+    //è§‚æµ‹é‡æ›´æ–°
     z.data[0][0] = encoder_v3.data[0][0];
     z.data[1][0] = encoder_v3.data[1][0];
     z.data[2][0] += encoder_v3.data[2][0] * dT;
@@ -70,10 +71,10 @@ void get_encoder_mileage(){
 
 /**/
 void KalmanFilter() {
-    //IMUÊı¾İ¶ÁÈë
+    //IMUæ•°æ®è¯»å–
     float u3[3] = { IMU::imu.position._accel[0],IMU::imu.position._accel[1],IMU::imu.attitude.yaw_v };
     Matrix u(u3, 3, 1);
-    //ÂË²¨£¬Èç¹û¼ÓËÙ¶ÈÌ«Ğ¡£¬ÔòÊÓÎª¼ÓËÙ¶È¼ÆµÄÆ¯ÒÆ
+    //é™æ­¢æ—¶ï¼ŒåŠ é€Ÿåº¦ä¿®æ­£ä¸º0
     if (abs(u3[0]) <= 0.0055) {
         IMUstate.data[2][0] = 0.0;
         state.data[2][0] = 0.0;
@@ -84,7 +85,7 @@ void KalmanFilter() {
         state.data[3][0] = 0.0;
         u3[1] = 0.0;
     }
-    //´¿IMUÔ¤²â
+    //çº¯IMUé¢„æµ‹
     float IMUyaw = IMUstate.data[4][0];
     float IMU_B53[15] = { dT * dT * cos(IMUyaw) / 2,dT * dT * sin(IMUyaw) / 2,0,
         -dT * dT * sin(IMUyaw) / 2,dT * dT * cos(IMUyaw) / 2,0,
@@ -94,7 +95,7 @@ void KalmanFilter() {
     Matrix IMU_B(IMU_B53,5,3);
     IMUstate = F * IMUstate + IMU_B * u;
     
-    //Ô¤²â
+    //é¢„æµ‹
     float theta = state.data[4][0];
     float B53[15] = { dT * dT * cos(theta) / 2,dT * dT * sin(theta) / 2,0,
         -dT * dT * sin(theta) / 2,dT * dT * cos(theta) / 2,0,
@@ -103,20 +104,20 @@ void KalmanFilter() {
         0,0,dT };
     Matrix B(B53, 5, 3);
     state = F * state + B * u;
-    //Ô¤²âP
+    //é¢„æµ‹P
     P = F * P * F.transpose() + Q;
 
 
-    //¸üĞÂ
+    //æ›´æ–°
     float H35[15] = { 0,0,cos(theta),sin(theta),0,
         0,0,-sin(theta),cos(theta),0,
         0,0,0,0,1 };
     Matrix H(H35, 3, 5);
-    //¿¨¶ûÂüÔöÒæ
+    //å¡å°”æ›¼å¢ç›Š
     K = P * H.transpose() * (H * P * H.transpose() + R).inverse();
-    //»ñÈ¡×´Ì¬×îÓÅ¹À¼Æ
+    //æ›´æ–°çŠ¶æ€é‡
     state = state + K * (z - H * state);
-    //¸üĞÂĞ­·½²î¾ØÕó
+    //æ›´æ–°P
     P = (I - K * H) * P;
 
     prev_u = u;
@@ -129,11 +130,11 @@ void set_mileage_zero() {
 }
 
 
-void KalmanFilter2() {
-    //IMUÊı¾İ¶ÁÈë
+void KalmanFilter2() { // ä¿®æ­£ç‰ˆï¼Œåº”è¯¥è¿™ä¸ªç‰ˆæœ¬æ˜¯æ­£ç¡®çš„
+    //IMUæ•°æ®è¯»å–
     float u3[3] = { IMU::imu.position._accel[0],IMU::imu.position._accel[1],IMU::imu.attitude.yaw };
     Matrix u(u3, 3, 1);
-    //ÂË²¨£¬Èç¹û¼ÓËÙ¶ÈÌ«Ğ¡£¬ÔòÊÓÎª¼ÓËÙ¶È¼ÆµÄÆ¯ÒÆ
+    //é™æ­¢æ—¶ï¼ŒåŠ é€Ÿåº¦ä¿®æ­£ä¸º0
     if (abs(u3[0]) <= 0.0055) {
         IMUstate.data[2][0] = 0.0;
         state.data[2][0] = 0.0;
@@ -144,7 +145,7 @@ void KalmanFilter2() {
         state.data[3][0] = 0.0;
         u3[1] = 0.0;
     }
-    //´¿IMUÔ¤²â
+    //çº¯IMUé¢„æµ‹
     float IMUyaw = IMUstate.data[4][0];
     float IMU_B53[15] = { dT * dT * cos(IMUyaw) / 2,dT * dT * sin(IMUyaw) / 2,0,
         -dT * dT * sin(IMUyaw) / 2,dT * dT * cos(IMUyaw) / 2,0,
@@ -154,7 +155,7 @@ void KalmanFilter2() {
     Matrix IMU_B(IMU_B53,5,3);
     IMUstate = F * IMUstate + IMU_B * u;
     
-    //Ô¤²â
+    //é¢„æµ‹
     float theta = state.data[4][0];
     float B53[15] = { dT * dT * cos(theta) / 2,dT * dT * sin(theta) / 2,0,
         -dT * dT * sin(theta) / 2,dT * dT * cos(theta) / 2,0,
@@ -163,20 +164,20 @@ void KalmanFilter2() {
         0,0,1 };
     Matrix B(B53, 5, 3);
     state = F * state + B * u;
-    //Ô¤²âP
+    //é¢„æµ‹P
     P = F * P * F.transpose() + Q;
 
 
-    //¸üĞÂ
+    //æ›´æ–°
     float H35[15] = { 0,0,cos(theta),sin(theta),0,
         0,0,-sin(theta),cos(theta),0,
         0,0,0,0,1 };
     Matrix H(H35, 3, 5);
-    //¿¨¶ûÂüÔöÒæ
+    //å¡å°”æ›¼å¢ç›Š
     K = P * H.transpose() * (H * P * H.transpose() + R).inverse();
-    //»ñÈ¡×´Ì¬×îÓÅ¹À¼Æ
+    //æ›´æ–°çŠ¶æ€é‡
     state = state + K * (z - H * state);
-    //¸üĞÂĞ­·½²î¾ØÕó
+    //æ›´æ–°P
     P = (I - K * H) * P;
 
     prev_u = u;

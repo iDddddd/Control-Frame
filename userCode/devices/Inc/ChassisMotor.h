@@ -45,8 +45,6 @@ public:
     float targetSpeed{};
     MOTOR_FEEDBACK_t feedback{};
     MOTOR_STATE_t state{};
-    float vx{}, vy{};
-    float target_vx{}, target_vy{};
 
     void CANMessageGenerate() override;
 

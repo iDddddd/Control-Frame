@@ -3,6 +3,9 @@
 //
 
 #include "ManiControl.h"
+#include "ChassisTask.h"
+
+
 
 MC_ctrl_t ManiControl::mc_ctrl{};
 uint8_t ManiControl::mani_rx_buff[2][BUFF_SIZE];
@@ -102,7 +105,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
             case 0x01: {
                 TaskFlag = STOP;
                 mc_ctrl.ChassisStopFlag = mani_rx_buff[bufIndex][4];
-                AutoChassisStop();
+                chassis.AutoChassisStop();
                 break;
             }
             case 0x02: {
@@ -111,7 +114,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisDis_col.y_Dis, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisDis_col.Theta, &mani_rx_buff[bufIndex][12], 4);
 
-                ChassisDistanceSet(mc_ctrl.chassisDis_col.x_Dis.f, mc_ctrl.chassisDis_col.y_Dis.f,
+                chassis.ChassisDistanceSet(mc_ctrl.chassisDis_col.x_Dis.f, mc_ctrl.chassisDis_col.y_Dis.f,
                                    mc_ctrl.chassisDis_col.Theta.f);
                 break;
             }
@@ -147,7 +150,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisVel_col.y_Vel, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisVel_col.w_Vel, &mani_rx_buff[bufIndex][12], 4);
 
-                ChassisVelocitySet(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
+                chassis.ChassisVelocitySet(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
                                    mc_ctrl.chassisVel_col.w_Vel.f);
                 break;
             }

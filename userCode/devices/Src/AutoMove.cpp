@@ -25,7 +25,7 @@ void AutoMove::Handle() {
         vx = tem_vx;
         vy = tem_vy;
     } else {
-        AutoChassisStop();
+        chassis.AutoChassisStop();
     }
     if (X.FinishFlag && Y.FinishFlag && O.FinishFlag && !SendFlag) {
         StopMove();
@@ -40,9 +40,9 @@ void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
     X.Calc(x_distance);
     Y.Calc(y_distance);
     O.Calc(o_angle);
-    // encoder_theta = 0;
-    // encoder_x = 0;
-    // encoder_y = 0;
+    encoder_theta = 0;
+    encoder_x = 0;
+    encoder_y = 0;
     IMU::imu.position.displace[0] = 0;
     IMU::imu.position.displace[1] = 0;
 }
@@ -52,7 +52,7 @@ void AutoMove::StopMove() {
     X.Stop();
     Y.Stop();
     O.Stop();
-    WheelsSpeedCalc(0, 0, 0);//强行把底盘速度置0，不然编码器速度不会归零，目前不太清楚为什么
+    chassis.WheelsSpeedCalc(0, 0, 0);//强行把底盘速度置0，不然编码器速度不会归零，目前不太清楚为什么
 }
 
 
@@ -104,7 +104,8 @@ float Move_X::Handle(float reference) {
             v_rel = Para.v_max;
         }
     }
-    if (reference >= Para.d_max - 0.05) {
+    if (reference >= Para.d_max) {
+    //if ((reference >= Para.d_max - 0.05 && Para.d_max > 0.05) ||(reference >= Para.d_max && Para.d_max <= 0.05)) {
         //if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;
@@ -166,7 +167,8 @@ float Move_Y::Handle(float reference) {
             v_rel = Para.v_max;
         }       
     }
-    if (reference >= Para.d_max - 0.05) {
+    if (reference >= Para.d_max) {
+    //if ((reference >= Para.d_max - 0.05 && Para.d_max > 0.05) ||(reference >= Para.d_max && Para.d_max <= 0.05)) {
         //if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;
@@ -180,7 +182,7 @@ void Move_Y::Stop() {
 }
 
 Spin::Spin() {
-    Para.a = 1;
+    Para.a = 4;
     Para.v_max = 0.5;
     pid.kp = 0.015;
     pid.ki = 0;
@@ -190,9 +192,10 @@ Spin::Spin() {
 
 void Spin::Calc(float target) {
     if (target >= 0){
-        Para.a = 1;
+        Para.a = 4;
         Para.v_max = 0.5;
         stopFlag = false;
+        FinishFlag = false;
         //Para.d_max = target-IMU::imu.attitude.yaw;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
@@ -204,7 +207,7 @@ void Spin::Calc(float target) {
         }
     }
     else{
-        Para.a = -1;
+        Para.a = -4;
         Para.v_max = -0.5;
         stopFlag = false;
         Para.d_max = target;
@@ -247,7 +250,7 @@ float Spin::Handle(const float reference) {
             v_rel = Para.v_max;
         }*/
     }
-    if ((abs(reference - Para.d_max) < 0.23 && reference >= 0) || (abs(reference - Para.d_max) < 0.255 && reference < 0)) {//修正角度偏差；在转角在90~180时，似乎这个修正项是合理的
+    if ((abs(reference - Para.d_max) < 0.05 && Para.d_max >= 0) || (abs(reference - Para.d_max) < 0.05 && Para.d_max < 0)) {//修正角度偏差；在转角在90~180时，似乎这个修正项是合理的
         //if (expectPos >= Para.d_max) {
             Stop();
             FinishFlag = true;
