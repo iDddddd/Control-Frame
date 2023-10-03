@@ -139,9 +139,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
     if (htim == &htim7) {
         IMU::imu.Handle();
-        convert8_3();//8估3
-        get_encoder_mileage();//底盘里程更新
-    //    KalmanFilter();//目前卡尔曼滤波有问题
         CtrlHandle();
 
     }

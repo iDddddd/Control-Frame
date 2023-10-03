@@ -45,7 +45,7 @@ void Motor_4315::RS485MessageGenerate() {
  * @brief 4315电机类的执行处理函数
  */
 void Motor_4315::Handle() {
-    nowAngle = (float )(RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u) ) / 16384.0f * 360.0f;
+    nowAngle = (float)(RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u) ) / 16384.0f * 360.0f;
 
     AngleCalc();
     if (stopFlag == 1) {

@@ -1,7 +1,3 @@
-//
-// Created by mac on 2022/12/14.
-//
-
 #include "ManiControl.h"
 
 MC_ctrl_t ManiControl::mc_ctrl{};
@@ -102,7 +98,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
             case 0x01: {
                 TaskFlag = STOP;
                 mc_ctrl.ChassisStopFlag = mani_rx_buff[bufIndex][4];
-                AutoChassisStop();
+//                AutoChassisStop();
                 break;
             }
             case 0x02: {
@@ -111,8 +107,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisDis_col.y_Dis, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisDis_col.Theta, &mani_rx_buff[bufIndex][12], 4);
 
-                ChassisDistanceSet(mc_ctrl.chassisDis_col.x_Dis.f, mc_ctrl.chassisDis_col.y_Dis.f,
-                                   mc_ctrl.chassisDis_col.Theta.f);
+//                ChassisDistanceSet(mc_ctrl.chassisDis_col.x_Dis.f, mc_ctrl.chassisDis_col.y_Dis.f,mc_ctrl.chassisDis_col.Theta.f);
                 break;
             }
             case 0x03: {
@@ -147,7 +142,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisVel_col.y_Vel, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisVel_col.w_Vel, &mani_rx_buff[bufIndex][12], 4);
 
-                ChassisVelocitySet(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
+                ChassisSetVelocity(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
                                    mc_ctrl.chassisVel_col.w_Vel.f);
                 break;
             }

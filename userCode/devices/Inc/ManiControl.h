@@ -1,10 +1,7 @@
-//
-// Created by mac on 2022/12/14.
-//
-
 #ifndef RM_FRAME_C_MANICONTROL_H
 #define RM_FRAME_C_MANICONTROL_H
 #include "Device.h"
+#include "ChassisTask.h"
 
 #define BUFF_SIZE 40u
 #define CONTROL_LENGTH 0x10

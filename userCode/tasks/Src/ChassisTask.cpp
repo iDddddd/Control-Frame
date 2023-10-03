@@ -7,10 +7,8 @@
 constexpr float L = 0.24f; //车身长
 constexpr float M = 0.24f; //车身宽
 
-float v1x, v1y, v2x, v2y, v3x, v3y, v4x, v4y = 0.0;
-
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = 0.36f,
+        .kp = 0.38f,
         .ki = 0.006f,
         .kd = 0.3f,
         .componentKpMax = 2000,
@@ -18,54 +16,9 @@ PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
         .componentKdMax = 0,
         .outputMax = 2000
 };
-PID_Regulator_t pidRegulator2 = {//此为储存pid参数的结构体
-        .kp = 0.45f,
-        .ki = 0.006f,
-        .kd = 0.5f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
-PID_Regulator_t pidRegulator3 = {//此为储存pid参数的结构体
-        .kp = 0.35f,
-        .ki = 0.002f,
-        .kd = 0.3f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
-PID_Regulator_t pidRegulator4 = {//此为储存pid参数的结构体
-        .kp = 0.41f,
-        .ki = 0.006f,
-        .kd = 0.4f,
-        .componentKpMax = 2000,
-        .componentKiMax = 0,
-        .componentKdMax = 0,
-        .outputMax = 2000 //4010电机输出电流上限，可以调小，勿调大
-};
 
-MOTOR_INIT_t chassisMotorInit1 = {//底盘电机初始化结构体
+MOTOR_INIT_t chassisMotorInit = {//底盘电机初始化结构体
         .speedPIDp = &pidRegulator1,
-        .anglePIDp = nullptr,
-        .ctrlType = SPEED_Single,
-        .reductionRatio = 1.0f
-};
-MOTOR_INIT_t chassisMotorInit2 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator2,
-        .anglePIDp = nullptr,
-        .ctrlType = SPEED_Single,
-        .reductionRatio = 1.0f
-};
-MOTOR_INIT_t chassisMotorInit3 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator3,
-        .anglePIDp = nullptr,
-        .ctrlType = SPEED_Single,
-        .reductionRatio = 1.0f
-};
-MOTOR_INIT_t chassisMotorInit4 = {//底盘电机初始化结构体
-        .speedPIDp = &pidRegulator4,
         .anglePIDp = nullptr,
         .ctrlType = SPEED_Single,
         .reductionRatio = 1.0f
@@ -78,24 +31,6 @@ MOTOR_INIT_t swerveMotorInit = {//底盘电机初始化结构体
         .reductionRatio = 1.0f
 };
 
-MOTOR_INIT_t swerveMotorInit2 = {//底盘电机初始化结构体
-        .speedPIDp = nullptr,
-        .anglePIDp = nullptr,
-        .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
-};
-MOTOR_INIT_t swerveMotorInit3 = {//底盘电机初始化结构体
-        .speedPIDp = nullptr,
-        .anglePIDp = nullptr,
-        .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
-};
-MOTOR_INIT_t swerveMotorInit4 = {//底盘电机初始化结构体
-        .speedPIDp = nullptr,
-        .anglePIDp = nullptr,
-        .ctrlType = DIRECT,
-        .reductionRatio = 1.0f
-};
 COMMU_INIT_t chassisCommuInit1 = {
         ._id = 0x141,
         .canType = can1
@@ -115,10 +50,10 @@ COMMU_INIT_t chassisCommuInit4 = {
 
 //底盘电机实例化，之后只需调用SetTargetVelocity函数即可控制电机
 
-Motor_4010 CFR(&chassisCommuInit1, &chassisMotorInit1);
-Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit2);
-Motor_4010 CBL(&chassisCommuInit3, &chassisMotorInit3);
-Motor_4010 CBR(&chassisCommuInit4, &chassisMotorInit4);
+Motor_4010 CFR(&chassisCommuInit1, &chassisMotorInit);
+Motor_4010 CFL(&chassisCommuInit2, &chassisMotorInit);
+Motor_4010 CBL(&chassisCommuInit3, &chassisMotorInit);
+Motor_4010 CBR(&chassisCommuInit4, &chassisMotorInit);
 
 
 Motor_4315 RFR(MOTOR_ID_1, &swerveMotorInit);
@@ -127,10 +62,10 @@ Motor_4315 RBL(MOTOR_ID_3, &swerveMotorInit);
 Motor_4315 RBR(MOTOR_ID_4, &swerveMotorInit);
 
 
-AutoMove autoMove;
+//AutoMove autoMove;
 bool ChassisStopFlag = true;
 float FBVelocity, LRVelocity, RTVelocity;
-float ZeroYaw;
+//float ZeroYaw;
 
 
 /**
@@ -160,58 +95,51 @@ void ChassisSetVelocity(float _fbV, float _lrV, float _rtV) {
  * @brief 无头模式速度设定
  *
  */
-void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV) {
+/*void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV) {
     ChassisStopFlag = false;
     FBVelocity = _fbV * cos(IMU::imu.attitude.yaw) - _lrV * sin(IMU::imu.attitude.yaw);
     LRVelocity = _fbV * sin(IMU::imu.attitude.yaw) + _lrV * cos(IMU::imu.attitude.yaw);
     RTVelocity = _rtV;
-}
+}*/
 
-void Headmemory() {
+/*void Headmemory() {
     ZeroYaw = IMU::imu.attitude.yaw;
-}
+}*/
 
-void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
+/*void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV) {
     ChassisStopFlag = false;
     FBVelocity = _fbV * cos((IMU::imu.attitude.yaw - ZeroYaw)) - _lrV * sin((IMU::imu.attitude.yaw - ZeroYaw));
     LRVelocity = _fbV * sin((IMU::imu.attitude.yaw - ZeroYaw)) + _lrV * cos((IMU::imu.attitude.yaw - ZeroYaw));
     RTVelocity = _rtV;
-}
+}*/
 
 /**
  * @brief 自动移动设定速度
  */
-void AutoSetVelocity() {
+/*void AutoSetVelocity() {
     ChassisStopFlag = false;
     autoMove.Handle();
     FBVelocity = autoMove.vy;
     LRVelocity = autoMove.vx;
     RTVelocity = autoMove.vo;
+}*/
 
-}
-
-void ChassisDistanceSet(float x, float y, float o) {
+/*void ChassisDistanceSet(float x, float y, float o) {
     autoMove.StartMove(x, y, o);
-}
+}*/
 
-
-void ChassisVelocitySet(float x_vel, float y_vel, float w_vel) {
-    FBVelocity = y_vel;
-    LRVelocity = x_vel;
-    RTVelocity = w_vel;
-}
 /**
  * @brief 自动模式下执行急停模式的底盘任务处理
  */
-void AutoChassisStop() {
+/*void AutoChassisStop() {
     ChassisStopFlag = true;
 
     //Classis_Motor.Stop();
     autoMove.StopMove();
-    /*RFL.Stop();
+    RFL.Stop();
     RFR.Stop();
     RBL.Stop();
-    RBR.Stop();*/
+    RBR.Stop();
     RFL.SetTargetAngle(0);
     RFR.SetTargetAngle(90);
     RBL.SetTargetAngle(90);//让车辆能及时刹住
@@ -222,15 +150,13 @@ void AutoChassisStop() {
     CFL.Stop();
     CBL.Stop();
     CBR.Stop();
-}
+}*/
 
 /**
  * @brief 执行急停模式的底盘任务处理
  */
 void ChassisStop() {
     ChassisStopFlag = true;
-
-    //Classis_Motor.Stop();
     RFL.Stop();
     RFR.Stop();
     RBL.Stop();
@@ -319,21 +245,13 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     CBR.SetTargetSpeed(ClassisSpeed[3]);
 
     //注：编码器的速度以及遥控器输入的控制速度均为°/s，用m/s时可能需要改pid参数
-    v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
+/*    v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
     v1y = CFR.state.speed * cos(RFR.nowAngle/180*PI);
     v2x = CFL.state.speed * sin(RFL.nowAngle/180*PI);
     v2y = CFL.state.speed * cos(RFL.nowAngle/180*PI);
     v3x = CBL.state.speed * sin(RBL.nowAngle/180*PI);
     v3y = CBL.state.speed * cos(RBL.nowAngle/180*PI);
     v4x = CBR.state.speed * sin(RBR.nowAngle/180*PI);
-    v4y = CBR.state.speed * cos(RBR.nowAngle/180*PI);
-/*    CFR.targetSpeed * sin(RFRAngle/180*PI);
-    CFR.targetSpeed * cos(RFRAngle/180*PI);
-    CFL.targetSpeed * sin(RFLAngle/180*PI);
-    CFL.targetSpeed * cos(RFLAngle/180*PI);
-    CBL.targetSpeed * sin(RBLAngle/180*PI);
-    CBL.targetSpeed * cos(RBLAngle/180*PI);
-    CBR.targetSpeed * sin(RBRAngle/180*PI);
-    CBR.targetSpeed * cos(RBRAngle/180*PI);*/
+    v4y = CBR.state.speed * cos(RBR.nowAngle/180*PI);*/
 }
 
