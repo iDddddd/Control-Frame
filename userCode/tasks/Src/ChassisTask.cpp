@@ -1,6 +1,6 @@
-#include <cstdint>
-
-constexpr std::size_t MODULE_NUM = 4;
+constexpr float TRACK_WIDTH = 0.24f; //轮距
+constexpr float WHEEL_BASE = 0.24f; //轴距
+constexpr float WHEEL_DIAMETER = 0.052f; //4010直径 m
 
 #include "ChassisTask.h"
 #include "IMU.h"
@@ -34,17 +34,13 @@ COMMU_INIT_t chassisCommuInit2 = {0x142, can1};
 COMMU_INIT_t chassisCommuInit3 = {0x143, can1};
 COMMU_INIT_t chassisCommuInit4 = {0x144, can1};
 
-constexpr float TRACK_WIDTH = 0.24f; //轮距
-constexpr float WHEEL_BASE = 0.24f; //轴距
-constexpr float WHEEL_DIAMETER = 0.052f; //4010直径 m
-
 Chassis chassis;
 
 Chassis::Chassis() : modules{ \
-    Swerve_Module_t({{&chassisCommuInit1, &chassisMotorInit}, {MOTOR_ID_1, &swerveMotorInit}, 180, TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
-    Swerve_Module_t({{&chassisCommuInit2, &chassisMotorInit}, {MOTOR_ID_2, &swerveMotorInit}, 0, -TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
-    Swerve_Module_t({{&chassisCommuInit3, &chassisMotorInit}, {MOTOR_ID_3, &swerveMotorInit}, 0, -TRACK_WIDTH / 2, -WHEEL_BASE / 2}), \
-    Swerve_Module_t({{&chassisCommuInit4, &chassisMotorInit}, {MOTOR_ID_4, &swerveMotorInit}, 180, TRACK_WIDTH / 2, -WHEEL_BASE / 2}),
+    Swerve_Module_t({{&chassisCommuInit1, &chassisMotorInit}, {0, &swerveMotorInit}, 0, 180, TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
+    Swerve_Module_t({{&chassisCommuInit2, &chassisMotorInit}, {1, &swerveMotorInit}, 0, 0, -TRACK_WIDTH / 2, WHEEL_BASE / 2}), \
+    Swerve_Module_t({{&chassisCommuInit3, &chassisMotorInit}, {2, &swerveMotorInit}, 180, 180, -TRACK_WIDTH / 2, -WHEEL_BASE / 2}), \
+    Swerve_Module_t({{&chassisCommuInit4, &chassisMotorInit}, {3, &swerveMotorInit}, 180,  0, TRACK_WIDTH / 2, -WHEEL_BASE / 2}),
     } {
 
 }
@@ -77,6 +73,6 @@ void Chassis::ForwardKinematics() {
         float vx = target.vx - target.w * module.posx;
         float vy = target.vy + target.w * module.posy;
         module.wheel.SetTargetSpeed(sqrt(vx * vx + vy * vy) / (WHEEL_DIAMETER * PI) * 360);
-        module.swerve.SetTargetAngle(atan2(vy, vx) * 180 / PI + module.theta);
+        module.swerve.SetTargetAngle(atan2(vy, vx) * 180 / PI + module.orient - module.zeroOffset);
     }
 }

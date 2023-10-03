@@ -10,6 +10,8 @@
 #include "AutoMove.h"
 #include "ChassisMotor.h"
 
+constexpr std::size_t MODULE_NUM = 4;
+
 /*枚举类型定义------------------------------------------------------------*/
 
 /*
@@ -33,7 +35,7 @@ typedef struct {
 typedef struct {
     Motor_4010 wheel;
     Motor_4315 swerve;
-    float theta;
+    float orient, zeroOffset;
     float posx, posy;
 } Swerve_Module_t;
 
