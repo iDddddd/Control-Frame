@@ -8,8 +8,8 @@ MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
 MyMap<uint32_t, uint8_t *> RS485::dict_RS485;
 uint8_t RS485::rsmessage[4][11] = {0};
 TX_QUEUE_t CAN::canQueue = {
-        .front = 0,
-        .rear = 0,
+    .front = 0,
+    .rear = 0,
 };
 uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
 
@@ -78,30 +78,16 @@ void CAN::CANPackageSend() {
             HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
         } else if (canQueue.Data[canQueue.front].ID & CAN2_MASK) {
 
-            if (canQueue.Data[canQueue.front].DLC <= 0x08) {
-                txHeaderTypeDef.ExtId = canQueue.Data[canQueue.front].ID ^ CAN2_MASK;//从消息包中取出对应的ID
-                txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
-                txHeaderTypeDef.IDE = CAN_ID_EXT;//扩展帧
-                txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
-                txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-                HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-            } else {
-                txHeaderTypeDef.ExtId = canQueue.Data[canQueue.front].ID;
-                txHeaderTypeDef.DLC = 0x08;
-                txHeaderTypeDef.IDE = CAN_ID_EXT;
-                txHeaderTypeDef.RTR = CAN_RTR_DATA;
-                txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-                HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-                txHeaderTypeDef.ExtId = canQueue.Data[canQueue.front].ID + 1;
-                txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC - 0x08;
-                txHeaderTypeDef.IDE = CAN_ID_EXT;
-                txHeaderTypeDef.RTR = CAN_RTR_DATA;
-                txHeaderTypeDef.TransmitGlobalTime = DISABLE;
-                HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message + 8, &box);
-            }
+            txHeaderTypeDef.ExtId =canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
+            txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
+            txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
+            txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
+            txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
+
+            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
 
         }
-        memset(canQueue.Data[canQueue.front].message, 0 , sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
+        memset(canQueue.Data[canQueue.front].message, 0, sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
         canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
 }
@@ -115,10 +101,8 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     CAN_RxHeaderTypeDef rx_header;
 
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);//获取接收到的数据,完成后调用CAN中断处理函数，再次进入此函数等待接收
+    memcpy(dict_CAN[rx_header.StdId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 
-    uint32_t mapID = rx_header.StdId;
-    if(hcan == &hcan2) mapID |= 1u << 30;
-    memcpy(dict_CAN[mapID], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 }
 
 /**
@@ -172,7 +156,7 @@ void RS485::RS485Init() {
     //内存缓冲区 2
     hdma_usart1_rx.Instance->M1AR = (uint32_t) (rs485_rx_buff[1]);
     //数据长度
-    hdma_usart1_rx.Instance->NDTR = RX_SIZE;//不确定需不需要
+    hdma_usart1_rx.Instance->NDTR = RX_SIZE;
     //使能双缓冲区
     CLEAR_BIT(hdma_usart1_rx.Instance->CR, DMA_SxCR_DBM);
     SET_BIT(hdma_usart1_rx.Instance->CR, DMA_SxCR_CIRC);
@@ -185,7 +169,7 @@ void RS485::Rx_Handle() {
     {
         __HAL_UART_CLEAR_PEFLAG(&huart1);
     } else if (USART1->SR & UART_FLAG_IDLE) {
-        static uint16_t rx_len = 0;
+        static uint16_t uart1_rx_len = 0;
         __HAL_UART_CLEAR_PEFLAG(&huart1);
 
         if ((hdma_usart1_rx.Instance->CR & DMA_SxCR_CT) == RESET) {
@@ -195,7 +179,7 @@ void RS485::Rx_Handle() {
             __HAL_DMA_DISABLE(&hdma_usart1_rx);
 
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            rx_len = RX_SIZE - hdma_usart1_rx.Instance->NDTR;
+            uart1_rx_len = RX_SIZE - hdma_usart1_rx.Instance->NDTR;
 
             //重新设定数据长度
             hdma_usart1_rx.Instance->NDTR = RX_SIZE;
@@ -207,16 +191,15 @@ void RS485::Rx_Handle() {
             __HAL_DMA_ENABLE(&hdma_usart1_rx);
 
             //将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
-            if (rx_len == MOTOR_RX_SIZE) {
-                memcpy(dict_RS485[rs485_rx_buff[0][2] - 0x01], rs485_rx_buff[0], rx_len);
+            if (uart1_rx_len == MOTOR_RX_SIZE) {
+                memcpy(dict_RS485[rs485_rx_buff[0][2] - 0x01], rs485_rx_buff[0], uart1_rx_len);
             }
         } else {
             /* Current memory buffer used is Memory 1 */
             //失效DMA
             __HAL_DMA_DISABLE(&hdma_usart1_rx);
-
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            rx_len = RX_SIZE - hdma_usart1_rx.Instance->NDTR;
+            uart1_rx_len = RX_SIZE - hdma_usart1_rx.Instance->NDTR;
 
             //重新设定数据长度
             hdma_usart1_rx.Instance->NDTR = RX_SIZE;
@@ -226,8 +209,8 @@ void RS485::Rx_Handle() {
 
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart1_rx);
-            if (rx_len == MOTOR_RX_SIZE) {
-                memcpy(dict_RS485[rs485_rx_buff[1][2] - 0x01], rs485_rx_buff[1], rx_len);
+            if (uart1_rx_len == MOTOR_RX_SIZE) {
+                memcpy(dict_RS485[rs485_rx_buff[1][2] - 0x01], rs485_rx_buff[1], uart1_rx_len);
             }
         }
     }

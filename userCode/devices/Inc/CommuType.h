@@ -8,7 +8,7 @@
 #include "Device.h"
 #include "Map.h"
 
-#define MAX_MESSAGE_COUNT 20
+#define MAX_MESSAGE_COUNT 10
 #define RX_SIZE 20
 #define MOTOR_RX_SIZE 15u
 
@@ -23,7 +23,7 @@ constexpr uint32_t CAN2_MASK = 1u << 30;
 typedef struct {
     uint32_t ID;
     uint8_t DLC;
-    uint8_t message[16];
+    uint8_t message[8];
 }DATA_t;
 
 typedef struct {

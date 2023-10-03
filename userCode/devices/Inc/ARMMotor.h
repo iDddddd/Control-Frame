@@ -26,21 +26,17 @@ public:
 
     void Handle() override;
 
-    void MoveTo();
 
     void SetTargetPosition(float pos);
 
 private:
     uint8_t Direction{};
-    float Position{};
     uint16_t Speed{1500};
     uint32_t Pulse{0};
 
     bool SendFlag = false;
     uint8_t TxMessage[8]{0};
     uint8_t TxMessageDLC{};
-
-    int32_t nowPos = 0;
 
     void CANMessageGenerate() override;
 };
@@ -57,8 +53,6 @@ public:
 
     void Handle() override;
 
-    void MoveTo();
-
     void SetTargetPosition(float tarpos);
 
     ~SteppingMotor_v5();
@@ -69,7 +63,7 @@ private:
     uint32_t Pulse{};
 
     bool SendFlag = false;
-    uint8_t TxMessage[16]{0};
+    uint8_t TxMessage[8]{0};
     uint8_t TxMessageDLC{};
 
     int32_t nowPos = 0;
