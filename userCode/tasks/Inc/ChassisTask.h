@@ -10,10 +10,6 @@
 #include "AutoMove.h"
 #include "ChassisMotor.h"
 
-#define WHEEL_DIAMETER             0.052f//4010直径 m
-#define REDUCTION_RATIO 19.0f
-#define TRACK_WIDTH            0.40f //轮距
-#define WHEEL_BASE             0.38f //轴距
 /*枚举类型定义------------------------------------------------------------*/
 
 /*
@@ -25,52 +21,47 @@ typedef enum {
 
 /*结构体定义--------------------------------------------------------------*/
 
-/*
+/**
  * 底盘任务状态结构体
  */
 typedef struct {
+    float vx;
+    float vy;
+    float w;
+} Chassis_State_t;
 
-} CHASSIS_STATE_T;
-
-/*
- * 底盘任务控制结构体
- */
 typedef struct {
+    Motor_4010 wheel;
+    Motor_4315 swerve;
+    float theta;
+    float posx, posy;
+} Swerve_Module_t;
 
+class Chassis {
+public:
+    Chassis();
+    static Chassis& Instance();
 
-} CHASSIS_CONTROL_T;
+    Chassis_State_t SetTargetVelocity(Chassis_State_t set);
+    void Stop();
 
+    void Handle();
 
+private:
+    Swerve_Module_t modules[MODULE_NUM];
+    Chassis_State_t target = {0};
+    Chassis_State_t estimation = {0};
+    bool brake = false;
+/*    const Swerve_Module_t* FR = modules;
+    const Swerve_Module_t* FL = modules + 1;
+    const Swerve_Module_t* BL = modules + 2;
+    const Swerve_Module_t* BR = modules + 3;*/
 
-/*结构体成员取值定义组------------------------------------------------------*/
-/*外部变量声明-------------------------------------------------------------*/
-
-extern CHASSIS_STATE_T chassisState;
-extern CHASSIS_CONTROL_T chassisControl;
-
-extern float FBVelocity, LRVelocity, RTVelocity;
-extern float ZeroYaw;
+    void ForwardKinematics();
+};
 
 
 /*外部函数声明-------------------------------------------------------------*/
-int sign(float x);
-
-float SetAngle(float Angle);
-
-void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity);
-
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
-
-void ChassisStop();
-
-void ChassisSetVelocity(float _fbV, float _lrV, float _rtV);
-
-void HeadlessSetVelocity(float _fbV, float _lrV, float _rtV);
-
-void Headmemory();
-
-void HeadkeepSetVelocity(float _fbV, float _lrV, float _rtV);
-
-void AutoSetVelocity();
 
 #endif //RM_FRAME_C_CHASSISTASK_H

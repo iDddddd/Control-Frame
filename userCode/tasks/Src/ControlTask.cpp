@@ -5,7 +5,7 @@
 
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
-        ChassisStop();
+        Chassis::Instance().Stop();
         ArmStop();
     } 
     // else if (RemoteControl::rcInfo.sRight == MID_POS){//右侧二档，脉冲模式
@@ -15,8 +15,7 @@ void CtrlHandle() {
         switch (RemoteControl::rcInfo.sLeft) {
             case UP_POS://左侧一档{
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-                    ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                       RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
+                    Chassis::Instance().SetTargetVelocity({RemoteControl::rcInfo.right_col * 2,RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 5});
 //                    Headmemory();
                 }/*else if (RemoteControl::rcInfo.sRight == MID_POS){
                     AutoSetVelocity();

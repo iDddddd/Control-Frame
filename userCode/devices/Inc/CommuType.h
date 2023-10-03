@@ -21,12 +21,14 @@ typedef struct {
     uint32_t _id;//canID
     uint8_t canType;
 } COMMU_INIT_t;
+
 typedef struct {
     uint32_t ID;
     uint8_t DLC;
     uint8_t canType;
     uint8_t message[16];
 }DATA_t;
+
 typedef struct {
     DATA_t Data[MAX_MESSAGE_COUNT];
     int front;

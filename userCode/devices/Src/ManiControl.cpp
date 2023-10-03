@@ -142,8 +142,8 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.chassisVel_col.y_Vel, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.chassisVel_col.w_Vel, &mani_rx_buff[bufIndex][12], 4);
 
-                ChassisSetVelocity(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
-                                   mc_ctrl.chassisVel_col.w_Vel.f);
+//                ChassisSetVelocity(mc_ctrl.chassisVel_col.x_Vel.f, mc_ctrl.chassisVel_col.y_Vel.f,
+//                                   mc_ctrl.chassisVel_col.w_Vel.f);
                 break;
             }
         }
