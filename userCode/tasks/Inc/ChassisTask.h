@@ -10,7 +10,7 @@
 #include "AutoMove.h"
 #include "ChassisMotor.h"
 
-constexpr std::size_t MODULE_NUM = 4;
+constexpr std::size_t MODULE_NUM = 4u;
 
 /*枚举类型定义------------------------------------------------------------*/
 
@@ -35,9 +35,8 @@ typedef struct {
 typedef struct {
     Motor_4010 wheel;
     Motor_4315 swerve;
-    float orient, zeroOffset;
+    float orient, zeroOffset; // orient指轮组安装朝向，车轮向前为零点，逆时针为正；zeroOffset指电机零点的位置，电路板朝右为零点，与电机定义相同顺时针为正
     float posx, posy;
-    float vx, vy;
 } Swerve_Module_t;
 
 class Chassis {
@@ -61,7 +60,7 @@ private:
     const Swerve_Module_t* BR = modules + 3;*/
 
     void ForwardKinematics();
-    void BackwardKinematics();
+    void BackwardEstimation();
 };
 
 

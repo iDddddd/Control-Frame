@@ -160,7 +160,6 @@ void Motor_4010::MotorStateUpdate() {
     switch (ctrlType) {
         case SPEED_Single: {
             state.speed = (float) (feedback.speed) / reductionRatio;
-            //state.speed /= (360/PI/0.048f);
         }
         case POSITION_Double: {
             state.speed = (float) (feedback.speed) / reductionRatio;

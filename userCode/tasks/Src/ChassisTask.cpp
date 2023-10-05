@@ -61,6 +61,7 @@ void Chassis::Handle() {
     if(!brake) {
         ForwardKinematics();
     }
+    BackwardEstimation();
 }
 
 void Chassis::ForwardKinematics() {
@@ -72,24 +73,42 @@ void Chassis::ForwardKinematics() {
     }
 }
 
-void Chassis::BackwardKinematics(){
-    float sum_posx, sum_posy, sum_posL2 = 0;
-    for(int i = 0; i < MODULE_NUM; i++){
-        sum_posx += modules[i].posx;
-        sum_posy += modules[i].posy;
-        sum_posL2 += modules[i].posx * modules[i].posx + modules[i].posy * modules[i].posy;
+void Chassis::BackwardEstimation() {
+    float sumX = 0, sumY = 0, sumL2 = 0;
+    for(auto& module : modules){
+        sumX += module.posx;
+        sumY += module.posy;
+        sumL2 += module.posx * module.posx + module.posy * module.posy;
     }
-    float a = sum_posy, b = -sum_posx, c = sum_posL2;
-    unsigned int n = MODULE_NUM;
-    float rev[9] = {(n*c-b*b)/n/(n*c-a*a-b*b), a*b/n/(n*c-a*a-b*b), -a/(n*c-a*a-b*b),
-                        a*b/n/(n*c-a*a-b*b), (n*c-a*a)/n/(n*c-a*a-b*b), -b/(n*c-a*a-b*b),
-                        -a/(n*c-a*a-b*b), -b/(n*c-a*a-b*b), n/(n*c-a*a-b*b)};//ATA的逆矩阵
-    estimation.vx = 0;
-    estimation.vy = 0;
-    estimation.w = 0;
-    for(int i = 0; i < MODULE_NUM; i++){
-        estimation.vx += ((rev[0] + rev[2] * modules[i].posy) * modules[i].vx + (rev[1] - rev[2] * modules[i].posx) * modules[i].vy);
-        estimation.vy += ((rev[3] + rev[5] * modules[i].posy) * modules[i].vx + (rev[4] - rev[5] * modules[i].posx) * modules[i].vy);
-        estimation.w += ((rev[6] + rev[8] * modules[i].posy) * modules[i].vx + (rev[7] - rev[8] * modules[i].posx) * modules[i].vy);
+
+    #define DET (MODULE_NUM * (MODULE_NUM * sumL2 - sumX * sumX - sumY * sumY))
+
+    float rev[3][3] = { \
+        (MODULE_NUM * sumL2 - sumX * sumX) / DET, \
+        -sumX * sumY / DET, \
+        -sumY * MODULE_NUM  / DET, \
+        -sumX * sumY / DET, \
+        (MODULE_NUM * sumL2 - sumY * sumY) / DET, \
+        MODULE_NUM * sumX / DET, \
+        -sumY * MODULE_NUM / DET, \
+        sumX * MODULE_NUM / DET, \
+        MODULE_NUM * MODULE_NUM / DET \
+    };//ATA的逆矩阵
+
+    float sumVx = 0, sumVy = 0, crossProduct = 0;
+
+    for(auto& module : modules){
+        #define REAL_SPEED ((module.wheel.state.speed) / 360 * PI * WHEEL_DIAMETER)
+        #define REAL_ANGLE (((module.swerve.nowAngle) + module.orient - module.zeroOffset) * PI / 180)  // Additional PI/2 should be considered in the following procedure
+        float vx = -REAL_SPEED * sin(REAL_ANGLE); // cos(x + PI/2) = -sin(x)
+        float vy = REAL_SPEED * cos(REAL_ANGLE); // sin(x + PI/2) = cos(x)
+
+        sumVx += vx;
+        sumVy += vy;
+        crossProduct += vx * module.posy - vy * module.posx;
     }
+
+    estimation.vx = rev[0][0] * sumVx + rev[0][1] * sumVy + rev[0][2] * crossProduct;
+    estimation.vy = rev[1][0] * sumVx + rev[1][1] * sumVy + rev[1][2] * crossProduct;
+    estimation.w = rev[2][0] * sumVx + rev[2][1] * sumVy + rev[2][2] * crossProduct;
 }

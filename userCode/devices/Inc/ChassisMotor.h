@@ -40,7 +40,6 @@ class Motor_4010 : public Motor, public CAN {
 public:
     uint8_t RxMessage[8]{};
     int16_t motor4010_intensity{};
-    float targetSpeed{};
     MOTOR_FEEDBACK_t feedback{};
     MOTOR_STATE_t state{};
 
@@ -59,6 +58,7 @@ public:
 private:
     //位置模式
     float targetAngle{};
+    float targetSpeed{};
     float realAngle{};
     float thisAngle{};
     float lastRead{};

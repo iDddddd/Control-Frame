@@ -64,8 +64,9 @@ struct Motor_Object_t {
 class Motor : private Device {
 public:
     Motor(MOTOR_INIT_t *_init, Motor *motor);//电机初始化函数
-
     ~Motor();
+
+
 
     void ErrorHandle() override;
 
