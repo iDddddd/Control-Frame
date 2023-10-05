@@ -29,7 +29,7 @@ void AutoMove::Handle() {
     }
     if (X.FinishFlag && Y.FinishFlag && O.FinishFlag && !SendFlag) {
         StopMove();
-        CompleteTask();//?
+        CompleteTask(0x02);//?
         SendFlag = true;
     }//完成后发送
 }
