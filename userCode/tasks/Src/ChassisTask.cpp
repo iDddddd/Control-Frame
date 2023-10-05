@@ -3,7 +3,20 @@ constexpr float WHEEL_BASE = 0.24f; //轴距
 constexpr float WHEEL_DIAMETER = 0.052f; //4010直径 m
 
 #include "ChassisTask.h"
-#include "IMU.h"
+
+Odometer_State_t Odometer::OdomReset() {
+    Odometer_State_t retval = odom;
+    odom = {0};
+    return retval;
+}
+
+Odometer_State_t &Odometer::OdomCalc(Chassis_State_t curVel) {
+#define INTERVAL 0.001f
+    odom.x += (curVel.vx * cos(odom.theta) - curVel.vy * sin(odom.theta)) * INTERVAL;
+    odom.y += (curVel.vx * sin(odom.theta) + curVel.vy * cos(odom.theta)) * INTERVAL;
+    odom.theta += curVel.w * INTERVAL;
+    return odom;
+}
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
         .kp = 0.38f,
@@ -44,7 +57,7 @@ Chassis& Chassis::Instance() {
     return chassis;
 }
 
-Chassis_State_t Chassis::SetTargetVelocity(Chassis_State_t set) {
+Chassis_State_t& Chassis::SetTargetVelocity(Chassis_State_t set) {
     target = set;
     return target;
 }
@@ -61,7 +74,7 @@ void Chassis::Handle() {
     if(!brake) {
         ForwardKinematics();
     }
-    BackwardEstimation();
+    OdomCalc(BackwardEstimation());
 }
 
 void Chassis::ForwardKinematics() {
@@ -73,7 +86,7 @@ void Chassis::ForwardKinematics() {
     }
 }
 
-void Chassis::BackwardEstimation() {
+Chassis_State_t& Chassis::BackwardEstimation() {
     float sumX = 0, sumY = 0, sumL2 = 0;
     for(auto& module : modules){
         sumX += module.posx;
@@ -111,4 +124,6 @@ void Chassis::BackwardEstimation() {
     estimation.vx = rev[0][0] * sumVx + rev[0][1] * sumVy + rev[0][2] * crossProduct;
     estimation.vy = rev[1][0] * sumVx + rev[1][1] * sumVy + rev[1][2] * crossProduct;
     estimation.w = rev[2][0] * sumVx + rev[2][1] * sumVy + rev[2][2] * crossProduct;
+
+    return estimation;
 }

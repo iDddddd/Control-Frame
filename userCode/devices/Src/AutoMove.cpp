@@ -52,7 +52,6 @@ void AutoMove::StopMove() {
     X.Stop();
     Y.Stop();
     O.Stop();
-    WheelsSpeedCalc(0, 0, 0);//强行把底盘速度置0，不然编码器速度不会归零，目前不太清楚为什么
 }
 
 

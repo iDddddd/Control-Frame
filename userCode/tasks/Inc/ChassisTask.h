@@ -33,18 +33,32 @@ typedef struct {
 } Chassis_State_t;
 
 typedef struct {
+    float x;
+    float y;
+    float theta;
+} Odometer_State_t;
+
+typedef struct {
     Motor_4010 wheel;
     Motor_4315 swerve;
     float orient, zeroOffset; // orient指轮组安装朝向，车轮向前为零点，逆时针为正；zeroOffset指电机零点的位置，电路板朝右为零点，与电机定义相同顺时针为正
     float posx, posy;
 } Swerve_Module_t;
 
-class Chassis {
+class Odometer {
+public:
+    Odometer_State_t OdomReset();
+    Odometer_State_t &OdomCalc(Chassis_State_t curVel);
+private:
+    Odometer_State_t odom{0};
+};
+
+class Chassis : public Odometer{
 public:
     Chassis();
     static Chassis& Instance();
 
-    Chassis_State_t SetTargetVelocity(Chassis_State_t set);
+    Chassis_State_t& SetTargetVelocity(Chassis_State_t set);
     void Stop();
 
     void Handle();
@@ -60,11 +74,7 @@ private:
     const Swerve_Module_t* BR = modules + 3;*/
 
     void ForwardKinematics();
-    void BackwardEstimation();
+    Chassis_State_t& BackwardEstimation();
 };
-
-
-/*外部函数声明-------------------------------------------------------------*/
-void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 
 #endif //RM_FRAME_C_CHASSISTASK_H
