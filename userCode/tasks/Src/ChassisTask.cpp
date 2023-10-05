@@ -254,7 +254,8 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     float vx, vy, w;
     vx = lrVelocity;
     vy = fbVelocity;
-    w = rtVelocity * 2.0f * PI;//w顺时针为正
+    //w = rtVelocity * 2.0f * PI;//w顺时针为正
+    w = rtVelocity;
     float A, B, C, D;
     A = vx - w * L / 2;
     B = vx + w * L / 2;

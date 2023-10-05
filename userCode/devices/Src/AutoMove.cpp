@@ -40,9 +40,9 @@ void AutoMove::StartMove(float x_distance, float y_distance, float o_angle) {
     X.Calc(x_distance);
     Y.Calc(y_distance);
     O.Calc(o_angle);
-    // encoder_theta = 0;
-    // encoder_x = 0;
-    // encoder_y = 0;
+    encoder_theta = 0;
+    encoder_x = 0;
+    encoder_y = 0;
     IMU::imu.position.displace[0] = 0;
     IMU::imu.position.displace[1] = 0;
 }
@@ -98,7 +98,6 @@ float Move_X::Handle(float reference) {
         } else if (expectPos > Para.d1 && expectPos < (Para.d1 + Para.d2)) {
             expectPos += Para.v * 0.001f;
         }
-
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
         if (v_rel > Para.v_max) {
             v_rel = Para.v_max;
@@ -106,7 +105,7 @@ float Move_X::Handle(float reference) {
     }
     if (reference >= Para.d_max - 0.05) {
         //if (expectPos >= Para.d_max) {
-            Stop();
+            // Stop();
             FinishFlag = true;
         }
     return v_rel;
@@ -168,7 +167,7 @@ float Move_Y::Handle(float reference) {
     }
     if (reference >= Para.d_max - 0.05) {
         //if (expectPos >= Para.d_max) {
-            Stop();
+            // Stop();
             FinishFlag = true;
         }
     return v_rel;
@@ -180,9 +179,9 @@ void Move_Y::Stop() {
 }
 
 Spin::Spin() {
-    Para.a = 1;
-    Para.v_max = 0.5;
-    pid.kp = 0.015;
+    Para.a = 2;
+    Para.v_max = 1;
+    pid.kp = 1.5;
     pid.ki = 0;
     pid.kd = 0;
 
@@ -190,9 +189,11 @@ Spin::Spin() {
 
 void Spin::Calc(float target) {
     if (target >= 0){
-        Para.a = 1;
-        Para.v_max = 0.5;
+        Para.a = 8;
+        Para.v_max = 4;
         stopFlag = false;
+        FinishFlag = false;
+        expectPos = 0;
         //Para.d_max = target-IMU::imu.attitude.yaw;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
@@ -204,7 +205,7 @@ void Spin::Calc(float target) {
         }
     }
     else{
-        Para.a = -1;
+        Para.a = -2;
         Para.v_max = -0.5;
         stopFlag = false;
         Para.d_max = target;
@@ -247,11 +248,12 @@ float Spin::Handle(const float reference) {
             v_rel = Para.v_max;
         }*/
     }
-    if ((abs(reference - Para.d_max) < 0.23 && reference >= 0) || (abs(reference - Para.d_max) < 0.255 && reference < 0)) {//修正角度偏差；在转角在90~180时，似乎这个修正项是合理的
+    //if ((abs(reference - Para.d_max) < 0.227 && reference >= 0) || (abs(reference - Para.d_max) < 0.255 && reference < 0)) {//修正角度偏差；在转角在90~180时，似乎这个修正项是合理的
+    if ((abs(reference - Para.d_max) < 0.05)){
         //if (expectPos >= Para.d_max) {
-            Stop();
+            // Stop();
             FinishFlag = true;
-        }
+    }
     return v_rel;
 }
 
