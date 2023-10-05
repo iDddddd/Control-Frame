@@ -16,24 +16,11 @@ SteppingMotor_v4::SteppingMotor_v4(uint32_t id, MOTOR_INIT_t *motorInit) :
 
 
 void SteppingMotor_v4::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
-
-        canQueue.Data[canQueue.rear].ID = ID;
-        canQueue.Data[canQueue.rear].DLC = TxMessageDLC;
-        canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
-        canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
-        canQueue.Data[canQueue.rear].message[2] = TxMessage[2];
-        canQueue.Data[canQueue.rear].message[3] = TxMessage[3];
-        canQueue.Data[canQueue.rear].message[4] = TxMessage[4];
-        canQueue.Data[canQueue.rear].message[5] = TxMessage[5];
-        canQueue.Data[canQueue.rear].message[6] = TxMessage[6];
-        canQueue.Data[canQueue.rear].message[7] = TxMessage[7];
-
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    } else {
-        canQueue.rear = 0;
-        canQueue.front = 0;
-    }
+    canQueue.push({ \
+        ID, TxMessageDLC, \
+        TxMessage[0], TxMessage[1], TxMessage[2], TxMessage[3], \
+        TxMessage[4], TxMessage[5], TxMessage[6], TxMessage[7], \
+    });
 }
 
 void SteppingMotor_v4::Handle() {
@@ -82,25 +69,12 @@ SteppingMotor_v5::SteppingMotor_v5(uint32_t id, MOTOR_INIT_t *motorInit) :
 
 SteppingMotor_v5::~SteppingMotor_v5() = default;
 
-void SteppingMotor_v5::CANMessageGenerate() {;
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
-
-        canQueue.Data[canQueue.rear].ID = ID;
-        canQueue.Data[canQueue.rear].DLC = TxMessageDLC;
-        canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
-        canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
-        canQueue.Data[canQueue.rear].message[2] = TxMessage[2];
-        canQueue.Data[canQueue.rear].message[3] = TxMessage[3];
-        canQueue.Data[canQueue.rear].message[4] = TxMessage[4];
-        canQueue.Data[canQueue.rear].message[5] = TxMessage[5];
-        canQueue.Data[canQueue.rear].message[6] = TxMessage[6];
-        canQueue.Data[canQueue.rear].message[7] = TxMessage[7];
-
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    } else {
-        canQueue.rear = 0;
-        canQueue.front = 0;
-    }
+void SteppingMotor_v5::CANMessageGenerate() {
+    canQueue.push({ \
+        ID, TxMessageDLC, \
+        TxMessage[0], TxMessage[1], TxMessage[2], TxMessage[3], \
+        TxMessage[4], TxMessage[5], TxMessage[6], TxMessage[7], \
+    });
 }
 
 void SteppingMotor_v5::Handle() {

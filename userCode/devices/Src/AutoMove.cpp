@@ -1,31 +1,27 @@
-//
-// Created by David9686 on 2022/12/15.
-//
-
 #include "AutoMove.h"
 
 Move_X X;
 Move_Y Y;
 Spin O;
 float tem_vx,tem_vy;
-extern float encoder_x, encoder_y, encoder_theta;
+//extern float encoder_x, encoder_y, encoder_theta;
 
 void AutoMove::Handle() {
     if (!StopFlag) {
         // vx = X.Handle(IMU::imu.position.displace[1]);
         // vy = Y.Handle(IMU::imu.position.displace[0]);
         // vo = O.Handle(IMU::imu.attitude.yaw);
-        vx = X.Handle(encoder_x);
-        vy = Y.Handle(encoder_y);
-        vo = O.Handle(encoder_theta);
+//        vx = X.Handle(encoder_x);
+//        vy = Y.Handle(encoder_y);
+//        vo = O.Handle(encoder_theta);
         //vo = 0;//测试用，完了记得删
         /**/
-        tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
-        tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
+//        tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
+//        tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
         vx = tem_vx;
         vy = tem_vy;
     } else {
-        AutoChassisStop();
+        //AutoChassisStop();
     }
     if (X.FinishFlag && Y.FinishFlag && O.FinishFlag && !SendFlag) {
         StopMove();

@@ -26,11 +26,38 @@ typedef struct {
     uint8_t message[8];
 }DATA_t;
 
-typedef struct {
-    DATA_t Data[MAX_MESSAGE_COUNT];
-    int front;
-    int rear;
-}TX_QUEUE_t;
+class CANQueue {
+public:
+    bool isEmpty() const {
+        if(front == rear) return true;
+        else return false;
+    }
+
+    DATA_t* top() {
+        return &data[front];
+    }
+
+    DATA_t pop() {
+        DATA_t retval = data[front];
+        front = (front + 1) % MAX_MESSAGE_COUNT;
+        return retval;
+    }
+
+    void push(DATA_t&& input) {
+        if ((rear + 1) % MAX_MESSAGE_COUNT != front) {
+            data[rear] = input;
+            rear = (rear + 1) % MAX_MESSAGE_COUNT;
+        }
+        else {
+            rear = 0;
+            front = 0;
+        }
+    }
+
+private:
+    DATA_t data[MAX_MESSAGE_COUNT] = {0};
+    size_t front = 0, rear = 0;
+};
 
 /*类型定义----------------------------------------------------------------*/
 /*CAN类------------------------------------------------------------------*/
@@ -40,7 +67,7 @@ typedef struct {
 class CAN {
 public:
     uint32_t ID;//CAN ID
-    static TX_QUEUE_t canQueue;//CAN发送队列
+    static CANQueue canQueue;//CAN发送队列
 
     static void CANInit();//CAN初始化函数,需在main函数中调用，无需过多关注
 

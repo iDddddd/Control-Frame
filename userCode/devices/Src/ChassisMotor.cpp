@@ -1,7 +1,3 @@
-//
-// Created by 25396 on 2023/9/3.
-//
-
 #include "ChassisMotor.h"
 
 
@@ -111,26 +107,11 @@ void Motor_4010::SetTargetSpeed(float _targetSpeed) {
 
 
 void Motor_4010::CANMessageGenerate() {
-
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
-
-        canQueue.Data[canQueue.rear].ID = ID;
-        canQueue.Data[canQueue.rear].DLC = 0x08;
-        canQueue.Data[canQueue.rear].message[0] = 0xA1;
-        canQueue.Data[canQueue.rear].message[1] = 0x00;
-        canQueue.Data[canQueue.rear].message[2] = 0x00;
-        canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity;
-        canQueue.Data[canQueue.rear].message[5] = motor4010_intensity >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = 0x00;
-        canQueue.Data[canQueue.rear].message[7] = 0x00;
-
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    }else{
-        canQueue.rear = 0;
-        canQueue.front = 0;
-    }
-
+    canQueue.push({ \
+        ID, 0X08, \
+        0xA1, 0x00, 0x00, 0x00, \
+        static_cast<uint8_t>(motor4010_intensity), static_cast<uint8_t>(motor4010_intensity >> 8u), 0x00, 0x00 \
+    });
 }
 
 void Motor_4010::Handle() {

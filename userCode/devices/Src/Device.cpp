@@ -1,6 +1,3 @@
-//
-// Created by LEGION on 2021/10/4.
-//
 #include "Device.h"
 #include "RemoteControl.h"
 #include "Motor.h"

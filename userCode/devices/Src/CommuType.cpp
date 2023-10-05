@@ -1,16 +1,8 @@
-//
-// Created by 25396 on 2023/2/11.
-//
-
 #include "CommuType.h"
 
 MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
 MyMap<uint32_t, uint8_t *> RS485::dict_RS485;
 uint8_t RS485::rsmessage[4][11] = {0};
-TX_QUEUE_t CAN::canQueue = {
-    .front = 0,
-    .rear = 0,
-};
 uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
 
 /*CAN类------------------------------------------------------------------*/
@@ -64,31 +56,28 @@ CAN::~CAN() = default;
  *              in Device.cpp
  */
 void CAN::CANPackageSend() {
-    if (canQueue.front != canQueue.rear) {
+    if(!canQueue.isEmpty()) {
         CAN_TxHeaderTypeDef txHeaderTypeDef;
         uint32_t box = 0;//邮箱号
 
-        if (!(canQueue.Data[canQueue.front].ID & CAN2_MASK)) {
-            txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
-            txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
+        if (!(canQueue.top()->ID & CAN2_MASK)) {
+            txHeaderTypeDef.StdId = canQueue.top()->ID;//从消息包中取出对应的ID
+            txHeaderTypeDef.DLC = canQueue.top()->DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_STD;//标准帧
             txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
             txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
-            HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-        } else if (canQueue.Data[canQueue.front].ID & CAN2_MASK) {
-
-            txHeaderTypeDef.ExtId =canQueue.Data[canQueue.front].ID ^ CAN2_MASK;//从消息包中取出对应的ID
-            txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
+            HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.pop().message, &box);
+        }
+        else {
+            txHeaderTypeDef.ExtId =canQueue.top()->ID ^ CAN2_MASK;//从消息包中取出对应的ID
+            txHeaderTypeDef.DLC = canQueue.top()->DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
             txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
             txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
-            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-
+            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.pop().message, &box);
         }
-        memset(canQueue.Data[canQueue.front].message, 0, sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
-        canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
 }
 
@@ -114,6 +103,8 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
 void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
     dict_CAN.insert(ID, RxMessage);//将对应电机的canID与RxMessage绑定
 }
+
+CANQueue CAN::canQueue;
 
 
 
