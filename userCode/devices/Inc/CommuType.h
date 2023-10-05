@@ -1,14 +1,10 @@
-//
-// Created by 25396 on 2023/2/11.
-//
-
 #ifndef RM_FRAME_C_COMMUTYPE_H
 #define RM_FRAME_C_COMMUTYPE_H
 
 #include "Device.h"
 #include "Map.h"
 
-#define MAX_MESSAGE_COUNT 10
+#define MAX_MESSAGE_COUNT 20
 #define RX_SIZE 20
 #define MOTOR_RX_SIZE 15u
 
@@ -47,10 +43,6 @@ public:
         if ((rear + 1) % MAX_MESSAGE_COUNT != front) {
             data[rear] = input;
             rear = (rear + 1) % MAX_MESSAGE_COUNT;
-        }
-        else {
-            rear = 0;
-            front = 0;
         }
     }
 

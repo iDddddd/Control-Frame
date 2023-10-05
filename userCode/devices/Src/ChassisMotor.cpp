@@ -127,8 +127,10 @@ void Motor_4010::Handle() {
         motor4010_intensity = intensity;
     }
 
-
-    CANMessageGenerate();
+    static int i = 0;
+    if(i == 2) CANMessageGenerate();
+    i++;
+    i = i % 3;
 }
 
 void Motor_4010::MotorStateUpdate() {
