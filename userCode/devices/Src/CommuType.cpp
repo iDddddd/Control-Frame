@@ -78,7 +78,7 @@ void CAN::CANPackageSend() {
             HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
         } else if (canQueue.Data[canQueue.front].ID & CAN2_MASK) {
 
-            txHeaderTypeDef.ExtId =canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
+            txHeaderTypeDef.ExtId =canQueue.Data[canQueue.front].ID ^ CAN2_MASK;//从消息包中取出对应的ID
             txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
             txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
@@ -101,8 +101,10 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     CAN_RxHeaderTypeDef rx_header;
 
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);//获取接收到的数据,完成后调用CAN中断处理函数，再次进入此函数等待接收
-    memcpy(dict_CAN[rx_header.StdId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 
+    uint32_t mapID = rx_header.StdId;
+    if(hcan == &hcan2) mapID |= 1u << 30;
+    memcpy(dict_CAN[mapID], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 }
 
 /**
