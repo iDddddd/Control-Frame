@@ -13,7 +13,7 @@ const float dT = 0.001;
 
 
 
-//å®šä¹‰çš„å‡½æ•°
+//º¯Êý¶¨Òå
 void convert8_3();
 void get_encoder_mileage();
 void KalmanFilter();

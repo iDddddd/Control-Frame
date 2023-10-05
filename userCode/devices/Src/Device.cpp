@@ -113,7 +113,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
        // cnt2++;
 
         /**只需关注该部分代码**/
-        chassis.ChassisHandle();//底盘数据处理
+        ChassisHandle();//底盘数据处理
         
         Motor::MotorsHandle();//电机数据处理
        // if(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1)>0||HAL_CAN_GetTxMailboxesFreeLevel(&hcan2)>0) {
