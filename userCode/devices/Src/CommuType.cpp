@@ -56,27 +56,29 @@ CAN::~CAN() = default;
  *              in Device.cpp
  */
 void CAN::CANPackageSend() {
-    if(!canQueue.isEmpty()) {
+    if(!canQueue.empty()) {
         CAN_TxHeaderTypeDef txHeaderTypeDef;
         uint32_t box = 0;//邮箱号
 
-        if (!(canQueue.top()->ID & CAN2_MASK)) {
-            txHeaderTypeDef.StdId = canQueue.top()->ID;//从消息包中取出对应的ID
-            txHeaderTypeDef.DLC = canQueue.top()->DLC;//数据长度
+        if (!(canQueue.front().ID & CAN2_MASK)) {
+            txHeaderTypeDef.StdId = canQueue.front().ID;//从消息包中取出对应的ID
+            txHeaderTypeDef.DLC = canQueue.front().DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_STD;//标准帧
             txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
             txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
-            HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.pop().message, &box);
+            HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.front().message, &box);
+            canQueue.pop();
         }
         else {
-            txHeaderTypeDef.ExtId =canQueue.top()->ID ^ CAN2_MASK;//从消息包中取出对应的ID
-            txHeaderTypeDef.DLC = canQueue.top()->DLC;//数据长度
+            txHeaderTypeDef.ExtId = canQueue.front().ID ^ CAN2_MASK;//从消息包中取出对应的ID
+            txHeaderTypeDef.DLC = canQueue.front().DLC;//数据长度
             txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
             txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
             txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
-            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.pop().message, &box);
+            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.front().message, &box);
+            canQueue.pop();
         }
     }
 }
@@ -104,7 +106,7 @@ void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
     dict_CAN.insert(ID, RxMessage);//将对应电机的canID与RxMessage绑定
 }
 
-CANQueue CAN::canQueue;
+std::queue<DATA_t> CAN::canQueue;
 
 
 

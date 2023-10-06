@@ -16,11 +16,11 @@ SteppingMotor_v4::SteppingMotor_v4(uint32_t id, MOTOR_INIT_t *motorInit) :
 
 
 void SteppingMotor_v4::CANMessageGenerate() {
-    canQueue.push({ \
+    canQueue.push({\
         ID, TxMessageDLC, \
         TxMessage[0], TxMessage[1], TxMessage[2], TxMessage[3], \
         TxMessage[4], TxMessage[5], TxMessage[6], TxMessage[7], \
-    });
+});
 }
 
 void SteppingMotor_v4::Handle() {
@@ -70,11 +70,11 @@ SteppingMotor_v5::SteppingMotor_v5(uint32_t id, MOTOR_INIT_t *motorInit) :
 SteppingMotor_v5::~SteppingMotor_v5() = default;
 
 void SteppingMotor_v5::CANMessageGenerate() {
-    canQueue.push({ \
+    canQueue.push({\
         ID, TxMessageDLC, \
         TxMessage[0], TxMessage[1], TxMessage[2], TxMessage[3], \
         TxMessage[4], TxMessage[5], TxMessage[6], TxMessage[7], \
-    });
+});
 }
 
 void SteppingMotor_v5::Handle() {

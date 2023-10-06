@@ -18,8 +18,8 @@ Odometer_State_t &Odometer::OdomCalc(Chassis_State_t curVel) {
 }
 
 PID_Regulator_t pidRegulator1 = {//此为储存pid参数的结构体
-        .kp = 0.38f,
-        .ki = 0.006f,
+        .kp = 2.0f,
+        .ki = 0.01f,
         .kd = 0.3f,
         .componentKpMax = 2000,
         .componentKiMax = 0,

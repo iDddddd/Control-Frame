@@ -1,6 +1,8 @@
 #ifndef RM_FRAME_C_COMMUTYPE_H
 #define RM_FRAME_C_COMMUTYPE_H
 
+#include <queue>
+
 #include "Device.h"
 #include "Map.h"
 
@@ -22,25 +24,25 @@ typedef struct {
     uint8_t message[8];
 }DATA_t;
 
-class CANQueue {
+/*class CANQueue {
 public:
-    bool isEmpty() const {
-        if(front == rear) return true;
+    bool empty() const {
+        if(top == rear) return true;
         else return false;
     }
 
-    DATA_t* top() {
-        return &data[front];
+    DATA_t& front() {
+        return data[top];
     }
 
     DATA_t pop() {
-        DATA_t retval = data[front];
-        front = (front + 1) % MAX_MESSAGE_COUNT;
+        DATA_t retval = data[top];
+        top = (top + 1) % MAX_MESSAGE_COUNT;
         return retval;
     }
 
-    void push(DATA_t&& input) {
-        if ((rear + 1) % MAX_MESSAGE_COUNT != front) {
+    void emplace(DATA_t&& input) {
+        if ((rear + 1) % MAX_MESSAGE_COUNT != top) {
             data[rear] = input;
             rear = (rear + 1) % MAX_MESSAGE_COUNT;
         }
@@ -48,8 +50,8 @@ public:
 
 private:
     DATA_t data[MAX_MESSAGE_COUNT] = {0};
-    size_t front = 0, rear = 0;
-};
+    size_t top = 0, rear = 0;
+};*/
 
 /*类型定义----------------------------------------------------------------*/
 /*CAN类------------------------------------------------------------------*/
@@ -59,7 +61,8 @@ private:
 class CAN {
 public:
     uint32_t ID;//CAN ID
-    static CANQueue canQueue;//CAN发送队列
+    //static CANQueue canQueue;//CAN发送队列
+    static std::queue<DATA_t> canQueue;
 
     static void CANInit();//CAN初始化函数,需在main函数中调用，无需过多关注
 
