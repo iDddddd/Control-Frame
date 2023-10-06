@@ -12,17 +12,13 @@ StepperMotor::StepperMotor(MOTOR_INIT_t *_init) : Motor(_init, this) {
 }
 
 void StepperMotor::Handle() {
-    static int step_count = 0;
     if (stopFlag) {
-        STEP = 0;
+        HAL_TIM_PWM_Stop(&htim12, TIM_CHANNEL_2);
     }
-    step_count++;
-    if(step_count>1) {
-        if (STEP > 0) {
-            HAL_GPIO_TogglePin(STEP_GPIO_Port, STEP_Pin);
-            STEP--;
-        }
-        step_count = 0;
+    if(STEP > 0){
+        STEP--;
+    } else{
+        HAL_TIM_PWM_Stop(&htim12, TIM_CHANNEL_2);
     }
 }
 
@@ -31,13 +27,15 @@ void StepperMotor::Grab(bool _posflag) {
     stopFlag = false;
     if(posflag && !_posflag){
         DIR = 0;
-        HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
-        STEP = 300;
+        HAL_GPIO_WritePin(DIR_GPIO_Port,DIR_Pin, GPIO_PIN_RESET);
+        STEP = 1000;
         posflag = false;
     } else if(!posflag && _posflag){
         DIR = 1;
-        HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
-        STEP = 300;
+        HAL_GPIO_WritePin(DIR_GPIO_Port,DIR_Pin, GPIO_PIN_SET);
+        STEP = 1000;
         posflag = true;
     }
+    HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
+    __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 499);
 }

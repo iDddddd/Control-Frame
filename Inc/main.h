@@ -79,10 +79,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define DIR_Pin GPIO_PIN_0
-#define DIR_GPIO_Port GPIOF
-#define STEP_Pin GPIO_PIN_1
-#define STEP_GPIO_Port GPIOF
 #define IST8310_RSTN_Pin GPIO_PIN_6
 #define IST8310_RSTN_GPIO_Port GPIOG
 #define LED_R_Pin GPIO_PIN_12
@@ -109,8 +105,10 @@ void Error_Handler(void);
 #define OLED_RST_GPIO_Port GPIOB
 #define CS1_GYRO_Pin GPIO_PIN_0
 #define CS1_GYRO_GPIO_Port GPIOB
-#define OLED_DC_Pin GPIO_PIN_14
-#define OLED_DC_GPIO_Port GPIOB
+#define DIR_Pin GPIO_PIN_14
+#define DIR_GPIO_Port GPIOB
+#define STEP_Pin GPIO_PIN_15
+#define STEP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
