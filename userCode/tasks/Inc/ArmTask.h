@@ -14,7 +14,7 @@
 
 #define l2 152.8f
 #define l3 130.46f
-#define l4 133.36f
+#define l4 110.69
 
 class ArmTask {
 public:

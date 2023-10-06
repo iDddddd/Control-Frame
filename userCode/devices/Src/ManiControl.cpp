@@ -157,6 +157,12 @@ void ManiControl::GetData(uint8_t bufIndex) {
 
                break;
             }
+            case 0x09:{
+                TaskFlag = ARM_RESET;
+                mc_ctrl.arm_reset = mani_rx_buff[bufIndex][4];
+                
+                ArmReset();
+            }
         }
     }
 }

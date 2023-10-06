@@ -25,7 +25,7 @@ public:
     ~SteppingMotor_v4();
 
     void Handle() override;
-
+    void Reset();
 
     void SetTargetPosition(float pos);
 
@@ -54,6 +54,7 @@ public:
 
     void SetTargetPosition(float tarpos);
 
+    void Reset();
     ~SteppingMotor_v5();
 
 private:
@@ -69,7 +70,6 @@ private:
     int32_t nowPos = 0;
 
     void CANMessageGenerate() override;
-
 };
 
 #endif //RM_FRAME_C_ARMMOTOR_H

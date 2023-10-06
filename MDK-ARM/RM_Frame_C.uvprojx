@@ -878,4 +878,13 @@
     <files/>
   </RTE>
 
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>RM_Frame_C</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
+
 </Project>

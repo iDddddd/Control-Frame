@@ -128,6 +128,20 @@ void ArmTask::ArmCalc(float x,float y,float z){
     Angle[1] = PI/2 - angle1 - angle4;
     Angle[2] = PI/2 - angle2;
     Angle[3] = PI/2 - angle3 - angle5;
+    for(float & i : Angle) {
+        if(i != i){//判断是否为nan
+            i = 0;
+        }
+    }
+}
+
+void ArmReset() {
+    Joint1Motor.Reset();
+    Joint2Motor.Reset();
+    Joint3Motor.Reset();
+   // Joint4Motor.Reset();
+    Joint5Motor.Reset();
+
 }
 
 

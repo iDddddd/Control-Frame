@@ -38,7 +38,7 @@ void SteppingMotor_v4::CANMessageGenerate() {
 }
 
 void SteppingMotor_v4::Handle() {
-    if(SendFlag) {
+    if (SendFlag) {
         if (stopFlag) {
             Pulse = 0;
         } else {
@@ -71,6 +71,12 @@ void SteppingMotor_v4::SetTargetPosition(float pos) {
     TarPos = pos;
 }
 
+void SteppingMotor_v4::Reset() {
+    stopFlag = true;
+    TarPos = 0;
+    NowPos = 0;
+}
+
 SteppingMotor_v4::~SteppingMotor_v4() = default;
 
 
@@ -84,7 +90,8 @@ SteppingMotor_v5::SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorI
 
 SteppingMotor_v5::~SteppingMotor_v5() = default;
 
-void SteppingMotor_v5::CANMessageGenerate() {;
+void SteppingMotor_v5::CANMessageGenerate() {
+    ;
     if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
 
         canQueue.Data[canQueue.rear].ID = can_ID;
@@ -149,6 +156,20 @@ void SteppingMotor_v5::SetTargetPosition(float tarpos) {
     stopFlag = false;
     SendFlag = true;
     TarPos = tarpos;
+}
+
+void SteppingMotor_v5::Reset() {
+    stopFlag = true;
+    TxMessageDLC = 0x03;
+    TxMessage[0] = 0x0A;
+    TxMessage[1] = 0x6D;
+    TxMessage[2] = 0x6B;
+    TxMessage[3] = 0x00;
+    TxMessage[4] = 0x00;
+    TxMessage[5] = 0x00;
+    TxMessage[6] = 0x00;
+    TxMessage[7] = 0x00;
+    CANMessageGenerate();
 }
 
 

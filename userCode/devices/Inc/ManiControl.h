@@ -18,7 +18,8 @@ typedef enum {
     CLAW,
     TRAY,
     MOVE_VEL,
-    ARM_POS
+    ARM_POS,
+    ARM_RESET
 }TASK_FLAG_t;
 
 /*结构体定义--------------------------------------------------------------*/
@@ -48,6 +49,7 @@ typedef struct {
 typedef struct {
     ARM_col_t arm_col;
     ARM_pos_t arm_pos;
+    uint8_t arm_reset;
     ChassisDis_col_t chassisDis_col;
     ChassisVel_col_t chassisVel_col;
     uint8_t TrayFlag;
@@ -74,7 +76,8 @@ extern void AutoChassisStop();//Realized in ChassisTask
 extern void ChassisDistanceSet(float x, float y, float o);//Realized in ChassisTask
 extern void ChassisVelocitySet(float x_vel, float y_vel, float w_vel);//Realized in ChassisTask
 extern void ArmJointSet(float Joint1Pos, float Joint2Pos, float Joint3Pos, float Joint4Pos, float Joint5Pos);
-extern void ArmPositionSet(float x, float y, float z);//Realized in ArmJointTask
+extern void ArmPositionSet(float x, float y, float z);//Realized in ArmTask
+void ArmReset();//Realized in ArmTask
 //extern void AutoTraySet(uint8_t trayflag);//Realized in ArmJointTask
 extern void ClawSet(uint8_t clawflag);//Realized in ArmJointTask
 
