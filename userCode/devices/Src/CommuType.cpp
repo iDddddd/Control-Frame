@@ -1,6 +1,7 @@
 #include "CommuType.h"
 
-MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
+std::map<uint32_t, uint8_t *> CAN::dict_CAN;
+//MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
 MyMap<uint32_t, uint8_t *> RS485::dict_RS485;
 uint8_t RS485::rsmessage[4][11] = {0};
 uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
@@ -94,7 +95,9 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);//获取接收到的数据,完成后调用CAN中断处理函数，再次进入此函数等待接收
 
     uint32_t mapID = rx_header.StdId;
-    if(hcan == &hcan2) mapID |= 1u << 30;
+    if(mapID > 0x144 || mapID < 0x141) {
+			mapID |= 1u << 30;
+		}
     memcpy(dict_CAN[mapID], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
 }
 
@@ -103,7 +106,8 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
  * @param RxMessage
  */
 void CAN::ID_Bind_Rx(uint8_t *RxMessage) const {
-    dict_CAN.insert(ID, RxMessage);//将对应电机的canID与RxMessage绑定
+//    dict_CAN.insert(ID, RxMessage);//将对应电机的canID与RxMessage绑定
+    dict_CAN[ID] = RxMessage;
 }
 
 std::queue<DATA_t> CAN::canQueue;
@@ -225,10 +229,10 @@ void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) {
-      CAN::CANPackageSend();
+    CAN::CANPackageSend();
 }
 void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan) {
-      CAN::CANPackageSend();
+    CAN::CANPackageSend();
 }
 void USART1_IRQHandler() {
 

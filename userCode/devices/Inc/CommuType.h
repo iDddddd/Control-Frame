@@ -2,6 +2,7 @@
 #define RM_FRAME_C_COMMUTYPE_H
 
 #include <queue>
+#include <map>
 
 #include "Device.h"
 #include "Map.h"
@@ -77,7 +78,8 @@ public:
     virtual void CANMessageGenerate() = 0;//can消息包生成函数,需在每个电机类中实现
 
 protected:
-    static MyMap<uint32_t, uint8_t *> dict_CAN;//canID与can回传消息的字典
+    static std::map<uint32_t, uint8_t *> dict_CAN;//canID与can回传消息的字典
+//    static MyMap<uint32_t, uint8_t *> dict_CAN;
     void ID_Bind_Rx(uint8_t *RxMessage) const;//将canID与can回传消息绑定
 };
 
