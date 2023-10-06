@@ -12,7 +12,7 @@
 #define can1 1
 #define can2 2
 
-#define MAX_MESSAGE_COUNT 20
+#define MAX_MESSAGE_COUNT 10
 #define RX_SIZE 20
 #define MOTOR_RX_SIZE 15u
 /*结构体定义--------------------------------------------------------------*/
@@ -25,7 +25,7 @@ typedef struct {
     uint32_t ID;
     uint8_t DLC;
     uint8_t canType;
-    uint8_t message[16];
+    uint8_t message[8];
 }DATA_t;
 typedef struct {
     DATA_t Data[MAX_MESSAGE_COUNT];

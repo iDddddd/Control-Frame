@@ -19,7 +19,6 @@ void autoImpulse(){
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
-        ArmStop();
     } 
     // else if (RemoteControl::rcInfo.sRight == MID_POS){//右侧二档，脉冲模式
     //     ChassisSetVelocity(0.4,0,0);

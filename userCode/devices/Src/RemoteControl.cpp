@@ -79,7 +79,7 @@ void RemoteControl::ITHandle() {
     {
         __HAL_UART_CLEAR_PEFLAG(&huart3);
     } else if (USART3->SR & UART_FLAG_IDLE) {
-        static uint16_t this_time_rx_len = 0;
+        static uint16_t urat3_rx_len = 0;
 
         __HAL_UART_CLEAR_PEFLAG(&huart3);
 
@@ -92,7 +92,7 @@ void RemoteControl::ITHandle() {
 
             //get receive data length, length = set_data_length - remain_length
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            this_time_rx_len = SBUS_RX_BUF_NUM - hdma_usart3_rx.Instance->NDTR;
+            urat3_rx_len = SBUS_RX_BUF_NUM - hdma_usart3_rx.Instance->NDTR;
 
             //reset set_data_lenght
             //重新设定数据长度
@@ -106,7 +106,7 @@ void RemoteControl::ITHandle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart3_rx);
 
-            if (this_time_rx_len == RC_FRAME_LENGTH) {
+            if (urat3_rx_len == RC_FRAME_LENGTH) {
                 RemoteControl::sbus_to_rc(RemoteControl::sbus_rx_buf[0]);
             }
         } else {
@@ -117,7 +117,7 @@ void RemoteControl::ITHandle() {
 
             //get receive data length, length = set_data_length - remain_length
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            this_time_rx_len = SBUS_RX_BUF_NUM - hdma_usart3_rx.Instance->NDTR;
+            urat3_rx_len = SBUS_RX_BUF_NUM - hdma_usart3_rx.Instance->NDTR;
 
             //reset set_data_lenght
             //重新设定数据长度
@@ -131,7 +131,7 @@ void RemoteControl::ITHandle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart3_rx);
 
-            if (this_time_rx_len == RC_FRAME_LENGTH) {
+            if (urat3_rx_len == RC_FRAME_LENGTH) {
                 //处理遥控器数据
                 RemoteControl::sbus_to_rc(RemoteControl::sbus_rx_buf[1]);
             }
