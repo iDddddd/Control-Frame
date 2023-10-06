@@ -1,7 +1,6 @@
 constexpr float TRACK_WIDTH = 0.24f; //轮距
 constexpr float WHEEL_BASE = 0.24f; //轴距
 constexpr float WHEEL_DIAMETER = 0.052f; //4010直径 m
-
 #include "ChassisTask.h"
 
 Odometer_State_t Odometer::OdomReset() {
@@ -79,10 +78,10 @@ void Chassis::Handle() {
 
 void Chassis::ForwardKinematics() {
     for(auto& module : modules) {
-        float vx = target.vx - target.w * module.posx;
-        float vy = target.vy + target.w * module.posy;
+        float vx = target.vx + target.w * module.posy;
+        float vy = target.vy - target.w * module.posx;
         module.wheel.SetTargetSpeed(sqrt(vx * vx + vy * vy) / (WHEEL_DIAMETER * PI) * 360);
-        module.swerve.SetTargetAngle(atan2(vy, vx) * 180 / PI + module.orient - module.zeroOffset);
+        module.swerve.SetTargetAngle(atan2(vx, vy) * 180 / PI + module.orient - module.zeroOffset);
     }
 }
 
@@ -107,14 +106,13 @@ Chassis_State_t& Chassis::BackwardEstimation() {
         sumX * MODULE_NUM / DET, \
         MODULE_NUM * MODULE_NUM / DET \
     };//ATA的逆矩阵
-
     float sumVx = 0, sumVy = 0, crossProduct = 0;
 
     for(auto& module : modules){
         #define REAL_SPEED ((module.wheel.state.speed) / 360 * PI * WHEEL_DIAMETER)
         #define REAL_ANGLE (((module.swerve.nowAngle) + module.orient - module.zeroOffset) * PI / 180)  // Additional PI/2 should be considered in the following procedure
-        float vx = -REAL_SPEED * sin(REAL_ANGLE); // cos(x + PI/2) = -sin(x)
-        float vy = REAL_SPEED * cos(REAL_ANGLE); // sin(x + PI/2) = cos(x)
+        float vx = REAL_SPEED * sin(REAL_ANGLE); // cos(-x + PI/2) = sin(x)，转向电机的nowAngle是顺时针旋转为正方向
+        float vy = REAL_SPEED * cos(REAL_ANGLE); // sin(-x + PI/2) = cos(x)
 
         sumVx += vx;
         sumVy += vy;
