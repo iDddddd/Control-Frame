@@ -11,7 +11,7 @@ void CtrlHandle() {
         switch (RemoteControl::rcInfo.sLeft) {
             case UP_POS://左侧一档{
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-                    Chassis::Instance().SetTargetVelocity({RemoteControl::rcInfo.right_rol * 2,RemoteControl::rcInfo.right_col * 2, RemoteControl::rcInfo.left_rol * 5});
+                    Chassis::Instance().SetTargetVelocity({RemoteControl::rcInfo.right_rol * 2,RemoteControl::rcInfo.right_col * 2, -RemoteControl::rcInfo.left_rol * 5});
 //                    Headmemory();
                 }/*else if (RemoteControl::rcInfo.sRight == MID_POS){
                     AutoSetVelocity();
@@ -22,6 +22,7 @@ void CtrlHandle() {
                     // HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
                     //                     RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
 //                    ChassisDistanceSet(0, 0, PI/2);
+                    Chassis::Instance().SetTargetDistance({0,0.5,0});
                     
                 } else if (RemoteControl::rcInfo.sRight == MID_POS) {
 //                    ChassisDistanceSet(0, 1, 0);
@@ -31,7 +32,7 @@ void CtrlHandle() {
                 break;
             case DOWN_POS:
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
-//                    AutoSetVelocity();
+                    Chassis::Instance().CalcVelocity();
                 }
                 
                 break;

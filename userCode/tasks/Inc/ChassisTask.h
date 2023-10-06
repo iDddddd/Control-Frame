@@ -25,7 +25,7 @@ typedef enum {
 typedef struct {
     float vx;
     float vy;
-    float w;
+    float w;// 逆时针为正
 } Chassis_State_t;
 
 typedef struct {
@@ -45,7 +45,7 @@ class Odometer {
 public:
     Odometer_State_t OdomReset();
     Odometer_State_t &OdomCalc(Chassis_State_t curVel);
-private:
+protected:
     Odometer_State_t odom{0};
 };
 
@@ -55,6 +55,7 @@ public:
     static Chassis& Instance();
 
     Chassis_State_t& SetTargetVelocity(Chassis_State_t set);
+
     void Stop();
 
     void Handle();

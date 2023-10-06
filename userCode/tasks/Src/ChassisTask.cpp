@@ -78,10 +78,10 @@ void Chassis::Handle() {
 
 void Chassis::ForwardKinematics() {
     for(auto& module : modules) {
-        float vx = target.vx + target.w * module.posy;
-        float vy = target.vy - target.w * module.posx;
+        float vx = target.vx - target.w * module.posy;
+        float vy = target.vy + target.w * module.posx;
         module.wheel.SetTargetSpeed(sqrt(vx * vx + vy * vy) / (WHEEL_DIAMETER * PI) * 360);
-        module.swerve.SetTargetAngle(atan2(vx, vy) * 180 / PI + module.orient - module.zeroOffset);
+        module.swerve.SetTargetAngle(atan2(vx, vy) * 180 / PI + module.orient - module.zeroOffset); // 电机顺时针为正方向
     }
 }
 
@@ -98,12 +98,12 @@ Chassis_State_t& Chassis::BackwardEstimation() {
     float rev[3][3] = { \
         (MODULE_NUM * sumL2 - sumX * sumX) / DET, \
         -sumX * sumY / DET, \
-        -sumY * MODULE_NUM  / DET, \
+        sumY * MODULE_NUM  / DET, \
         -sumX * sumY / DET, \
         (MODULE_NUM * sumL2 - sumY * sumY) / DET, \
-        MODULE_NUM * sumX / DET, \
-        -sumY * MODULE_NUM / DET, \
-        sumX * MODULE_NUM / DET, \
+        -MODULE_NUM * sumX / DET, \
+        sumY * MODULE_NUM / DET, \
+        -sumX * MODULE_NUM / DET, \
         MODULE_NUM * MODULE_NUM / DET \
     };//ATA的逆矩阵
     float sumVx = 0, sumVy = 0, crossProduct = 0;
@@ -116,7 +116,7 @@ Chassis_State_t& Chassis::BackwardEstimation() {
 
         sumVx += vx;
         sumVy += vy;
-        crossProduct += vx * module.posy - vy * module.posx;
+        crossProduct += vy * module.posx - vx * module.posy;
     }
 
     estimation.vx = rev[0][0] * sumVx + rev[0][1] * sumVy + rev[0][2] * crossProduct;
