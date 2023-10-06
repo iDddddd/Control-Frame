@@ -731,11 +731,6 @@
               <FileType>8</FileType>
               <FilePath>..\userCode\tasks\Src\Matrix.cpp</FilePath>
             </File>
-            <File>
-              <FileName>KF.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\userCode\tasks\Src\KF.cpp</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
