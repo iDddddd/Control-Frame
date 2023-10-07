@@ -16,24 +16,24 @@ SteppingMotor_v4::SteppingMotor_v4(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorI
 
 
 void SteppingMotor_v4::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((can2Queue.rear + 1) % MAX_MESSAGE_COUNT != can2Queue.front) {
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].DLC = TxMessageDLC;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
-        canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
-        canQueue.Data[canQueue.rear].message[2] = TxMessage[2];
-        canQueue.Data[canQueue.rear].message[3] = TxMessage[3];
-        canQueue.Data[canQueue.rear].message[4] = TxMessage[4];
-        canQueue.Data[canQueue.rear].message[5] = TxMessage[5];
-        canQueue.Data[canQueue.rear].message[6] = TxMessage[6];
-        canQueue.Data[canQueue.rear].message[7] = TxMessage[7];
+        can2Queue.Data[can2Queue.rear].ID = can_ID;
+        can2Queue.Data[can2Queue.rear].DLC = TxMessageDLC;
+        can2Queue.Data[can2Queue.rear].canType = canType;
+        can2Queue.Data[can2Queue.rear].message[0] = TxMessage[0];
+        can2Queue.Data[can2Queue.rear].message[1] = TxMessage[1];
+        can2Queue.Data[can2Queue.rear].message[2] = TxMessage[2];
+        can2Queue.Data[can2Queue.rear].message[3] = TxMessage[3];
+        can2Queue.Data[can2Queue.rear].message[4] = TxMessage[4];
+        can2Queue.Data[can2Queue.rear].message[5] = TxMessage[5];
+        can2Queue.Data[can2Queue.rear].message[6] = TxMessage[6];
+        can2Queue.Data[can2Queue.rear].message[7] = TxMessage[7];
 
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+        can2Queue.rear = (can2Queue.rear + 1) % MAX_MESSAGE_COUNT;
     } else {
-        canQueue.rear = 0;
-        canQueue.front = 0;
+        can2Queue.rear = 0;
+        can2Queue.front = 0;
     }
 }
 
@@ -91,24 +91,24 @@ SteppingMotor_v5::SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorI
 SteppingMotor_v5::~SteppingMotor_v5() = default;
 
 void SteppingMotor_v5::CANMessageGenerate() {
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((can2Queue.rear + 1) % MAX_MESSAGE_COUNT != can2Queue.front) {
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].DLC = TxMessageDLC;
-        canQueue.Data[canQueue.rear].canType = canType;
-        canQueue.Data[canQueue.rear].message[0] = TxMessage[0];
-        canQueue.Data[canQueue.rear].message[1] = TxMessage[1];
-        canQueue.Data[canQueue.rear].message[2] = TxMessage[2];
-        canQueue.Data[canQueue.rear].message[3] = TxMessage[3];
-        canQueue.Data[canQueue.rear].message[4] = TxMessage[4];
-        canQueue.Data[canQueue.rear].message[5] = TxMessage[5];
-        canQueue.Data[canQueue.rear].message[6] = TxMessage[6];
-        canQueue.Data[canQueue.rear].message[7] = TxMessage[7];
+        can2Queue.Data[can2Queue.rear].ID = can_ID;
+        can2Queue.Data[can2Queue.rear].DLC = TxMessageDLC;
+        can2Queue.Data[can2Queue.rear].canType = canType;
+        can2Queue.Data[can2Queue.rear].message[0] = TxMessage[0];
+        can2Queue.Data[can2Queue.rear].message[1] = TxMessage[1];
+        can2Queue.Data[can2Queue.rear].message[2] = TxMessage[2];
+        can2Queue.Data[can2Queue.rear].message[3] = TxMessage[3];
+        can2Queue.Data[can2Queue.rear].message[4] = TxMessage[4];
+        can2Queue.Data[can2Queue.rear].message[5] = TxMessage[5];
+        can2Queue.Data[can2Queue.rear].message[6] = TxMessage[6];
+        can2Queue.Data[can2Queue.rear].message[7] = TxMessage[7];
 
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
+        can2Queue.rear = (can2Queue.rear + 1) % MAX_MESSAGE_COUNT;
     } else {
-        canQueue.rear = 0;
-        canQueue.front = 0;
+        can2Queue.rear = 0;
+        can2Queue.front = 0;
     }
 }
 

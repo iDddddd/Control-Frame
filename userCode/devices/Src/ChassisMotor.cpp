@@ -45,13 +45,15 @@ void Motor_4315::RS485MessageGenerate() {
  * @brief 4315电机类的执行处理函数
  */
 void Motor_4315::Handle() {
-    nowAngle = (float )(RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u) ) / 16384.0f * 360.0f;
+    nowAngle =
+            (float) (RxMessage[7] | (RxMessage[8] << 8u) | (RxMessage[9] << 16u) | (RxMessage[10] << 24u)) / 16384.0f *
+            360.0f;
 
     AngleCalc();
     if (stopFlag == 1) {
-        motor4315_angle[rs485_ID] = (int32_t )(zeroAngle * 16384.0f / 360.0f);
+        motor4315_angle[rs485_ID] = (int32_t) (zeroAngle * 16384.0f / 360.0f);
     } else {
-        motor4315_angle[rs485_ID] = (int32_t )(realAngle * 16384.0f / 360.0f);
+        motor4315_angle[rs485_ID] = (int32_t) (realAngle * 16384.0f / 360.0f);
     }
 
     RS485MessageGenerate();
@@ -103,7 +105,7 @@ Motor_4010::Motor_4010(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit) : CAN(c
 void Motor_4010::SetTargetAngle(float _targetAngle) {
     stopFlag = false;
     targetAngle = _targetAngle;
-    txPos = _targetAngle*100;
+    txPos = _targetAngle * 100;
 }
 
 void Motor_4010::SetTargetSpeed(float _targetSpeed) {
@@ -115,24 +117,24 @@ void Motor_4010::SetTargetSpeed(float _targetSpeed) {
 
 void Motor_4010::CANMessageGenerate() {
 
-    if ((canQueue.rear + 1) % MAX_MESSAGE_COUNT != canQueue.front) {
+    if ((can1Queue.rear + 1) % MAX_MESSAGE_COUNT != can1Queue.front) {
 
-        canQueue.Data[canQueue.rear].ID = can_ID;
-        canQueue.Data[canQueue.rear].canType = canType;
-				canQueue.Data[canQueue.rear].DLC = 0x08;
-        canQueue.Data[canQueue.rear].message[0] = 0xA1;
-        canQueue.Data[canQueue.rear].message[1] = 0x00;
-        canQueue.Data[canQueue.rear].message[2] = 0x00;
-        canQueue.Data[canQueue.rear].message[3] = 0x00;
-        canQueue.Data[canQueue.rear].message[4] = motor4010_intensity;
-        canQueue.Data[canQueue.rear].message[5] = motor4010_intensity >> 8u;
-        canQueue.Data[canQueue.rear].message[6] = 0x00;
-        canQueue.Data[canQueue.rear].message[7] = 0x00;
+        can1Queue.Data[can1Queue.rear].ID = can_ID;
+        can1Queue.Data[can1Queue.rear].canType = canType;
+        can1Queue.Data[can1Queue.rear].DLC = 0x08;
+        can1Queue.Data[can1Queue.rear].message[0] = 0xA1;
+        can1Queue.Data[can1Queue.rear].message[1] = 0x00;
+        can1Queue.Data[can1Queue.rear].message[2] = 0x00;
+        can1Queue.Data[can1Queue.rear].message[3] = 0x00;
+        can1Queue.Data[can1Queue.rear].message[4] = motor4010_intensity;
+        can1Queue.Data[can1Queue.rear].message[5] = motor4010_intensity >> 8u;
+        can1Queue.Data[can1Queue.rear].message[6] = 0x00;
+        can1Queue.Data[can1Queue.rear].message[7] = 0x00;
 
-        canQueue.rear = (canQueue.rear + 1) % MAX_MESSAGE_COUNT;
-    }else{
-        canQueue.rear = 0;
-        canQueue.front = 0;
+        can1Queue.rear = (can1Queue.rear + 1) % MAX_MESSAGE_COUNT;
+    } else {
+        can1Queue.rear = 0;
+        can1Queue.front = 0;
     }
 
 }
@@ -154,8 +156,12 @@ void Motor_4010::Handle() {
         motor4010_intensity = intensity;
     }
 
+    static int sendcount = 0;
+    if (sendcount++ > 1) {
+        CANMessageGenerate();
+        sendcount = 0;
+    }
 
-    CANMessageGenerate();
 }
 
 void Motor_4010::MotorStateUpdate() {
@@ -202,7 +208,6 @@ void Motor_4010::MotorStateUpdate() {
     }
 
 }
-
 
 
 int16_t Motor_4010::IntensityCalc() {

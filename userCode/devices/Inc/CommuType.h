@@ -41,7 +41,8 @@ typedef struct {
 class CAN {
 public:
     uint32_t can_ID;//CAN ID
-    static TX_QUEUE_t canQueue;//CAN发送队列
+    static TX_QUEUE_t can1Queue;//CAN发送队列
+    static TX_QUEUE_t can2Queue;//CAN发送队列
 
     static void CANInit();//CAN初始化函数,需在main函数中调用，无需过多关注
 

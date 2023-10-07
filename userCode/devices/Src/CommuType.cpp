@@ -7,10 +7,8 @@
 MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
 MyMap<uint32_t, uint8_t *> RS485::dict_RS485;
 uint8_t RS485::rsmessage[4][11] = {0};
-TX_QUEUE_t CAN::canQueue = {
-        .front = 0,
-        .rear = 0,
-};
+TX_QUEUE_t CAN::can1Queue = {0};
+TX_QUEUE_t CAN::can2Queue = {0};
 uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
 
 /*CAN类------------------------------------------------------------------*/
@@ -64,31 +62,36 @@ CAN::~CAN() = default;
  *              in Device.cpp
  */
 void CAN::CANPackageSend() {
-    if (canQueue.front != canQueue.rear) {
+    if (can1Queue.front != can1Queue.rear) {
         CAN_TxHeaderTypeDef txHeaderTypeDef;
         uint32_t box = 0;//邮箱号
 
-        if (canQueue.Data[canQueue.front].canType == can1) {
-            txHeaderTypeDef.StdId = canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
-            txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
-            txHeaderTypeDef.IDE = CAN_ID_STD;//标准帧
-            txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
-            txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
-            HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
-        } else if (canQueue.Data[canQueue.front].canType == can2) {
+        txHeaderTypeDef.StdId = can1Queue.Data[can1Queue.front].ID;//从消息包中取出对应的ID
+        txHeaderTypeDef.DLC = can1Queue.Data[can1Queue.front].DLC;//数据长度
+        txHeaderTypeDef.IDE = CAN_ID_STD;//标准帧
+        txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
+        txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
 
-            txHeaderTypeDef.ExtId =canQueue.Data[canQueue.front].ID;//从消息包中取出对应的ID
-            txHeaderTypeDef.DLC = canQueue.Data[canQueue.front].DLC;//数据长度
-            txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
-            txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
-            txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
+        HAL_CAN_AddTxMessage(&hcan1, &txHeaderTypeDef, can1Queue.Data[can1Queue.front].message, &box);
 
-            HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, canQueue.Data[canQueue.front].message, &box);
+        memset(can1Queue.Data[can1Queue.front].message, 0, sizeof(can1Queue.Data[can1Queue.front].message));//清空消息包中的数据
+        can1Queue.front = (can1Queue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
+    }
+    if (can2Queue.front != can2Queue.rear) {
+        CAN_TxHeaderTypeDef txHeaderTypeDef;
+        uint32_t box = 0;//邮箱号
 
-        }
-        memset(canQueue.Data[canQueue.front].message, 0 , sizeof(canQueue.Data[canQueue.front].message));//清空消息包中的数据
-        canQueue.front = (canQueue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
+        txHeaderTypeDef.ExtId = can2Queue.Data[can2Queue.front].ID;//从消息包中取出对应的ID
+        txHeaderTypeDef.DLC = can2Queue.Data[can2Queue.front].DLC;//数据长度
+        txHeaderTypeDef.IDE = CAN_ID_EXT;//标准帧
+        txHeaderTypeDef.RTR = CAN_RTR_DATA;//数据帧
+        txHeaderTypeDef.TransmitGlobalTime = DISABLE;//时间戳
+
+        HAL_CAN_AddTxMessage(&hcan2, &txHeaderTypeDef, can2Queue.Data[can2Queue.front].message, &box);
+
+        memset(can2Queue.Data[can2Queue.front].message, 0, sizeof(can2Queue.Data[can2Queue.front].message));//清空消息包中的数据
+        can2Queue.front = (can2Queue.front + 1) % MAX_MESSAGE_COUNT;//消息队列头指针后移
     }
 }
 
@@ -101,7 +104,13 @@ void CAN::Rx_Handle(CAN_HandleTypeDef *hcan) {
     CAN_RxHeaderTypeDef rx_header;
 
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, canBuf);//获取接收到的数据,完成后调用CAN中断处理函数，再次进入此函数等待接收
-    memcpy(dict_CAN[rx_header.StdId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
+
+    if(rx_header.IDE == CAN_ID_STD) {
+        memcpy(dict_CAN[rx_header.StdId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
+    }
+    else if(rx_header.IDE == CAN_ID_EXT) {
+        memcpy(dict_CAN[rx_header.ExtId], canBuf, sizeof(canBuf));//将接收到的数据拷贝到字典中,则自动进入电机的RxMessage中
+    }
 
 }
 
@@ -226,8 +235,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-     // CAN::CANPackageSend();
+    // CAN::CANPackageSend();
 }
+
 /*
 void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) {
       CAN::CANPackageSend();
