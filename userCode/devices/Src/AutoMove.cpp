@@ -66,7 +66,7 @@ Move_X::Move_X() {
 
 void Move_X::Calc(float target) {
     if(target == 0) FinishFlag = true;
-    else {
+    else if(target > 0) {
         Para.a = 1.5;
         Para.v_max = 2;
         stopFlag = false;
@@ -79,6 +79,21 @@ void Move_X::Calc(float target) {
             Para.d1 = target / 2;
             Para.d2 = 0;
             Para.v_max = sqrt(2 * Para.a * Para.d1);
+        }
+    }
+    else {
+        Para.a = -1.5;
+        Para.v_max = -2;
+        stopFlag = false;
+        FinishFlag = false;
+        expectPos = 0;
+        Para.d_max = target;
+        Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
+        Para.d2 = target - 2 * Para.d1;
+        if (Para.d2 > 0) {
+            Para.d1 = target / 2;
+            Para.d2 = 0;
+            Para.v_max = -sqrt(2 * Para.a * Para.d1);
         }
     }
 }
@@ -103,7 +118,7 @@ float Move_X::Handle(float reference) {
             v_rel = Para.v_max;
         }
     }
-    if (reference >= Para.d_max - 0.05) {
+    if (abs(Para.d_max - reference) <= 0.05) {
         //if (expectPos >= Para.d_max) {
             // Stop();
             FinishFlag = true;
@@ -127,7 +142,7 @@ Move_Y::Move_Y() {
 
 void Move_Y::Calc(float target) {
     if(target == 0) FinishFlag = true;
-    else {
+    else if (target > 0) {
         Para.a = 1.5;
         Para.v_max = 2;
         stopFlag = false;
@@ -141,6 +156,22 @@ void Move_Y::Calc(float target) {
             Para.d2 = 0;
             Para.v_max = sqrt(2 * Para.a * Para.d1);
         }
+    }
+    else {
+        Para.a = -1.5;
+        Para.v_max = -2;
+        stopFlag = false;
+        FinishFlag = false;
+        expectPos = 0;
+        Para.d_max = target;
+        Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
+        Para.d2 = target - 2 * Para.d1;
+        if (Para.d2 > 0) {
+            Para.d1 = target / 2;
+            Para.d2 = 0;
+            Para.v_max = -sqrt(2 * Para.a * Para.d1);
+        }
+
     }
 }
 
@@ -165,7 +196,7 @@ float Move_Y::Handle(float reference) {
             v_rel = Para.v_max;
         }       
     }
-    if (reference >= Para.d_max - 0.05) {
+    if (abs(Para.d_max - reference) <= 0.05) {
         //if (expectPos >= Para.d_max) {
             // Stop();
             FinishFlag = true;
@@ -188,7 +219,8 @@ Spin::Spin() {
 }
 
 void Spin::Calc(float target) {
-    if (target >= 0){
+    if(target == 0) FinishFlag = true;
+    else if(target >= 0) {
         Para.a = 8;
         Para.v_max = 4;
         stopFlag = false;
