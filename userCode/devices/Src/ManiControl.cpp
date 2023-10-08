@@ -171,9 +171,9 @@ void ManiControl::GetData(uint8_t bufIndex) {
 
 
 void CompleteTask(uint8_t task) {
-    static uint8_t tx_message[6] = {0x7A,0x02,0x01,task,0x01,0x00};
-    tx_message[5] = LRC_calc(tx_message,5);
-    HAL_UART_Transmit_IT(&huart6, tx_message, 6);
+    static uint8_t tx_message[7] = {0x7A,0x02,0x01,0x02,task,0x01,0x00};
+    tx_message[6] = LRC_calc(tx_message,6);
+    HAL_UART_Transmit_IT(&huart6, tx_message, 7);
 }
 
 uint8_t LRC_calc(uint8_t *data, uint8_t len) {
