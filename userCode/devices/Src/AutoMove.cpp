@@ -102,19 +102,19 @@ float Move_X::Handle(float reference) {
     if (stopFlag) {
         v_rel = 0;
     } else {
-        if (expectPos >= Para.d_max) {
+        if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
-        } else if (expectPos < Para.d1) {
+        } else if (abs(expectPos) < abs(Para.d1)) {
             Para.v += Para.a * 0.001f;
             expectPos += (2 * Para.v - Para.a * 0.001f) / 2 * 0.001f;
-        } else if (expectPos > (Para.d1 + Para.d2)) {
+        } else if (abs(expectPos) > abs(Para.d1 + Para.d2)) {
             Para.v -= Para.a * 0.001f;
             expectPos += (2 * Para.v + Para.a * 0.001f) / 2 * 0.001f;
-        } else if (expectPos > Para.d1 && expectPos < (Para.d1 + Para.d2)) {
+        } else if (abs(expectPos) > abs(Para.d1) && abs(expectPos) < abs(Para.d1 + Para.d2)) {
             expectPos += Para.v * 0.001f;
         }
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
-        if (v_rel > Para.v_max) {
+        if (abs(v_rel) > abs(Para.v_max)) {
             v_rel = Para.v_max;
         }
     }
@@ -179,20 +179,20 @@ float Move_Y::Handle(float reference) {
     if (stopFlag) {
         v_rel = 0;
     } else {
-        if (expectPos >= Para.d_max) {
+        if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
-        } else if (expectPos < Para.d1) {
+        } else if (abs(expectPos) < abs(Para.d1)) {
             Para.v += Para.a * 0.001f;
             expectPos += (2 * Para.v - Para.a * 0.001f) / 2 * 0.001f;
-        } else if (expectPos > (Para.d1 + Para.d2)) {
+        } else if (abs(expectPos) > abs(Para.d1 + Para.d2)) {
             Para.v -= Para.a * 0.001f;
             expectPos += (2 * Para.v + Para.a * 0.001f) / 2 * 0.001f;
-        } else if (expectPos > Para.d1 && expectPos < (Para.d1 + Para.d2)) {
+        } else if (abs(expectPos) > abs(Para.d1) && abs(expectPos) < abs(Para.d1 + Para.d2)) {
             expectPos += Para.v * 0.001f;
         }
 
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
-        if (v_rel > Para.v_max) {
+        if (abs(v_rel) > abs(Para.v_max)) {
             v_rel = Para.v_max;
         }       
     }
@@ -221,6 +221,10 @@ Spin::Spin() {
 void Spin::Calc(float target) {
     pid.kp = 1.65 + 1.2 * (PI - target) / PI;
     pid.ki = 0;
+    if (abs(Para.d_max) < 0.2) {
+        pid.ki = 0.006;
+        // pid.kp = 50;
+    }
     if(target == 0) FinishFlag = true;
     else if(target >= 0) {
         Para.a = 10;
