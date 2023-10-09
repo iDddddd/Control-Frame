@@ -16,14 +16,6 @@ uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
  * @brief CAN通信的初始化，主要是CAN通信的相关配置
  */
 void CAN::CANInit() {
-    HAL_CAN_Start(&hcan1);
-    HAL_CAN_Start(&hcan2);
-    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
-    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
-
-    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
-    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
-
     CAN_FilterTypeDef canFilterTypeDef;
 
     canFilterTypeDef.FilterMode = CAN_FILTERMODE_IDMASK;
@@ -38,7 +30,17 @@ void CAN::CANInit() {
     canFilterTypeDef.SlaveStartFilterBank = 14;
 
     HAL_CAN_ConfigFilter(&hcan1, &canFilterTypeDef);
+    canFilterTypeDef.FilterBank = 14;
     HAL_CAN_ConfigFilter(&hcan2, &canFilterTypeDef);
+
+    HAL_CAN_Start(&hcan1);
+    HAL_CAN_Start(&hcan2);
+
+    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);//接收中断
+
+    HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
+    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);//发送中断
 
 }
 

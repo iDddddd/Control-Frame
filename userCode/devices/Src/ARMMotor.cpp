@@ -38,6 +38,10 @@ void SteppingMotor_v4::CANMessageGenerate() {
 }
 
 void SteppingMotor_v4::Handle() {
+    if(RxMessage[1] == 0x9F){
+        CompleteTask(0x08);
+        RxMessage[1] = 0x00;
+    }
     if (SendFlag) {
         if (stopFlag) {
             Pulse = 0;
