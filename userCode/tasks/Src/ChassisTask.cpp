@@ -288,24 +288,46 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     ClassisSpeed[2] = sqrt(A * A + D * D);//左后轮
     ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
-/*修正角度*/   
-/*
-    if(abs(int(RFRAngle - RFR.nowAngle) % 360) >= 90) {
-        ClassisSpeed[0] = -ClassisSpeed[0];
-        RFRAngle = (RFRAngle > 0) ? (RFRAngle - 180) : (RFRAngle + 180);
+    float nowAngle[4] = {RFR.nowAngle - RFR.zeroAngle, RFL.nowAngle - RFL.zeroAngle, 
+                        RBL.nowAngle - RBL.zeroAngle, RBR.nowAngle - RBR.zeroAngle};
+    /*修正角度*/   
+    for(int k = -3; k <= 3; k++) {
+        if(abs(RFRAngle + k * 180 - nowAngle[0]) <= 90) {
+            RFRAngle += (k * 180);
+            if(abs(k) % 2) {
+                ClassisSpeed[0] = -ClassisSpeed[0];
+            }
+            break;
+        }
     }
-    if(abs(int(RFLAngle - RFL.nowAngle) % 360) >= 90) {
-        ClassisSpeed[1] = -ClassisSpeed[1];
-        RFLAngle = (RFLAngle > 0) ? (RFLAngle - 180) : (RFLAngle + 180);
+    for(int k = -3; k <= 3; k++) {
+        if(abs(RFLAngle + k * 180 - nowAngle[1]) <= 90) {
+            RFLAngle += (k * 180);
+            if(abs(k) % 2) {
+                ClassisSpeed[1] = -ClassisSpeed[1];
+            }
+            break;
+        }
     }
-    if(abs(int(RBLAngle - RBL.nowAngle) % 360) >= 90) {
-        ClassisSpeed[2] = -ClassisSpeed[2];
-        RBLAngle = (RBLAngle > 0) ? (RBLAngle - 180) : (RBLAngle + 180);
+    for(int k = -3; k <= 3; k++) {
+        if(abs(RBLAngle + k * 180 - nowAngle[2]) <= 90) {
+            RBLAngle += (k * 180);
+            if(abs(k) % 2) {
+                ClassisSpeed[2] = -ClassisSpeed[2];
+            }
+            break;
+        }
     }
-    if(abs(int(RBRAngle - RBR.nowAngle) % 360) >= 90) {
-        ClassisSpeed[3] = -ClassisSpeed[3];
-        RBRAngle = (RBRAngle > 0) ? (RBRAngle - 180) : (RBRAngle + 180);
-    }*/
+    for(int k = -3; k <= 3; k++) {
+        if(abs(RBRAngle + k * 180 - nowAngle[3]) <= 90) {
+            RBRAngle += (k * 180);
+            if(abs(k) % 2) {
+                ClassisSpeed[3] = -ClassisSpeed[3];
+            }
+            break;
+        }
+    }
+
 
     //设置底盘电机角度
     RFL.SetTargetAngle(RFLAngle);
