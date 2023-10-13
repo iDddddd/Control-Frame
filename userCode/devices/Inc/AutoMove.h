@@ -29,6 +29,9 @@ public:
     float v_rel{0};
     EASY_PID pid;
     bool FinishFlag{false};
+    bool ReachFlag{0};
+
+    uint16_t finishcount{0};  // ReachFlag达到后开始计数，计数结束后正式finish
 
     Move_X();
 
@@ -46,12 +49,17 @@ public:
 
 class Move_Y {
 public:
+    float lastreference{0};
+
     float expectPos{0};
     Pos_Para_t Para{};
     float y_rel{};
     float v_rel{0};
     EASY_PID pid;
     bool FinishFlag{false};
+    bool ReachFlag{false};  // 到位后置1，用来增大kp值，使之稳定在目标点。
+
+    uint16_t finishcount{0};  // ReachFlag达到后开始计数，计数结束后正式finish
 
     Move_Y();
 
@@ -76,6 +84,9 @@ public:
     EASY_PID pid;
 
     bool FinishFlag{false};//好像MoveX和MoveY里面都有，所以干脆这里也加上得了
+    bool ReachFlag{0};
+
+    uint16_t finishcount{0}; // ReachFlag达到后开始计数，计数结束后正式finish
 
     Spin();
 

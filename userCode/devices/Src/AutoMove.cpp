@@ -11,7 +11,7 @@ float tem_vx,tem_vy;
 extern float encoder_x, encoder_y, encoder_theta;
 
 void AutoMove::Handle() {
-    if (!StopFlag) {
+    /*if (!StopFlag)*/ {
         // vx = X.Handle(IMU::imu.position.displace[1]);
         // vy = Y.Handle(IMU::imu.position.displace[0]);
         // vo = O.Handle(IMU::imu.attitude.yaw);
@@ -19,14 +19,14 @@ void AutoMove::Handle() {
         vy = Y.Handle(encoder_y);
         vo = O.Handle(encoder_theta);
         //vo = 0;//测试用，完了记得删
-        /**/
+        
         tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
         tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
         vx = tem_vx;
         vy = tem_vy;
-    } else {
+    } /*else {
         AutoChassisStop();
-    }
+    }*/
     if (X.FinishFlag && Y.FinishFlag && O.FinishFlag && !SendFlag) {
         StopMove();
         CompleteTask(0x02);//?
@@ -65,12 +65,17 @@ Move_X::Move_X() {
 }
 
 void Move_X::Calc(float target) {
-    if(target == 0) FinishFlag = true;
+    if(target == 0) {
+        FinishFlag = true;
+        ReachFlag = true;
+    }
     else if(target > 0) {
         Para.a = 1.5;
         Para.v_max = 2;
         stopFlag = false;
         FinishFlag = false;
+        ReachFlag = false;
+        finishcount = 0;
         expectPos = 0;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
@@ -86,6 +91,8 @@ void Move_X::Calc(float target) {
         Para.v_max = -2;
         stopFlag = false;
         FinishFlag = false;
+        ReachFlag = false;
+        finishcount = 0;
         expectPos = 0;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
@@ -101,7 +108,8 @@ void Move_X::Calc(float target) {
 float Move_X::Handle(float reference) {
     if (stopFlag) {
         v_rel = 0;
-    } else {
+    }
+    else {// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -113,16 +121,23 @@ float Move_X::Handle(float reference) {
         } else if (abs(expectPos) > abs(Para.d1) && abs(expectPos) < abs(Para.d1 + Para.d2)) {
             expectPos += Para.v * 0.001f;
         }
+
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
         if (abs(v_rel) > abs(Para.v_max)) {
             v_rel = Para.v_max;
         }
     }
-    if (abs(Para.d_max - reference) <= 0.05) {
-        //if (expectPos >= Para.d_max) {
-            // Stop();
+
+    if (abs(Para.d_max - reference) <= 0.02) {
+        ReachFlag = true;
+    }
+    if(ReachFlag) {
+        pid.kp = 20;
+        finishcount++;
+        if(finishcount == 500) {
             FinishFlag = true;
         }
+    }
     return v_rel;
 }
 
@@ -141,12 +156,17 @@ Move_Y::Move_Y() {
 }
 
 void Move_Y::Calc(float target) {
-    if(target == 0) FinishFlag = true;
+    if(target == 0) {
+        FinishFlag = true;
+        ReachFlag = true;
+    }
     else if (target > 0) {
         Para.a = 1.5;
         Para.v_max = 2;
         stopFlag = false;
         FinishFlag = false;
+        ReachFlag = false;
+        finishcount = 0;
         expectPos = 0;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
@@ -162,6 +182,8 @@ void Move_Y::Calc(float target) {
         Para.v_max = -2;
         stopFlag = false;
         FinishFlag = false;
+        ReachFlag = false;
+        finishcount = 0;
         expectPos = 0;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
@@ -176,9 +198,7 @@ void Move_Y::Calc(float target) {
 }
 
 float Move_Y::Handle(float reference) {
-    if (stopFlag) {
-        v_rel = 0;
-    } else {
+    {// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -194,13 +214,21 @@ float Move_Y::Handle(float reference) {
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
         if (abs(v_rel) > abs(Para.v_max)) {
             v_rel = Para.v_max;
-        }       
+        }
     }
-    if (abs(Para.d_max - reference) <= 0.05) {
-        //if (expectPos >= Para.d_max) {
-            // Stop();
+        
+    if (abs(Para.d_max - reference) <= 0.02) {
+        ReachFlag = true;
+    }
+
+    if(ReachFlag) {
+        pid.kp = 20;
+        finishcount++;
+        if(finishcount == 500) {
             FinishFlag = true;
         }
+    }
+
     return v_rel;
 }
 
@@ -219,20 +247,29 @@ Spin::Spin() {
 }
 
 void Spin::Calc(float target) {
-    pid.kp = 1.65 + 1.2 * (PI - target) / PI;
+    pid.kp = 1.85 + 1.25 * (PI - target) / PI;
     pid.ki = 0;
-    if (abs(Para.d_max) < 0.2) {
+    if (abs(target) < 0.2 && target != 0) {
         pid.ki = 0.006;
         // pid.kp = 50;
     }
-    if(target == 0) FinishFlag = true;
-    else if(target >= 0) {
+    if(target == 0) {
+        FinishFlag = true;
+        pid.kp = 300; // 先试试吧……
+        Para.a = 0;
+        Para.v_max = 0;
+        expectPos = 0;
+        Para.d_max = Para.d1 = Para.d2 = 0;
+    }
+    else if(target > 0) {
         Para.a = 10;
         Para.v_max = 8;
         stopFlag = false;
         FinishFlag = false;
+        ReachFlag = false;
+        finishcount = 0;
         expectPos = 0;
-        //Para.d_max = target-IMU::imu.attitude.yaw;
+        // Para.d_max = target-IMU::imu.attitude.yaw;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
         Para.d2 = target - 2 * Para.d1;
@@ -246,6 +283,9 @@ void Spin::Calc(float target) {
         Para.a = -10;
         Para.v_max = -8;
         stopFlag = false;
+        FinishFlag = false;
+        ReachFlag = false;
+        finishcount = 0;
         Para.d_max = target;
         Para.d1 = Para.v_max * Para.v_max / (2 * Para.a);
         Para.d2 = target - 2 * Para.d1;
@@ -261,7 +301,8 @@ void Spin::Calc(float target) {
 float Spin::Handle(const float reference) {
     if (stopFlag) {
         v_rel = 0;
-    } else {
+    }
+    else {
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -278,23 +319,22 @@ float Spin::Handle(const float reference) {
         if (abs(v_rel) > abs(Para.v_max)) {
             v_rel = Para.v_max;
         }
-        /*if(abs(expectPos-reference) < 0.01){
-            return 0;
-        }
-        v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
-        if (v_rel > Para.v_max) {
-            v_rel = Para.v_max;
-        }*/
     }
+
     if ((abs(reference - Para.d_max) < 0.01 * abs(Para.d_max))){
-        //if (expectPos >= Para.d_max) {
-            // Stop();
-            FinishFlag = true;
+        ReachFlag = true;
+        FinishFlag = true;
     }
+    // if(ReachFlag) {
+    //     pid.kp = 300;
+    //     finishcount++;
+    //     if(finishcount == 500) {
+    //         FinishFlag = true;
+    //     }
+    // }
     return v_rel;
 }
 
 void Spin::Stop() {
     stopFlag = true;
-
 }

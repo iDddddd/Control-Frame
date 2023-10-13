@@ -212,12 +212,10 @@ void AutoChassisStop() {
     RFR.Stop();
     RBL.Stop();
     RBR.Stop();*/
-    RFL.SetTargetAngle(0);
-    RFR.SetTargetAngle(90);
-    RBL.SetTargetAngle(90);//让车辆能及时刹住
-    //RFR.SetTargetAngle(0);
-    //RBL.SetTargetAngle(0);
-    RBR.SetTargetAngle(0);
+    // RFL.SetTargetAngle(-45);
+    // RFR.SetTargetAngle(45);
+    // RBL.SetTargetAngle(45);//让车辆能及时刹住
+    // RBR.SetTargetAngle(-45);
     CFR.Stop();
     CFL.Stop();
     CBL.Stop();

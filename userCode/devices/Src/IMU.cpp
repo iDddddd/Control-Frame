@@ -4,7 +4,7 @@
 
 #include "IMU.h"
 
-#define IMU_USE_MAG
+//#define IMU_USE_MAG
 IMU IMU::imu;
 
 void IMU::Init() {
