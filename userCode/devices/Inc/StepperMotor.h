@@ -7,6 +7,7 @@
 
 #include "Device.h"
 #include "Motor.h"
+#include "ManiControl.h"
 
 class StepperMotor : public Motor {
 public:

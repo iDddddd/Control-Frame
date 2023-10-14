@@ -69,11 +69,13 @@ COMMU_INIT_t Joint5CommuInit = {
         .canType = can2
 
 };
+
+SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
 SteppingMotor_v5 Joint1Motor(&Joint1CommuInit, &Joint1MotorInit);
 SteppingMotor_v5 Joint2Motor(&Joint2CommuInit, &Joint2MotorInit);
 SteppingMotor_v5 Joint3Motor(&Joint3CommuInit, &Joint3MotorInit);
 //SteppingMotor_v4 Joint4Motor(&Joint4CommuInit, &Joint4MotorInit);
-SteppingMotor_v4 Joint5Motor(&Joint5CommuInit, &Joint5MotorInit);
+
 StepperMotor ClawMotor(&ClawMotorInit);
 
 bool ArmStopFlag = true;
@@ -107,7 +109,7 @@ void ClawSet(uint8_t clawflag) {
 }
 
 void ArmPositionSet(float x, float y, float z){
-    ArmTask::ArmCalc(x,y,z);
+    ArmTask::ArmCalc(-x,y,z);
     ArmJointSet(ArmTask::Angle[0], ArmTask::Angle[1], ArmTask::Angle[2], 0, ArmTask::Angle[3]);
 }
 void ArmTask::ArmCalc(float x,float y,float z){

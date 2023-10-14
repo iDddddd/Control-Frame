@@ -38,13 +38,20 @@ void SteppingMotor_v4::CANMessageGenerate() {
 }
 
 void SteppingMotor_v4::Handle() {
-    if(RxMessage[1] == 0x9F){
+    if (RxMessage[1] == 0x9F) {
         CompleteTask(0x08);
         RxMessage[1] = 0x00;
     }
     if (SendFlag) {
         if (stopFlag) {
-            Pulse = 0;
+            TxMessageDLC = 0x05;
+            TxMessage[0] = 0xF6;
+            TxMessage[1] = 0x00;
+            TxMessage[2] = 0x00;
+            TxMessage[3] = 0x00;
+            TxMessage[4] = 0x6B;
+            CANMessageGenerate();
+            SendFlag = false;
         } else {
             if (TarPos >= NowPos) {
                 Direction = 0x01;
@@ -79,6 +86,12 @@ void SteppingMotor_v4::Reset() {
     stopFlag = true;
     TarPos = 0;
     NowPos = 0;
+}
+
+void SteppingMotor_v4::Stop() {
+    stopFlag = true;
+    SendFlag = true;
+
 }
 
 SteppingMotor_v4::~SteppingMotor_v4() = default;
@@ -119,7 +132,16 @@ void SteppingMotor_v5::CANMessageGenerate() {
 void SteppingMotor_v5::Handle() {
     if (SendFlag) {
         if (stopFlag) {
-            Pulse = 0;
+            TxMessageDLC = 0x07;
+            TxMessage[0] = 0xF6;
+            TxMessage[1] = 0x00;
+            TxMessage[2] = 0x00;
+            TxMessage[3] = 0x00;
+            TxMessage[4] = 0x00;
+            TxMessage[5] = 0x00;
+            TxMessage[6] = 0x6B;
+            CANMessageGenerate();
+            SendFlag = false;
         } else {
 
             if (TarPos >= 0) {
@@ -173,6 +195,12 @@ void SteppingMotor_v5::Reset() {
     TxMessage[6] = 0x00;
     TxMessage[7] = 0x00;
     CANMessageGenerate();
+}
+
+void SteppingMotor_v5::Stop() {
+    stopFlag = true;
+    SendFlag = true;
+
 }
 
 

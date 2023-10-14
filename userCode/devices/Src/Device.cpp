@@ -233,6 +233,7 @@ int main() {
     CAN::CANInit();//CAN初始化
     IMU::imu.Init();//IMU初始化
   //  bsp_BuzzerOn(1000);
+    ChassisDistanceSet(0, 0, 0);
     init_Flag = 1;
 
     /* USER CODE END 2 */

@@ -162,9 +162,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>130</LineNumber>
+          <LineNumber>155</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134303982</Address>
+          <Address>134304864</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -173,7 +173,23 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\userCode\devices\Src\ManiControl.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RM_Frame_C\../userCode/devices/Src/ManiControl.cpp\130</Expression>
+          <Expression>\\RM_Frame_C\../userCode/devices/Src/ManiControl.cpp\155</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>121</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134304596</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\userCode\devices\Src\ManiControl.cpp</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\RM_Frame_C\../userCode/devices/Src/ManiControl.cpp\121</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

@@ -25,6 +25,9 @@ public:
     ~SteppingMotor_v4();
 
     void Handle() override;
+
+    void Stop();
+
     void Reset();
 
     void SetTargetPosition(float pos);
@@ -52,6 +55,8 @@ public:
     SteppingMotor_v5(COMMU_INIT_t *commuInit, MOTOR_INIT_t *motorInit);
 
     void Handle() override;
+
+    void Stop();
 
     void SetTargetPosition(float tarpos);
 
