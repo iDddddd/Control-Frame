@@ -128,7 +128,7 @@ float Move_X::Handle(float reference) {
         }
     }
 
-    if (abs(Para.d_max - reference) <= 0.02) {
+    if (abs(Para.d_max - reference) <= 0.01) {
         ReachFlag = true;
     }
     if(ReachFlag) {
@@ -217,7 +217,7 @@ float Move_Y::Handle(float reference) {
         }
     }
         
-    if (abs(Para.d_max - reference) <= 0.02) {
+    if (abs(Para.d_max - reference) <= 0.01) {
         ReachFlag = true;
     }
 
@@ -325,13 +325,13 @@ float Spin::Handle(const float reference) {
         ReachFlag = true;
         FinishFlag = true;
     }
-    // if(ReachFlag) {
-    //     pid.kp = 300;
-    //     finishcount++;
-    //     if(finishcount == 500) {
-    //         FinishFlag = true;
-    //     }
-    // }
+    if(ReachFlag) {
+        //pid.kp = 300;
+        finishcount++;
+        if(finishcount == 500) {
+            FinishFlag = true;
+        }
+    }
     return v_rel;
 }
 

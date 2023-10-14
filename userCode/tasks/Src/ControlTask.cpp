@@ -19,7 +19,8 @@ void autoImpulse(){
 void CtrlHandle() {
     if (RemoteControl::rcInfo.sRight == DOWN_POS) {//右侧三档，急停模式
         ChassisStop();
-    } 
+    }
+    ArmTask::ArmStop();
     // else if (RemoteControl::rcInfo.sRight == MID_POS){//右侧二档，脉冲模式
     //     ChassisSetVelocity(0.4,0,0);
     // }
@@ -28,7 +29,7 @@ void CtrlHandle() {
             case UP_POS://左侧一档{
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     ChassisSetVelocity(RemoteControl::rcInfo.right_col * 2,
-                                       RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol * 2 * PI);
+                                       RemoteControl::rcInfo.right_rol * 2, -RemoteControl::rcInfo.left_rol * 2 * PI);
                     Headmemory();
                 }/*else if (RemoteControl::rcInfo.sRight == MID_POS){
                     AutoSetVelocity();
@@ -38,10 +39,10 @@ void CtrlHandle() {
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     // HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
                     //                     RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
-                    ChassisDistanceSet(0, 0, PI / 2);
+                    ChassisDistanceSet(0.05, 0.05, 0);
                     
                 } else if (RemoteControl::rcInfo.sRight == MID_POS) {
-                    ChassisDistanceSet(0, 1, 0);
+                    ChassisDistanceSet(0, 0, -PI/2);
                 }
                 //ChassisSetVelocity(0,0.4,0);
                

@@ -255,10 +255,10 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     //w = rtVelocity * 2.0f * PI;//w顺时针为正
     w = rtVelocity;
     float A, B, C, D;
-    A = vx - w * L / 2;
-    B = vx + w * L / 2;
-    C = vy - w * M / 2;
-    D = vy + w * M / 2;
+    A = vx + w * L / 2;
+    B = vx - w * L / 2;
+    C = vy + w * M / 2;
+    D = vy - w * M / 2;
 
     //计算四个轮子角度，单位：度
     RFRAngle = atan2(B, C) * 180 / PI;
