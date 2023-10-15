@@ -10,6 +10,8 @@ Spin O;
 float tem_vx,tem_vy;
 extern float encoder_x, encoder_y, encoder_theta;
 
+volatile uint16_t Xfinish, Yfinish, Ofinish;
+
 void AutoMove::Handle() {
     /*if (!StopFlag)*/ {
         // vx = X.Handle(IMU::imu.position.displace[1]);
@@ -66,10 +68,16 @@ Move_X::Move_X() {
 }
 
 void Move_X::Calc(float target) {
+    pid.kp = 1 + 0.2 * (2 - target);
+    pid.kd = 0;
     if(target == 0) {
         FinishFlag = true;
         ReachFlag = true;
         stopFlag = false;
+        Para.d_max = target;
+        expectPos = 0;
+        Para.a = 0;
+        Para.v_max = 0;
     }
     else if(target > 0) {
         Para.a = 1.5;
@@ -141,6 +149,9 @@ float Move_X::Handle(float reference) {
         }
     }
 
+    if (FinishFlag) Xfinish = 1;
+    else Xfinish = 0;
+
     return v_rel;
 }
 
@@ -159,10 +170,17 @@ Move_Y::Move_Y() {
 }
 
 void Move_Y::Calc(float target) {
+    pid.kp = 1 + 0.2 * (2 - target);
+    pid.kd = 0;
     if(target == 0) {
+        // pid.kp = 2;
         FinishFlag = true;
         ReachFlag = true;
         stopFlag = false;
+        Para.d_max = target;
+        expectPos = 0;
+        Para.a = 0;
+        Para.v_max = 0;
     }
     else if (target > 0) {
         Para.a = 1.5;
@@ -236,6 +254,9 @@ float Move_Y::Handle(float reference) {
         }
     }
 
+    if (FinishFlag) Yfinish = 1;
+    else Yfinish = 0;
+
     return v_rel;
 }
 
@@ -264,7 +285,7 @@ void Spin::Calc(float target) {
     if(target == 0) {// 纠偏
         FinishFlag = true;
         stopFlag = false;
-        pid.kp = 6; // 先试试吧……
+        pid.kp = 2; // 先试试吧……
         pid.kd = 0.1;
         Para.a = 0;
         Para.v_max = 0;
@@ -341,6 +362,9 @@ float Spin::Handle(const float reference) {
             FinishFlag = true;
         }
     }
+
+    if (FinishFlag) Ofinish = 1;
+    else Ofinish = 0;
     return v_rel;
 }
 

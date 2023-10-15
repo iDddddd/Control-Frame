@@ -288,43 +288,45 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 
     float nowAngle[4] = {RFR.nowAngle - RFR.zeroAngle, RFL.nowAngle - RFL.zeroAngle, 
                         RBL.nowAngle - RBL.zeroAngle, RBR.nowAngle - RBR.zeroAngle};
+
     /*修正角度*/   
-    for(int k = -3; k <= 3; k++) {
-        if(abs(RFRAngle + k * 180 - nowAngle[0]) <= 90) {
-            RFRAngle += (k * 180);
-            if(abs(k) % 2) {
-                ClassisSpeed[0] = -ClassisSpeed[0];
-            }
-            break;
-        }
-    }
-    for(int k = -3; k <= 3; k++) {
-        if(abs(RFLAngle + k * 180 - nowAngle[1]) <= 90) {
-            RFLAngle += (k * 180);
-            if(abs(k) % 2) {
-                ClassisSpeed[1] = -ClassisSpeed[1];
-            }
-            break;
-        }
-    }
-    for(int k = -3; k <= 3; k++) {
-        if(abs(RBLAngle + k * 180 - nowAngle[2]) <= 90) {
-            RBLAngle += (k * 180);
-            if(abs(k) % 2) {
-                ClassisSpeed[2] = -ClassisSpeed[2];
-            }
-            break;
-        }
-    }
-    for(int k = -3; k <= 3; k++) {
-        if(abs(RBRAngle + k * 180 - nowAngle[3]) <= 90) {
-            RBRAngle += (k * 180);
-            if(abs(k) % 2) {
-                ClassisSpeed[3] = -ClassisSpeed[3];
-            }
-            break;
-        }
-    }
+    // for(int k = -3; k <= 3; k++) {
+    //     if(abs(RFRAngle + k * 180 - nowAngle[0]) <= 90) {
+    //         RFRAngle += (k * 180);
+    //         if(abs(k) % 2) {
+    //             ClassisSpeed[0] = -ClassisSpeed[0];
+    //         }
+    //         break;
+    //     }
+    // }
+    // for(int k = -3; k <= 3; k++) {
+    //     if(abs(RFLAngle + k * 180 - nowAngle[1]) <= 90) {
+    //         RFLAngle += (k * 180);
+    //         if(abs(k) % 2) {
+    //             ClassisSpeed[1] = -ClassisSpeed[1];
+    //         }
+    //         break;
+    //     }
+    // }
+    // for(int k = -3; k <= 3; k++) {
+    //     if(abs(RBLAngle + k * 180 - nowAngle[2]) <= 90) {
+    //         RBLAngle += (k * 180);
+    //         if(abs(k) % 2) {
+    //             ClassisSpeed[2] = -ClassisSpeed[2];
+    //         }
+    //         break;
+    //     }
+    // }
+    // for(int k = -3; k <= 3; k++) {
+    //     if(abs(RBRAngle + k * 180 - nowAngle[3]) <= 90) {
+    //         RBRAngle += (k * 180);
+    //         if(abs(k) % 2) {
+    //             ClassisSpeed[3] = -ClassisSpeed[3];
+    //         }
+    //         break;
+    //     }
+    // }
+
 
 
     //设置底盘电机角度

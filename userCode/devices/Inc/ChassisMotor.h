@@ -22,6 +22,8 @@ public:
 
     void SetTargetAngle(float _targetAngle);
 
+    float getrealAngle();
+
     Motor_4315(uint32_t _id, MOTOR_INIT_t *_init);
 
     ~Motor_4315();
