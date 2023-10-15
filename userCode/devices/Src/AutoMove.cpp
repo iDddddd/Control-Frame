@@ -68,6 +68,7 @@ void Move_X::Calc(float target) {
     if(target == 0) {
         FinishFlag = true;
         ReachFlag = true;
+        stopFlag = false;
     }
     else if(target > 0) {
         Para.a = 1.5;
@@ -106,10 +107,10 @@ void Move_X::Calc(float target) {
 }
 
 float Move_X::Handle(float reference) {
-    /*if (stopFlag) {
+    if (stopFlag) {
         v_rel = 0;
     }
-    else */{// 估速度输出
+    else {// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -123,7 +124,7 @@ float Move_X::Handle(float reference) {
         }
 
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
-        if (abs(v_rel) > abs(Para.v_max)) {
+        if (abs(v_rel) > abs(Para.v_max) && Para.v_max != 0) {
             v_rel = Para.v_max;
         }
     }
@@ -163,6 +164,7 @@ void Move_Y::Calc(float target) {
     if(target == 0) {
         FinishFlag = true;
         ReachFlag = true;
+        stopFlag = false;
     }
     else if (target > 0) {
         Para.a = 1.5;
@@ -202,7 +204,10 @@ void Move_Y::Calc(float target) {
 }
 
 float Move_Y::Handle(float reference) {
-    {// 估速度输出
+    if (stopFlag) {
+        v_rel = 0;
+    }
+    else {// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -216,7 +221,7 @@ float Move_Y::Handle(float reference) {
         }
 
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 2.0);
-        if (abs(v_rel) > abs(Para.v_max)) {
+        if (abs(v_rel) > abs(Para.v_max) && Para.v_max != 0) {
             v_rel = Para.v_max;
         }
     }
@@ -263,7 +268,8 @@ void Spin::Calc(float target) {
     }
     if(target == 0) {// 纠偏
         FinishFlag = true;
-        pid.kp = 10; // 先试试吧……
+        stopFlag = false;
+        pid.kp = 6; // 先试试吧……
         Para.a = 0;
         Para.v_max = 0;
         expectPos = 0;
@@ -307,10 +313,10 @@ void Spin::Calc(float target) {
 }
 
 float Spin::Handle(const float reference) {
-    /*if (stopFlag) {
+    if (stopFlag) {
         v_rel = 0;
     }
-    else*/ {
+    else {
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
