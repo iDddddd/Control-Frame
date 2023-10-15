@@ -20,8 +20,9 @@ void AutoMove::Handle() {
         vo = O.Handle(encoder_theta);
         //vo = 0;//测试用，完了记得删
         
-        tem_vx = vx * cos(encoder_theta) - vy * sin(encoder_theta);
-        tem_vy = vy * cos(encoder_theta) + vx * sin(encoder_theta);
+        // 世界系 -> 车身系
+        tem_vx = vx * cos(encoder_theta) + vy * sin(encoder_theta);
+        tem_vy = vy * cos(encoder_theta) - vx * sin(encoder_theta);
         vx = tem_vx;
         vy = tem_vy;
     } /*else {
@@ -140,9 +141,6 @@ float Move_X::Handle(float reference) {
         }
     }
 
-    if(abs(v_rel) < 0.02) {
-        v_rel = 0;
-    }
     return v_rel;
 }
 
@@ -238,10 +236,6 @@ float Move_Y::Handle(float reference) {
         }
     }
 
-    if(abs(v_rel) < 0.02) {
-        v_rel = 0;
-    }
-
     return v_rel;
 }
 
@@ -260,8 +254,9 @@ Spin::Spin() {
 }
 
 void Spin::Calc(float target) {
-    pid.kp = 1.85 + 1.25 * (PI - target) / PI;
+    pid.kp = 1.9 + 1.25 * (PI - abs(target)) / PI;
     pid.ki = 0;
+    pid.kd = 0;
     if (abs(target) < 0.2 && target != 0) {
         pid.ki = 0.006;
         // pid.kp = 50;
@@ -270,6 +265,7 @@ void Spin::Calc(float target) {
         FinishFlag = true;
         stopFlag = false;
         pid.kp = 6; // 先试试吧……
+        pid.kd = 0.1;
         Para.a = 0;
         Para.v_max = 0;
         expectPos = 0;
@@ -340,7 +336,6 @@ float Spin::Handle(const float reference) {
         FinishFlag = true;
     }
     if(ReachFlag) {
-        //pid.kp = 300;
         if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;
