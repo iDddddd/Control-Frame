@@ -52,7 +52,7 @@ void AutoMove::StopMove() {
     X.Stop();
     Y.Stop();
     O.Stop();
-    WheelsSpeedCalc(0, 0, 0);//强行把底盘速度置0，不然编码器速度不会归零，目前不太清楚为什么
+    // WheelsSpeedCalc(0, 0, 0);//强行把底盘速度置0，不然编码器速度不会归零，目前不太清楚为什么
 }
 
 
@@ -106,10 +106,10 @@ void Move_X::Calc(float target) {
 }
 
 float Move_X::Handle(float reference) {
-    if (stopFlag) {
+    /*if (stopFlag) {
         v_rel = 0;
     }
-    else {// 估速度输出
+    else */{// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -132,11 +132,15 @@ float Move_X::Handle(float reference) {
         ReachFlag = true;
     }
     if(ReachFlag) {
-        pid.kp = 20;
-        finishcount++;
+        pid.kp = 5;
+        if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;
         }
+    }
+
+    if(abs(v_rel) < 0.02) {
+        v_rel = 0;
     }
     return v_rel;
 }
@@ -222,11 +226,15 @@ float Move_Y::Handle(float reference) {
     }
 
     if(ReachFlag) {
-        pid.kp = 20;
-        finishcount++;
+        pid.kp = 5;
+        if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;
         }
+    }
+
+    if(abs(v_rel) < 0.02) {
+        v_rel = 0;
     }
 
     return v_rel;
@@ -253,9 +261,9 @@ void Spin::Calc(float target) {
         pid.ki = 0.006;
         // pid.kp = 50;
     }
-    if(target == 0) {
+    if(target == 0) {// 纠偏
         FinishFlag = true;
-        pid.kp = 300; // 先试试吧……
+        pid.kp = 10; // 先试试吧……
         Para.a = 0;
         Para.v_max = 0;
         expectPos = 0;
@@ -299,10 +307,10 @@ void Spin::Calc(float target) {
 }
 
 float Spin::Handle(const float reference) {
-    if (stopFlag) {
+    /*if (stopFlag) {
         v_rel = 0;
     }
-    else {
+    else*/ {
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -316,7 +324,7 @@ float Spin::Handle(const float reference) {
         }
 
         v_rel = Para.v + pid.PIDCalc(expectPos, reference, 12);
-        if (abs(v_rel) > abs(Para.v_max)) {
+        if (abs(v_rel) > abs(Para.v_max) && Para.v_max != 0) {  // 要区分对待纠偏和正常转
             v_rel = Para.v_max;
         }
     }
@@ -327,7 +335,7 @@ float Spin::Handle(const float reference) {
     }
     if(ReachFlag) {
         //pid.kp = 300;
-        finishcount++;
+        if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;
         }
