@@ -74,15 +74,15 @@ float Motor_4315::getrealAngle() {
 }
 
 void Motor_4315::AngleCalc() {
-    if (targetAngle - lastAngle > 180) {
-        zeroAngle -= 360;
-    }
-    if (lastAngle - targetAngle > 180) {
-        zeroAngle += 360;
-    }
-    lastAngle = targetAngle;
+    // if (targetAngle - lastAngle > 180) {
+    //     zeroAngle -= 360;
+    // }
+    // if (lastAngle - targetAngle > 180) {
+    //     zeroAngle += 360;
+    // }
+    // lastAngle = targetAngle;
+    zeroAngle = (int(nowAngle) / 360) * 360;
     realAngle = targetAngle + zeroAngle;
-
 }
 
 uint16_t Motor_4315::CRC16Calc(uint8_t *data, uint16_t length) {

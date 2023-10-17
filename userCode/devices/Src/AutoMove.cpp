@@ -68,10 +68,11 @@ Move_X::Move_X() {
 }
 
 void Move_X::Calc(float target) {
-    pid.kp = 1.6 + 0.2 * (2 - target);
+    if (abs(target) < 0.02) target = 0;
+    pid.kp = 1.6 + 0.2 * (2 - abs(target));
     pid.kd = 0;
     if (abs(target) <= 0.1 && abs(target) != 0) {
-        pid.kp = -log(0.5 * target + 0.0001);
+        pid.kp = -log(0.5 * abs(target) + 0.0001);
     }
     if(target == 0) {
         FinishFlag = true;
@@ -177,10 +178,11 @@ Move_Y::Move_Y() {
 }
 
 void Move_Y::Calc(float target) {
-    pid.kp = 1.6 + 0.2 * (2 - target);
+    if (abs(target) < 0.02) target = 0;
+    pid.kp = 1.6 + 0.2 * (2 - abs(target));
     pid.kd = 0;
     if (abs(target) <= 0.1 && abs(target) != 0) {
-        pid.kp = -log(0.5 * target + 0.0001);
+        pid.kp = -log(0.5 * abs(target) + 0.0001);
     }
     if(target == 0) {
         // pid.kp = 2;
@@ -290,12 +292,13 @@ Spin::Spin() {
 }
 
 void Spin::Calc(float target) {
+    if (abs(target) < 0.02) target = 0;
     pid.kp = 4.85 - 2 * (PI - abs(target)) / PI;
     pid.ki = 0;
     pid.kd = 0;
-    if (abs(target) < 0.2 && target != 0) {
+    if (abs(target) < PI / 4 && target != 0) {
         pid.ki = 0.006;
-        // pid.kp = 50;
+        pid.kp = 24 - 200 * abs(target);// 0.05~14  0.02~20  24 - 200x
     }
     if(target == 0) {// 纠偏
         FinishFlag = true;
@@ -367,11 +370,16 @@ float Spin::Handle(const float reference) {
         }
     }
 
-    if ((abs(reference - Para.d_max) < 0.01 * abs(Para.d_max))){
+    if (abs(reference - Para.d_max) < 0.01 * abs(Para.d_max)){
         ReachFlag = true;
         FinishFlag = true;
     }
-    if(ReachFlag) {
+    if (abs(Para.d_max) < PI / 4 && abs(reference - Para.d_max) < 0.1 * abs(Para.d_max)) {
+        ReachFlag = true;
+        FinishFlag = true;
+    }
+
+    if (ReachFlag) {
         if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;

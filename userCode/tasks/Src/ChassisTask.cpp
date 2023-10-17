@@ -246,7 +246,7 @@ void ChassisStop() {
  * @param rtVelocity
  */
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
-    float ClassisSpeed[4];
+    float ChassisSpeed[4];
     float RFLAngle, RFRAngle, RBLAngle, RBRAngle;
    // rtVelocity *= -2.0f * PI;
     float vx, vy, w;
@@ -274,59 +274,84 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 
     //计算四个轮子线速度，单位：度/s
     
-    ClassisSpeed[0] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 360;//右前轮
-    ClassisSpeed[1] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
-    ClassisSpeed[2] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
-    ClassisSpeed[3] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
+    ChassisSpeed[0] = -sqrt(B * B + C * C)/(WHEEL_DIAMETER * PI)* 360;//右前轮
+    ChassisSpeed[1] = sqrt(B * B + D * D)/(WHEEL_DIAMETER * PI) * 360 ;//左前轮
+    ChassisSpeed[2] = sqrt(A * A + D * D)/(WHEEL_DIAMETER * PI) * 360;//左后轮
+    ChassisSpeed[3] = -sqrt(A * A + C * C)/(WHEEL_DIAMETER * PI) * 360;//右后轮
     
    //计算四个轮子线速度，单位：m/s
    /*
-    ClassisSpeed[0] = -sqrt(B * B + C * C);//右前轮
-    ClassisSpeed[1] = sqrt(B * B + D * D);//左前轮
-    ClassisSpeed[2] = sqrt(A * A + D * D);//左后轮
-    ClassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
+    ChassisSpeed[0] = -sqrt(B * B + C * C);//右前轮
+    ChassisSpeed[1] = sqrt(B * B + D * D);//左前轮
+    ChassisSpeed[2] = sqrt(A * A + D * D);//左后轮
+    ChassisSpeed[3] = -sqrt(A * A + C * C);//右后轮*/
 
     float nowAngle[4] = {RFR.nowAngle - RFR.zeroAngle, RFL.nowAngle - RFL.zeroAngle, 
                         RBL.nowAngle - RBL.zeroAngle, RBR.nowAngle - RBR.zeroAngle};
 
-    /*修正角度*/   
-    // for(int k = -3; k <= 3; k++) {
-    //     if(abs(RFRAngle + k * 180 - nowAngle[0]) <= 90) {
-    //         RFRAngle += (k * 180);
-    //         if(abs(k) % 2) {
-    //             ClassisSpeed[0] = -ClassisSpeed[0];
-    //         }
-    //         break;
-    //     }
-    // }
-    // for(int k = -3; k <= 3; k++) {
-    //     if(abs(RFLAngle + k * 180 - nowAngle[1]) <= 90) {
-    //         RFLAngle += (k * 180);
-    //         if(abs(k) % 2) {
-    //             ClassisSpeed[1] = -ClassisSpeed[1];
-    //         }
-    //         break;
-    //     }
-    // }
-    // for(int k = -3; k <= 3; k++) {
-    //     if(abs(RBLAngle + k * 180 - nowAngle[2]) <= 90) {
-    //         RBLAngle += (k * 180);
-    //         if(abs(k) % 2) {
-    //             ClassisSpeed[2] = -ClassisSpeed[2];
-    //         }
-    //         break;
-    //     }
-    // }
-    // for(int k = -3; k <= 3; k++) {
-    //     if(abs(RBRAngle + k * 180 - nowAngle[3]) <= 90) {
-    //         RBRAngle += (k * 180);
-    //         if(abs(k) % 2) {
-    //             ClassisSpeed[3] = -ClassisSpeed[3];
-    //         }
-    //         break;
-    //     }
-    // }
+    int offset = 0;
+    float difference = 0;
+    /*修正角度*/
+    
+    offset = (nowAngle[0] - RFRAngle) / 180;
+    difference = nowAngle[0] - RFRAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RFRAngle += offset * 180;
+        if (offset % 2) ChassisSpeed[0] = -ChassisSpeed[0];
+    }
+    else if (difference > 90) {
+        RFRAngle += (offset + 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[0] = -ChassisSpeed[0];
+    }
+    else if (difference < -90) {
+        RFRAngle += (offset - 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[0] = -ChassisSpeed[0];
+    }
 
+    offset = (nowAngle[1] - RFLAngle) / 180;
+    difference = nowAngle[1] - RFLAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RFLAngle += offset * 180;
+        if (offset % 2) ChassisSpeed[1] = -ChassisSpeed[1];
+   }
+    else if (difference > 90) {
+        RFLAngle += (offset + 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[1] = -ChassisSpeed[1];
+    }
+    else if (difference < -90) {
+        RFLAngle += (offset - 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[1] = -ChassisSpeed[1];
+    }
+
+    offset = (nowAngle[2] - RBLAngle) / 180;
+    difference = nowAngle[2] - RBLAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RBLAngle += offset * 180;
+        if (offset % 2) ChassisSpeed[2] = -ChassisSpeed[2];
+    }
+    else if (difference > 90) {
+        RBLAngle += (offset + 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[2] = -ChassisSpeed[2];
+    }
+    else if (difference < -90) {
+        RBLAngle += (offset - 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[2] = -ChassisSpeed[2];
+    }
+
+    offset = (nowAngle[3] - RBRAngle) / 180;
+    difference = nowAngle[3] - RBRAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RBRAngle += offset * 180;
+        if (offset % 2) ChassisSpeed[3] = -ChassisSpeed[3];
+    }
+    else if (difference > 90) {
+        RBRAngle += (offset + 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[3] = -ChassisSpeed[3];
+    }
+    else if (difference < -90) {
+        RBRAngle += (offset - 1) * 180;
+        if ((offset + 1) % 2) ChassisSpeed[3] = -ChassisSpeed[3];
+    }
 
 
     //设置底盘电机角度
@@ -336,10 +361,10 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
     RBR.SetTargetAngle(RBRAngle);
 
     //设置底盘电机转速
-    CFR.SetTargetSpeed(ClassisSpeed[0]);
-    CFL.SetTargetSpeed(ClassisSpeed[1]);
-    CBL.SetTargetSpeed(ClassisSpeed[2]);
-    CBR.SetTargetSpeed(ClassisSpeed[3]);
+    CFR.SetTargetSpeed(ChassisSpeed[0]);
+    CFL.SetTargetSpeed(ChassisSpeed[1]);
+    CBL.SetTargetSpeed(ChassisSpeed[2]);
+    CBR.SetTargetSpeed(ChassisSpeed[3]);
 
     //注：编码器的速度以及遥控器输入的控制速度均为°/s，用m/s时可能需要改pid参数
     CFR.vx = v1x = CFR.state.speed * sin(RFR.nowAngle/180*PI);// / 180 * PI * WHEEL_DIAMETER
