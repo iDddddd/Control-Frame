@@ -31,12 +31,12 @@ void StepperMotor::Grab(bool _posflag) {
     if(posflag && !_posflag){
         DIR = 0;
         HAL_GPIO_WritePin(DIR_GPIO_Port,DIR_Pin, GPIO_PIN_RESET);
-        STEP = 1000;
+        STEP = 1500;
         posflag = false;
     } else if(! posflag && _posflag){
         DIR = 1;
         HAL_GPIO_WritePin(DIR_GPIO_Port,DIR_Pin, GPIO_PIN_SET);
-        STEP = 1000;
+        STEP = 1500;
         posflag = true;
     }
     HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
