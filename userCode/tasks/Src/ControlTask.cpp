@@ -40,10 +40,10 @@ void CtrlHandle() {
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     // HeadlessSetVelocity(RemoteControl::rcInfo.right_col * 2,
                     //                     RemoteControl::rcInfo.right_rol * 2, RemoteControl::rcInfo.left_rol);
-                  //  ChassisDistanceSet(0, -0.5, 0);
+                  ChassisDistanceSet(0, 0.5, 0);
                     
                 } else if (RemoteControl::rcInfo.sRight == MID_POS) {
-                    //ChassisDistanceSet(-0.5, 0, 0);
+                    ChassisDistanceSet(0.5, 0, 0);
                 }
                 //ChassisSetVelocity(0,0.4,0);
                
