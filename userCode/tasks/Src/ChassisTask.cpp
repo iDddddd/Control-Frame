@@ -386,3 +386,64 @@ void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity) {
 
 }
 
+void WheelSwirl(float RFRAngle, float RFLAngle, float RBLAngle, float RBRAngle){
+    float nowAngle[4] = {RFR.nowAngle - RFR.zeroAngle, RFL.nowAngle - RFL.zeroAngle, 
+                        RBL.nowAngle - RBL.zeroAngle, RBR.nowAngle - RBR.zeroAngle};
+
+    int offset = 0;
+    float difference = 0;
+    /*修正角度*/
+    
+    offset = (nowAngle[0] - RFRAngle) / 180;
+    difference = nowAngle[0] - RFRAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RFRAngle += offset * 180;
+    }
+    else if (difference > 90) {
+        RFRAngle += (offset + 1) * 180;
+    }
+    else if (difference < -90) {
+        RFRAngle += (offset - 1) * 180;
+    }
+
+    offset = (nowAngle[1] - RFLAngle) / 180;
+    difference = nowAngle[1] - RFLAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RFLAngle += offset * 180;
+   }
+    else if (difference > 90) {
+        RFLAngle += (offset + 1) * 180;
+    }
+    else if (difference < -90) {
+        RFLAngle += (offset - 1) * 180;
+    }
+
+    offset = (nowAngle[2] - RBLAngle) / 180;
+    difference = nowAngle[2] - RBLAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RBLAngle += offset * 180;
+    }
+    else if (difference > 90) {
+        RBLAngle += (offset + 1) * 180;
+    }
+    else if (difference < -90) {
+        RBLAngle += (offset - 1) * 180;
+    }
+
+    offset = (nowAngle[3] - RBRAngle) / 180;
+    difference = nowAngle[3] - RBRAngle - offset * 180;
+    if (difference <= 90 && difference >= -90) {
+        RBRAngle += offset * 180;
+    }
+    else if (difference > 90) {
+        RBRAngle += (offset + 1) * 180;
+    }
+    else if (difference < -90) {
+        RBRAngle += (offset - 1) * 180;
+    }
+    //设置底盘电机角度
+    RFL.SetTargetAngle(RFLAngle);
+    RFR.SetTargetAngle(RFRAngle);
+    RBL.SetTargetAngle(RBLAngle);
+    RBR.SetTargetAngle(RBRAngle);
+}

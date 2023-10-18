@@ -61,6 +61,8 @@ void WheelAngleCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 
 void WheelsSpeedCalc(float fbVelocity, float lrVelocity, float rtVelocity);
 
+void WheelSwirl(float RFRAngle, float RFLAngle, float RBLAngle, float RBRAngle);
+
 void ChassisStop();
 
 void ChassisSetVelocity(float _fbV, float _lrV, float _rtV);
