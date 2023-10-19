@@ -59,7 +59,8 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
             /**只需关注该部分代码**/
-            if (LRC_calc(mani_rx_buff[0], uart6_rx_len - 1) == mani_rx_buff[0][uart6_rx_len - 1] && (mani_rx_buff[0][0] == 0x7A)) {
+            if (LRC_calc(mani_rx_buff[0], uart6_rx_len - 1) == mani_rx_buff[0][uart6_rx_len - 1] &&
+                (mani_rx_buff[0][0] == 0x7A)) {
                 GetData(0);
             }
             memset(mani_rx_buff[0], 0, BUFF_SIZE);
@@ -81,7 +82,8 @@ void ManiControl::IT_Handle() {
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart6_rx);
             /**只需关注该部分代码**/
-            if (LRC_calc(mani_rx_buff[1], uart6_rx_len - 1) == mani_rx_buff[1][uart6_rx_len - 1] && (mani_rx_buff[1][0] == 0x7A)) {
+            if (LRC_calc(mani_rx_buff[1], uart6_rx_len - 1) == mani_rx_buff[1][uart6_rx_len - 1] &&
+                (mani_rx_buff[1][0] == 0x7A)) {
                 GetData(1);
             }
             memset(mani_rx_buff[1], 0, BUFF_SIZE);
@@ -122,7 +124,8 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 memcpy(&mc_ctrl.arm_col.Joint4Pos, &mani_rx_buff[bufIndex][16], 4);
                 memcpy(&mc_ctrl.arm_col.Joint5Pos, &mani_rx_buff[bufIndex][20], 4);
 
-                ArmJointSet(mc_ctrl.arm_col.Joint1Pos.f, mc_ctrl.arm_col.Joint2Pos.f, mc_ctrl.arm_col.Joint3Pos.f, mc_ctrl.arm_col.Joint4Pos.f, mc_ctrl.arm_col.Joint5Pos.f);
+                ArmJointSet(mc_ctrl.arm_col.Joint1Pos.f, mc_ctrl.arm_col.Joint2Pos.f, mc_ctrl.arm_col.Joint3Pos.f,
+                            mc_ctrl.arm_col.Joint4Pos.f, mc_ctrl.arm_col.Joint5Pos.f);
                 break;
             }
             case 0x04: {
@@ -136,7 +139,7 @@ void ManiControl::GetData(uint8_t bufIndex) {
                 TaskFlag = TRAY;
                 mc_ctrl.TrayFlag = mani_rx_buff[bufIndex][4];
 
-              //  AutoTraySet(mc_ctrl.TrayFlag);
+                //  AutoTraySet(mc_ctrl.TrayFlag);
                 break;
             }
             case 0x07: {
@@ -149,17 +152,17 @@ void ManiControl::GetData(uint8_t bufIndex) {
                                    mc_ctrl.chassisVel_col.w_Vel.f);
                 break;
             }
-            case 0x08:{
+            case 0x08: {
                 TaskFlag = ARM_POS;
                 memcpy(&mc_ctrl.arm_pos.x, &mani_rx_buff[bufIndex][4], 4);
                 memcpy(&mc_ctrl.arm_pos.y, &mani_rx_buff[bufIndex][8], 4);
                 memcpy(&mc_ctrl.arm_pos.z, &mani_rx_buff[bufIndex][12], 4);
 
-                ArmPositionSet(mc_ctrl.arm_pos.x.f,mc_ctrl.arm_pos.y.f,mc_ctrl.arm_pos.z.f);
+                ArmPositionSet(mc_ctrl.arm_pos.x.f, mc_ctrl.arm_pos.y.f, mc_ctrl.arm_pos.z.f);
 
-               break;
+                break;
             }
-            case 0x09:{
+            case 0x09: {
                 TaskFlag = ARM_RESET;
                 mc_ctrl.arm_reset = mani_rx_buff[bufIndex][4];
 
@@ -171,8 +174,14 @@ void ManiControl::GetData(uint8_t bufIndex) {
 
 
 void CompleteTask(uint8_t task) {
-    static uint8_t tx_message[7] = {0x7A,0x02,0x01,0x02,task,0x01,0x00};
-    tx_message[6] = LRC_calc(tx_message,6);
+    static uint8_t tx_message[7] = {0};
+    tx_message[0] = 0x7A;
+    tx_message[1] = 0x02;
+    tx_message[2] = 0x01;
+    tx_message[3] = 0x02;
+    tx_message[4] = task;
+    tx_message[5] = 0x01;
+    tx_message[6] = LRC_calc(tx_message, 6);
     HAL_UART_Transmit_IT(&huart6, tx_message, 7);
 }
 

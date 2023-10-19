@@ -54,9 +54,9 @@ void SteppingMotor_v4::Handle() {
             SendFlag = false;
         } else {
             if (TarPos >= NowPos) {
-                Direction = 0x01;
+                Direction = 0x04;
             } else {
-                Direction = 0x11;
+                Direction = 0x14;
             }
             Pulse = (uint32_t) (abs(TarPos - NowPos) / 2.0f / PI * 200 * 16 * reductionRatio);
             NowPos = TarPos;
@@ -64,8 +64,8 @@ void SteppingMotor_v4::Handle() {
         TxMessageDLC = 0x08;
         TxMessage[0] = 0xFD;
         TxMessage[1] = Direction;
-        TxMessage[2] = 0xFF;
-        TxMessage[3] = 0x00;
+        TxMessage[2] = 0xB0;
+        TxMessage[3] = 0xFA;
         TxMessage[4] = Pulse >> 16u;
         TxMessage[5] = Pulse >> 8u;
         TxMessage[6] = Pulse;
@@ -153,9 +153,9 @@ void SteppingMotor_v5::Handle() {
             TxMessageDLC = 0x08;
             TxMessage[0] = 0xFD;
             TxMessage[1] = Direction;
-            TxMessage[2] = 0x05;
-            TxMessage[3] = 0xDC;
-            TxMessage[4] = 0xC8;
+            TxMessage[2] = 0x0F;
+            TxMessage[3] = 0xA0;
+            TxMessage[4] = 0xF0;
             TxMessage[5] = Pulse >> 24u;
             TxMessage[6] = Pulse >> 16u;
             TxMessage[7] = Pulse >> 8u;

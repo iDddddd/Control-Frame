@@ -67,7 +67,7 @@ public:
     static void IT_Handle();//串口中断处理函数，使用双缓冲接收
 
 };
-void CompleteTask(uint8_t task);//完成任务反馈函数,一般为向上位机发送数据0x01
+void CompleteTask(uint8_t task);
 uint8_t LRC_calc(uint8_t *data, uint8_t len);//LRC校验函数
 
 /*外部函数声明-------------------------------------------------------------*/
