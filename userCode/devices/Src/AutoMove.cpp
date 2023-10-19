@@ -155,7 +155,10 @@ float Move_X::Handle(float reference) {
     }
 
     if(ReachFlag) {
-        if (abs(Para.d_max) > 0.1) pid.kp = 5; // 避免微调的kp过大？
+        if (abs(Para.d_max) > 0.1) {
+            pid.kp = 3;
+            pid.kd = 0.5;
+        } // 避免微调的kp过大？
         if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;
@@ -275,7 +278,10 @@ float Move_Y::Handle(float reference) {
     }
 
     if(ReachFlag) {
-        if (abs(Para.d_max) > 0.1) pid.kp = 5; // 避免微调的kp过大？
+        if (abs(Para.d_max) > 0.1) {
+            pid.kp = 3;
+            pid.kd = 0.5;
+        } // 避免微调的kp过大？
         if(finishcount < 500) finishcount++;
         if(finishcount == 500) {
             FinishFlag = true;
@@ -304,14 +310,19 @@ Spin::Spin() {
 
 void Spin::Calc(float target) {
     if (abs(target) < 0.02) target = 0;
-    // pid.kp = 4.45 - 2 * (PI - abs(target)) / PI;
-    pid.kp = 1.9 + 1.4 * (PI - abs(target)) / PI; // 1.9 2.5
-    // pid.kp = 2.6;//2.5
-    pid.ki = 0;
-    pid.kd = 0;
     if (abs(target) < 0.1 && target != 0) {
         pid.ki = 0.006;
         pid.kp = 24 - 200 * abs(target);// 0.05~14  0.02~20  24 - 200x
+    }
+    else if(abs(target) < PI / 4 && target != 0) {
+        pid.kp = 1 / 3.5 / abs(target) + 3.5;
+    }
+    else {
+        // pid.kp = 4.45 - 2 * (PI - abs(target)) / PI;
+        pid.kp = 1.9 + 1.4 * (PI - abs(target)) / PI; // 1.9 2.5
+        // pid.kp = 2.6;//2.5
+        pid.ki = 0;
+        pid.kd = 0;
     }
     if(target == 0) {// 纠偏
         FinishFlag = true;
