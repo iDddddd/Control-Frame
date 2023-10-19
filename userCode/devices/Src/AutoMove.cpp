@@ -68,7 +68,7 @@ Move_X::Move_X() {
 }
 
 void Move_X::Calc(float target) {
-    if (abs(target) < 0.02) target = 0;
+    if (abs(target) < 0.015) target = 0;
     pid.kd = 0;
     if (abs(target) <= 0.1 && abs(target) != 0) {
         pid.kp = -log(0.5 * abs(target) + 0.0001);
@@ -89,8 +89,8 @@ void Move_X::Calc(float target) {
         Para.v_max = 0;
     }
     else if(target > 0) {
-        Para.a = 1;
-        Para.v_max = 1;
+        Para.a = 1.5;
+        Para.v_max = 2;
         stopFlag = false;
         FinishFlag = false;
         ReachFlag = false;
@@ -106,8 +106,8 @@ void Move_X::Calc(float target) {
         }
     }
     else {
-        Para.a = -1;
-        Para.v_max = -1;
+        Para.a = -1.5;
+        Para.v_max = -2;
         stopFlag = false;
         FinishFlag = false;
         ReachFlag = false;
@@ -125,10 +125,10 @@ void Move_X::Calc(float target) {
 }
 
 float Move_X::Handle(float reference) {
-    if (stopFlag) {
+    /*if (stopFlag) {
         v_rel = 0;
     }
-    else {// 估速度输出
+    else */{// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -183,7 +183,7 @@ Move_Y::Move_Y() {
 }
 
 void Move_Y::Calc(float target) {
-    if (abs(target) < 0.02) target = 0;
+    if (abs(target) < 0.015) target = 0;
     pid.kd = 0;
     if (abs(target) <= 0.1 && abs(target) != 0) {
         pid.kp = -log(0.5 * abs(target) + 0.0001);
@@ -193,6 +193,7 @@ void Move_Y::Calc(float target) {
     }
     else {
         pid.kp = 1.6 + 0.2 * (2 - abs(target));
+        // pid.kp = 1 + 0.2 * (2 - abs(target));
     }
     if(target == 0) {
         // pid.kp = 2;
@@ -205,8 +206,8 @@ void Move_Y::Calc(float target) {
         Para.v_max = 0;
     }
     else if (target > 0) {
-        Para.a = 1;
-        Para.v_max = 1;
+        Para.a = 1.5;
+        Para.v_max = 2;
         // if (target < 0.1) Para.a = 0.2;
         stopFlag = false;
         FinishFlag = false;
@@ -223,8 +224,8 @@ void Move_Y::Calc(float target) {
         }
     }
     else {
-        Para.a = -1;
-        Para.v_max = -1;
+        Para.a = -1.5;
+        Para.v_max = -2;
         // if (target < 0.1) Para.a = -0.2;
         stopFlag = false;
         FinishFlag = false;
@@ -244,10 +245,10 @@ void Move_Y::Calc(float target) {
 }
 
 float Move_Y::Handle(float reference) {
-    if (stopFlag) {
+    /*if (stopFlag) {
         v_rel = 0;
     }
-    else {// 估速度输出
+    else */{// 估速度输出
         if (abs(expectPos) >= abs(Para.d_max)) {
             Para.v = 0;
         } else if (abs(expectPos) < abs(Para.d1)) {
@@ -304,11 +305,11 @@ Spin::Spin() {
 void Spin::Calc(float target) {
     if (abs(target) < 0.02) target = 0;
     // pid.kp = 4.45 - 2 * (PI - abs(target)) / PI;
-    // pid.kp = 1.9 + 1.25 * (PI - abs(target)) / PI;
-    pid.kp = 2.5;
+    pid.kp = 1.9 + 1.4 * (PI - abs(target)) / PI; // 1.9 2.5
+    // pid.kp = 2.6;//2.5
     pid.ki = 0;
     pid.kd = 0;
-    if (abs(target) < PI / 4 && target != 0) {
+    if (abs(target) < 0.1 && target != 0) {
         pid.ki = 0.006;
         pid.kp = 24 - 200 * abs(target);// 0.05~14  0.02~20  24 - 200x
     }
