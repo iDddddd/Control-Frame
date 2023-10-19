@@ -11,6 +11,7 @@
 #include "ArmMotor.h"
 //#include "Servo.h"
 #include "StepperMotor.h"
+#include "ManiControl.h"
 
 #define l2 152.8f
 #define l3 130.46f
@@ -20,7 +21,7 @@ class ArmTask {
 public:
     static void ArmStop();
     static void ArmCalc(float x,float y,float z);
-
+    static void ArmReach();
 
     static float Angle[4];
 

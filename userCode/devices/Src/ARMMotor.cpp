@@ -39,7 +39,7 @@ void SteppingMotor_v4::CANMessageGenerate() {
 
 void SteppingMotor_v4::Handle() {
     if (RxMessage[1] == 0x9F) {
-        CompleteTask(0x08);
+        ReachFlag = true;
         RxMessage[1] = 0x00;
     }
     if (SendFlag) {
@@ -130,6 +130,10 @@ void SteppingMotor_v5::CANMessageGenerate() {
 }
 
 void SteppingMotor_v5::Handle() {
+    if (RxMessage[1] == 0x9F) {
+        ReachFlag = true;
+        RxMessage[1] = 0x00;
+    }
     if (SendFlag) {
         if (stopFlag) {
             TxMessageDLC = 0x07;

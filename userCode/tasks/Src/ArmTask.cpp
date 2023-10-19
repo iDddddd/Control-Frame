@@ -132,6 +132,14 @@ void ArmTask::ArmCalc(float x,float y,float z){
     }
 }
 
+void ArmTask::ArmReach() {
+    if(Joint1Motor.ReachFlag && Joint5Motor.ReachFlag){
+        CompleteTask(0x08);
+        Joint1Motor.ReachFlag = false;
+        Joint5Motor.ReachFlag = false;
+    }
+}
+
 void ArmReset() {
     Joint1Motor.Reset();
     Joint2Motor.Reset();

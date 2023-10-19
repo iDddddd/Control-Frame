@@ -51,6 +51,7 @@ void CtrlHandle() {
             case DOWN_POS:
                 if (RemoteControl::rcInfo.sRight == UP_POS) {
                     AutoSetVelocity();
+                    ArmTask::ArmReach();
                 }
                 
                 break;
