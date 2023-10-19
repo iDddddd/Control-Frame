@@ -70,12 +70,12 @@ Move_X::Move_X() {
 void Move_X::Calc(float target) {
     if (abs(target) < 0.015) target = 0;
     pid.kd = 0;
-    if (abs(target) <= 0.1 && abs(target) != 0) {
+    if (abs(target) <= 0.2 && abs(target) != 0) {
         pid.kp = -log(0.5 * abs(target) + 0.0001);
     }
-    else if (abs(target) <= 0.2 && abs(target) != 0) {
-        pid.kp = 1 / 1.1 / sqrt(abs(target));
-    }
+    // else if (abs(target) <= 0.2 && abs(target) != 0) {
+    //     pid.kp = 1 / 1.1 / sqrt(abs(target));
+    // }
     else {
         pid.kp = 1.6 + 0.2 * (2 - abs(target));
     }
@@ -185,12 +185,12 @@ Move_Y::Move_Y() {
 void Move_Y::Calc(float target) {
     if (abs(target) < 0.015) target = 0;
     pid.kd = 0;
-    if (abs(target) <= 0.1 && abs(target) != 0) {
+    if (abs(target) <= 0.2 && abs(target) != 0) {
         pid.kp = -log(0.5 * abs(target) + 0.0001);
     }
-    else if (abs(target) <= 0.2 && abs(target) != 0) {
-        pid.kp = 1 / 1.1 / sqrt(abs(target));
-    }
+    // else if (abs(target) <= 0.2 && abs(target) != 0) {
+    //     pid.kp = 1 / 1.1 / sqrt(abs(target));
+    // }
     else {
         pid.kp = 1.6 + 0.2 * (2 - abs(target));
         // pid.kp = 1 + 0.2 * (2 - abs(target));
@@ -312,6 +312,9 @@ void Spin::Calc(float target) {
     if (abs(target) < 0.1 && target != 0) {
         pid.ki = 0.006;
         pid.kp = 24 - 200 * abs(target);// 0.05~14  0.02~20  24 - 200x
+    }
+    else if (abs(target) < PI / 4 && target != 0) {
+        pid.kp = 1 / 3.5 / abs(target) + 3.5;
     }
     if(target == 0) {// 纠偏
         FinishFlag = true;
