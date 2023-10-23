@@ -9,6 +9,7 @@
 #include "Device.h"
 #include "ManiControl.h"
 #include "KF.h"
+#include "ChassisTask.h"
 
 /*结构体定义--------------------------------------------------------------*/
 typedef struct {
@@ -92,14 +93,15 @@ public:
 };
 
 class AutoMove {
-public:
-
-    float vx{};
-    float vy{};
-    float vo{};
+private:
+    Move_X X;
+    Move_Y Y;
+    Spin O;
+    Chassis_State_t autosetvelocity{0};
     bool StopFlag{true};
     bool SendFlag{false};
 
+public:
     AutoMove() = default;
 
     void StartMove(float x_distance, float y_distance, float o_angle);

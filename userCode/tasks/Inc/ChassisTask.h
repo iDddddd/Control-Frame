@@ -3,7 +3,6 @@
 
 #include "main.h"
 #include "Motor.h"
-#include "AutoMove.h"
 #include "ChassisMotor.h"
 
 constexpr std::size_t MODULE_NUM = 4u;
@@ -45,6 +44,7 @@ class Odometer {
 public:
     Odometer_State_t OdomReset();
     Odometer_State_t &OdomCalc(Chassis_State_t curVel);
+    Odometer_State_t getOdom();
 protected:
     Odometer_State_t odom{0};
 };

@@ -7,6 +7,7 @@
 
 #include "main.h"
 #include "ChassisTask.h"
+#include "AutoMove.h"
 #include "Motor.h"
 #include "RemoteControl.h"
 #include "ServoTask.h"
