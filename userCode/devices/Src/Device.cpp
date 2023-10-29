@@ -234,6 +234,7 @@ int main() {
         /* USER CODE END WHILE */
         //循环中不做处理，所有处理在中断中完成
         /* USER CODE BEGIN 3 */
+        HAL_Delay(500);
     }
     /* USER CODE END 3 */
 }
