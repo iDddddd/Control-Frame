@@ -62,6 +62,12 @@ Chassis& Chassis::Instance() {
 
 Chassis_State_t& Chassis::SetTargetVelocity(Chassis_State_t set) {
     target = set;
+    error.vx = target.vx - estimation.vx;
+    error.vy = target.vy - estimation.vy;
+    error.w = target.w - estimation.w;
+    target.vx += 0.2 * error.vx;
+    target.vy += 0.2 * error.vy;
+    target.w += 0.2 * error.w;
     return target;
 }
 

@@ -64,6 +64,7 @@ private:
     Swerve_Module_t modules[MODULE_NUM];
     Chassis_State_t target = {0};
     Chassis_State_t estimation = {0};
+    Chassis_State_t error = {0};
     bool brake = false;
 /*    const Swerve_Module_t* FR = modules;
     const Swerve_Module_t* FL = modules + 1;

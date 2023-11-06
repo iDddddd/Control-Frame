@@ -1,7 +1,7 @@
 #include "CommuType.h"
 
-std::map<uint32_t, uint8_t *> CAN::dict_CAN;
-//MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
+//std::map<uint32_t, uint8_t *> CAN::dict_CAN;
+MyMap<uint32_t, uint8_t *> CAN::dict_CAN;
 MyMap<uint32_t, uint8_t *> RS485::dict_RS485;
 uint8_t RS485::rsmessage[4][11] = {0};
 uint8_t RS485::rs485_rx_buff[2][RX_SIZE];
